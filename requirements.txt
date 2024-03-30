@@ -1,0 +1,7 @@
+pdf2image
+pytesseract
+PyMuPDF
+tiktoken
+deepl
+transformers
+torch

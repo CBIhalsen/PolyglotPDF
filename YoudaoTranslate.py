@@ -8,10 +8,11 @@ import time
 from importlib import reload
 
 reload(sys)
-
+# Note that Youdao does not support list translation, not recommended!
+#注意有道不支持列表翻译不建议使用！
 YOUDAO_URL = 'https://openapi.youdao.com/api'
-APP_KEY = '18955cb18fefccd2'
-APP_SECRET = 'GbCVlEDkrRCt5VyF5rABXTdlmAkBStdZ'
+APP_KEY = 'XXX'
+APP_SECRET = 'XXXX'
 
 def connect():
     qArray = ["待输入的文字1"]
