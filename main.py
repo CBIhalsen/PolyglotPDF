@@ -6,6 +6,7 @@ import time
 # import YoudaoTranslate as yt
 import fitz
 import os
+import download_model
 class main_function:
 
     def __init__(self,original_language,target_language,pdf_path,translation= True,key_deepl= '',DPI=150,):
