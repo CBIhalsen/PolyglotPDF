@@ -1,3 +1,4 @@
+It is being upgraded to provide a full UI interface and more translation apis.
 # PolyglotPDF README
 
 ## Overview
