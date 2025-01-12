@@ -1,6 +1,6 @@
-from pdf2image import convert_from_path
-import All_Translation as at
 
+import All_Translation as at
+from PIL import Image
 import pytesseract
 import time
 # import YoudaoTranslate as yt
@@ -192,10 +192,17 @@ class main_function:
             for i in range(self.doc.page_count):
                 self.start(image=None, pag_num=i)
         else:
-            for i, page in enumerate(convert_from_path(self.full_path, self.DPI)):
-                    # 可以选择保存图像到文件，也可以直接在内存中处理
-                    # page.save(f'1page_{i}.jpg', 'JPEG')
-                self.start(image=page, pag_num=i)
+            zoom = self.DPI / 72  # 将 DPI 从默认的 72 调整到指定 DPI
+            mat = fitz.Matrix(zoom, zoom)
+            for i, page in enumerate(self.doc):
+                pix = page.get_pixmap(matrix=mat)
+                # 转换为 PIL Image 对象
+                image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+                # 如果需要保存图像到文件
+                # image.save(f'page_{i}.jpg', 'JPEG')
+                self.start(image=image, pag_num=i)
+
+
 
 
 
