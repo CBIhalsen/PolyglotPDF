@@ -30,13 +30,14 @@ cd polyglotpdf
 ```bash
 pip install -r requirements.txt
 ```
+3. The API key is configured in config.json. The alicloud translation API is not recommended.
 
-3. Run the application:
+4. Run the application:
 ```bash
 python app.py
 ```
 
-4. Access the web interface:
+5. Access the web interface:
 Open your browser and navigate to `http://127.0.0.1:8000`
 
 ## Requirements
