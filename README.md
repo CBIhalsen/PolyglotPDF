@@ -11,6 +11,7 @@ PolyglotPDF is an advanced PDF processing tool that employs specialized techniqu
 - **Ultra-Fast Recognition**: Processes text, tables, and formulas in PDFs within ~1 second
 - **Layout-Preserving Translation**: Maintains original document formatting while translating content
 - **OCR Support**: Handles scanned documents efficiently
+- **Text-based PDF**：No GPU required
 - **Quick Translation**: Complete PDF translation in approximately 10 seconds
 - **Flexible API Integration**: Compatible with various translation service providers
 - **Web-based Comparison Interface**: Side-by-side comparison of original and translated documents
