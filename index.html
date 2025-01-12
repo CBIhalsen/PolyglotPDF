@@ -671,7 +671,7 @@ input:checked + .slider:before {
             </div>
         </div>
     </div>
-<div class="upload-container" id="uploadModal">
+<div class="upload-container" id="uploadModal"  >
     <div class="upload-content" id="upload_content-1">
         <div class="upload-header" >
             <h2>Add Literature to Your Reading List </h2>
@@ -1084,21 +1084,7 @@ function showToast(message) {
 }
 
 
-
-
-        // 点击模态框外部关闭
-        document.getElementById('uploadModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.style.display = 'none';
-            }
-        });
-
-        document.getElementById('settingsModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.style.display = 'none';
-            }
-        });
-
+        
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
             showHome();
