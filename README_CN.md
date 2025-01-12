@@ -38,12 +38,21 @@ python app.py
 在浏览器中打开 `http://127.0.0.1:8000`
 
 ## 环境要求
-- Python 3.7+
-- PyMuPDF
-- FastAPI
-- uvicorn
-- python-multipart
-- 其他依赖详见 requirements.txt
+- Python 3.8+
+- alibabacloud-alimt20181012==1.3.0
+- alibabacloud-tea-openapi==0.3.12
+- alibabacloud-tea-util==0.3.13
+- deepl==1.17.0
+- Flask==2.0.1
+- Flask-Cors==5.0.0
+- langdetect==1.0.9
+- Pillow==10.2.0
+- PyMuPDF==1.24.0
+- pytesseract==0.3.10
+- requests==2.31.0
+- tencentcloud-sdk-python==3.0.1300
+- tiktoken==0.6.0
+- Werkzeug==2.0.1
 
 ## 致谢
 本项目得益于 PyMuPDF 强大的 PDF 处理和版面保持功能。
