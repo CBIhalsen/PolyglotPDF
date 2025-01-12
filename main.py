@@ -3,7 +3,6 @@ import All_Translation as at
 from PIL import Image
 import pytesseract
 import time
-# import YoudaoTranslate as yt
 import fitz
 import os
 import download_model
@@ -389,13 +388,13 @@ class main_function:
                 page.insert_htmlbox(
                     rect,
                     translation_list[idx],
-                    css=f"* {{font-family:{get_font_by_language(self.target_language)};font-size:auto;font-weight:normal;}}"
+                    css=f"* {{font-family:{get_font_by_language(self.target_language)};font-size:auto;color: #111111 ;font-weight:normal;}}"
                 )
             else:
                 page.insert_htmlbox(
                     rect,
                     texts_list[idx],
-                    css=f"* {{font-family:{get_font_by_language(self.target_language)}; font-size:auto; font-weight:normal;}}"
+                    css=f"* {{font-family:{get_font_by_language(self.target_language)}; font-size:auto; color: #111111 ;font-weight:normal;}}"
                 )
 if __name__ == '__main__':
 
