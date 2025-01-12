@@ -1,0 +1,1 @@
+# The Google Translate api is one of the worst product introductions I've ever seen. Every single one of their products, except firebase, is poorly documented, and it takes a lot of time to figure out the rules they write in the seam and under the environment rules they require.

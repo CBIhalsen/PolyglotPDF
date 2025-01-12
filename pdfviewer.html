@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Split PDF Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            background-color: #f0f0f0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .pdf-container {
+            flex: 1;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .pdf-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1000;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        .divider {
+            width: 4px;
+            height: 100%;
+            background-color: #666;
+            cursor: col-resize;
+            transition: background-color 0.3s;
+        }
+        
+        .divider:hover {
+            background-color: #999;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .pdf-title {
+            text-align: center;
+            padding: 5px;
+            margin-bottom: 10px;
+            background-color: #333;
+            color: white;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        embed, object, iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .zoom-btn {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .zoom-btn:hover {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .exit-fullscreen {
+            display: none;
+        }
+
+        .pdf-container.fullscreen .exit-fullscreen {
+            display: flex;
+        }
+
+        .pdf-container.fullscreen .zoom-btn:not(.exit-fullscreen) {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <!-- 左侧PDF -->
+        <div class="pdf-container" id="pdf-container-1">
+
+            <div class="pdf-viewer">
+                <embed  id = "original_file"
+                    src=""
+                    type="application/pdf"
+                    width="100%"
+                    height="100%"
+                />
+                <div class="zoom-controls">
+                    <button class="zoom-btn" onclick="toggleFullscreen(1)">
+                        <i class="fas fa-expand"></i> 
+                    </button>
+                    <button class="zoom-btn exit-fullscreen" id="exit-fullscreen-1">
+                        <i class="fas fa-compress"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分隔线 -->
+        <div class="divider" id="divider"></div>
+
+        <!-- 右侧PDF -->
+        <div class="pdf-container" id="pdf-container-2">
+
+            <div class="pdf-viewer">
+                <embed id ="target_file"
+                    src="../g2_zh.pdf"
+                    type="application/pdf"
+                    width="100%"
+                    height="100%"
+                />
+                <div class="zoom-controls">
+                    <button class="zoom-btn" onclick="toggleFullscreen(2)">
+                        <i class="fas fa-expand"></i> 
+                    </button>
+                    <button class="zoom-btn exit-fullscreen" id="exit-fullscreen-2">
+                        <i class="fas fa-compress"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取URL参数
+const urlParams = new URLSearchParams(window.location.search);
+const name = urlParams.get('name'); // 获取name参数
+const nameTargetLanguage = urlParams.get('name_target_language'); // 获取name_target_language参数
+
+        console.log('name:', name);
+        console.log('name_target_language:', nameTargetLanguage);
+        // 获取 embed 元素
+        const embed1 = document.getElementById('original_file');
+        const embed2 = document.getElementById('target_file');
+
+        // 设置文件路径
+        embed1.src = `./static/original/${name}`; // 原文件在 original 文件夹下
+        embed2.src = `./static/target/${nameTargetLanguage}`; // 目标文件在 target 文件夹下
+
+        // 强制重新加载
+        embed1.src = embed1.src;
+         console.log('nam1e:', embed1);
+        embed2.src = embed2.src;
+
+
+
+        const divider = document.getElementById('divider');
+        const containers = document.querySelectorAll('.pdf-container');
+        let isDragging = false;
+
+        // 添加退出全屏按钮的事件监听器
+        document.getElementById('exit-fullscreen-1').addEventListener('click', () => exitFullscreen(1));
+        document.getElementById('exit-fullscreen-2').addEventListener('click', () => exitFullscreen(2));
+
+        // 拖动分隔线的功能
+        divider.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            const containerRect = document.querySelector('.container').getBoundingClientRect();
+            const percentage = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+
+            if (percentage > 20 && percentage < 80) {
+                containers[0].style.flex = `${percentage}`;
+                containers[1].style.flex = `${100 - percentage}`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        });
+
+        // 放大功能
+        function toggleFullscreen(pdfNum) {
+            const container = document.getElementById(`pdf-container-${pdfNum}`);
+            container.classList.add('fullscreen', 'fade-in');
+            document.getElementById('divider').style.display = 'none';
+            
+            // 隐藏另一个PDF容器
+            const otherNum = pdfNum === 1 ? 2 : 1;
+            document.getElementById(`pdf-container-${otherNum}`).style.display = 'none';
+        }
+
+        // 退出全屏功能
+        function exitFullscreen(pdfNum) {
+            const container = document.getElementById(`pdf-container-${pdfNum}`);
+            container.classList.remove('fullscreen', 'fade-in');
+            document.getElementById('divider').style.display = 'block';
+            
+            // 显示另一个PDF容器
+            const otherNum = pdfNum === 1 ? 2 : 1;
+            document.getElementById(`pdf-container-${otherNum}`).style.display = 'flex';
+            
+            // 重置flex属性
+            containers.forEach(container => {
+                container.style.flex = '1';
+            });
+        }
+
+        // ESC键退出全屏
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                containers.forEach((container, index) => {
+                    if (container.classList.contains('fullscreen')) {
+                        exitFullscreen(index + 1);
+                    }
+                });
+            }
+        });
+
+        // 双击分隔线重置布局
+        divider.addEventListener('dblclick', () => {
+            containers.forEach(container => {
+                container.style.flex = '1';
+            });
+        });
+    </script>
+</body>
+</html>

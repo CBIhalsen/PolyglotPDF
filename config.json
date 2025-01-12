@@ -1,0 +1,37 @@
+{
+  "translation_services": {
+    "youdao": {
+      "app_key": "XXX",
+      "app_secret": "XX"
+    },
+    "deepl": {
+      "auth_key": "XX"
+    },
+    "baidu": {
+      "api_key": "XX",
+      "secret_key": "XX"
+    },
+    "google": {
+      "api_key": "XX"
+    },
+    "tencent": {
+      "SecretId": "XXW",
+      "SecretKey": "XX"
+    },
+    "alicloud": {
+      "access_key_id": "XX",
+      "access_key_secret": "XX"
+    }
+  },
+  "ocr_services": {
+    "tesseract": {
+      "path": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+    }
+  },
+  "default_services": {
+    "translation": true,
+    "translation_service": "deepl",
+    "ocr_modle": false
+  },
+  "count": 2
+}

@@ -1,11 +1,13 @@
-
+import Google_translation as gt
+import Alicloud_translation as at
+import Tencent_translation as tt
 import tiktoken
 import time
-
+import baidu_translation as bt
 import os
 import Deepl_Translation as dt
+import YoudaoTranslate as yt
 
-os.environ['TRANSFORMERS_OFFLINE']="1"
 # #
 # Get the encoder of a specific model, assume gpt3.5, tiktoken is extremely fast,
 # and the error of this statistical token method is small and can be ignored
@@ -13,6 +15,7 @@ enc = tiktoken.encoding_for_model("gpt-3.5")
 
 
 class Offline_translation:
+
 
     def __init__(self,original_language,target_language,texts_to_process=[]):
 
@@ -23,6 +26,7 @@ class Offline_translation:
 
 
     def translation(self):
+        os.environ['TRANSFORMERS_OFFLINE'] = "1"
         processed_texts= process_texts(self.original_text,enc)
         split_points = calculate_split_points(processed_texts)
         translated_texts = batch_translate(processed_texts=processed_texts, split_points=split_points,original_language=self.original_language,target_language=self.target_language)
@@ -32,17 +36,59 @@ class Offline_translation:
 class Online_translation:
 
 
-    def __init__(self,original_language,target_language,key_deepl,texts_to_process=[]):
+    def __init__(self,original_language,target_language,translation_type,texts_to_process=[]):
 
         self.model_name = f"opus-mt-{original_language}-{target_language}"
         self.original_text = texts_to_process
         self.target_language = target_language
-        self.api_key_deepl = key_deepl
+        self.original_lang = original_language
+        self.translation_type = translation_type
 
+    def translation(self):
+        if self.translation_type == 'deepl':
+            translated_list =self.deepl_translation()
+        elif self.translation_type == 'youdao':
+            translated_list =self.youdao_translation()
+        elif self.translation_type == 'aliyun':
+            translated_list =self.alicloud_translation()
+        elif self.translation_type == 'tencent':
+            translated_list =self.tencent_translation()
+        elif self.translation_type == 'google':
+            translated_list =self.google_translation()
+        elif self.translation_type == 'baidu':
+            translated_list =self.baidu_translation()
+
+        return translated_list
 
     def deepl_translation(self):
 
-        translated_texts = dt.translate(self.original_text,self.target_language,self.api_key_deepl)
+        translated_texts = dt.translate(texts=self.original_text,original_lang=self.original_lang,target_lang=self.target_language)
+
+        return translated_texts
+
+    def google_translation(self):
+
+        translated_texts = gt.translate(self.original_text,self.original_lang,self.target_language)
+
+        return translated_texts
+    def youdao_translation(self):
+
+        translated_texts = yt.translate(texts=self.original_text,original_lang=self.original_lang,target_lang=self.target_language)
+
+        return translated_texts
+    def alicloud_translation(self):
+
+        translated_texts = at.translate(texts=self.original_text,original_lang=self.original_lang,target_lang=self.target_language)
+
+        return translated_texts
+    def tencent_translation(self):
+
+        translated_texts = tt.translate(source_text_list=self.original_text,original_lang=self.original_lang,target_lang=self.target_language)
+
+        return translated_texts
+    def baidu_translation(self):
+
+        translated_texts = bt.translate(texts=self.original_text,original_lang=self.original_lang,target_lang=self.target_language)
 
         return translated_texts
 
@@ -109,15 +155,11 @@ def translate(texts,original_language,target_language):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     result = pipe(texts)
-    # print(result)
-    # 原始列表
+
 
     # 提取值并组合成新的列表
     result_values = [d['translation_text'] for d in result]
-    # print(result_values)
-    # print(texts,"列1")
-    print(texts,'TT')
-    print(result_values,"TTT")
+
     return result_values
 
 
