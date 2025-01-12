@@ -1,6 +1,6 @@
 # PolyglotPDF
 ## Demo
-![Demo](https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/demo.gif?raw=true)
+<img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/demo.gif?raw=true" width="800" height="450">
 ### [🎬 Watch Full Video](https://github.com/CBIhalsen/PolyglotPDF/blob/main/demo.mp4)
 
 ## Overview
