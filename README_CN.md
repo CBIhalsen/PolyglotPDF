@@ -1,4 +1,12 @@
 # PolyglotPDF
+
+[![Python](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/)
+[![PDF](https://img.shields.io/badge/pdf-documentation-brightgreen.svg)](https://example.com)
+[![LaTeX](https://img.shields.io/badge/latex-typesetting-orange.svg)](https://www.latex-project.org/)
+[![Translation](https://img.shields.io/badge/translation-supported-yellow.svg)](https://example.com)
+[![Math](https://img.shields.io/badge/math-formulas-red.svg)](https://example.com)
+[![PyMuPDF](https://img.shields.io/badge/PyMuPDF-1.24.0-blue.svg)](https://pymupdf.readthedocs.io/)
+
 ## Demo
 <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/demo.gif?raw=true" width="80%" height="40%">
 
