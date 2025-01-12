@@ -16,6 +16,7 @@ PolyglotPDF is an advanced PDF processing tool that employs specialized techniqu
 - **Flexible API Integration**: Compatible with various translation service providers
 - **Web-based Comparison Interface**: Side-by-side comparison of original and translated documents
 - **Enhanced OCR Capabilities**: Improved accuracy in text recognition and processing
+- **Support for offline translation**: Use smaller translation model
 
 ## Installation and Setup
 
