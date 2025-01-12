@@ -38,12 +38,21 @@ python app.py
 Open your browser and navigate to `http://127.0.0.1:8000`
 
 ## Requirements
-- Python 3.7+
-- PyMuPDF
-- FastAPI
-- uvicorn
-- python-multipart
-- other dependencies listed in requirements.txt
+- Python 3.8+
+- alibabacloud-alimt20181012==1.3.0
+- alibabacloud-tea-openapi==0.3.12
+- alibabacloud-tea-util==0.3.13
+- deepl==1.17.0
+- Flask==2.0.1
+- Flask-Cors==5.0.0
+- langdetect==1.0.9
+- Pillow==10.2.0
+- PyMuPDF==1.24.0
+- pytesseract==0.3.10
+- requests==2.31.0
+- tencentcloud-sdk-python==3.0.1300
+- tiktoken==0.6.0
+- Werkzeug==2.0.1
 
 ## Acknowledgments
 This project leverages PyMuPDF's capabilities for efficient PDF processing and layout preservation.
