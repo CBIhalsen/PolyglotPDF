@@ -29,13 +29,14 @@ cd polyglotpdf
 ```bash
 pip install -r requirements.txt
 ```
+3. 在config.json内配置API密钥，不建议使用alicloud翻译API.
 
-3. 运行应用：
+4. 运行应用：
 ```bash
 python app.py
 ```
 
-4. 访问网页界面：
+5. 访问网页界面：
 在浏览器中打开 `http://127.0.0.1:8000`
 
 ## 环境要求
