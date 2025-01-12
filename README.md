@@ -1,7 +1,7 @@
 # PolyglotPDF
 ## Demo
 
-[![Demo](demo.gif)](https://archive.org/download/demo_20250112/demo.gif?raw=true)
+[![Demo](demo.gif)](https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/demo.gif?raw=true)
 [Full Video](https://archive.org/download/demo_20250112/demo.gif)
 
 ## Overview
