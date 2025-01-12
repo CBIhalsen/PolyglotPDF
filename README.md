@@ -2,6 +2,7 @@
 ## Demo
 
 [![Demo](demo.gif)](https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/demo.gif?raw=true)
+![image](https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/demo.gif?raw=true)
 [Full Video](https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/demo.gif?raw=true)
 
 ## Overview
