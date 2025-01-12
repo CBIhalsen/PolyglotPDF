@@ -1,5 +1,9 @@
 # PolyglotPDF
+## Demo
 
+![Demo](demo.gif)
+
+[查看完整演示视频](https://github.com/CBIhalsen/polyglotpdf/static/demo.mp4)
 ## 概述
 PolyglotPDF 是一款先进的 PDF 处理工具，采用特殊技术实现对 PDF 文档中的文字、表格和公式的超快速识别，通常仅需 1 秒即可完成处理。它支持 OCR 功能和完美保留版面的翻译功能，整篇文档的翻译通常可在 10 秒内完成（具体速度取决于翻译 API 服务商）。
 

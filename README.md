@@ -1,5 +1,9 @@
 # PolyglotPDF
+## Demo
 
+![Demo](demo.gif)
+
+[Full Video](https://github.com/CBIhalsen/polyglotpdf/static/demo.mp4)
 ## Overview
 PolyglotPDF is an advanced PDF processing tool that employs specialized techniques for ultra-fast text, table, and formula recognition in PDF documents, typically completing processing within 1 second. It features OCR capabilities and layout-preserving translation, with full document translations usually completed within 10 seconds (speed may vary depending on the translation API provider).
 
