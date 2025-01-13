@@ -81,3 +81,43 @@ This project leverages PyMuPDF's capabilities for efficient PDF processing and l
 - **Proposed Solution**: Switch to OCR mode for entire pages containing unsupported color spaces
 - **Example**: [View PDF sample with unsupported color spaces](https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/colorspace_issue_sample.pdf)
 
+
+### Font Optimization
+Current font configuration in the `start` function of `main.py`:
+```python
+# Current configuration
+css=f"* {{font-family:{get_font_by_language(self.target_language)};font-size:auto;color: #111111 ;font-weight:normal;}}"
+```
+
+You can optimize font display through the following methods:
+
+1. **Modify Default Font Configuration**
+```python
+# Custom font styles
+css=f"""* {{
+    font-family: {get_font_by_language(self.target_language)};
+    font-size: auto;
+    color: #111111;
+    font-weight: normal;
+    letter-spacing: 0.5px;  # Adjust letter spacing
+    line-height: 1.5;      # Adjust line height
+}}"""
+```
+
+2. **Embed Custom Fonts**
+You can embed custom fonts by following these steps:
+- Place font files (.ttf, .otf) in the project's `fonts` directory
+- Use `@font-face` to declare custom fonts in CSS
+```python
+css=f"""
+@font-face {{
+    font-family: 'CustomFont';
+    src: url('fonts/your-font.ttf') format('truetype');
+}}
+* {{
+    font-family: 'CustomFont', {get_font_by_language(self.target_language)};
+    font-size: auto;
+    font-weight: normal;
+}}
+"""
+```

@@ -79,3 +79,46 @@ python app.py
 - **待解决思路**：对于包含不支持色彩空间的页面，整页切换至OCR模式处理
 - **复现示例**：[查看不支持色彩空间的PDF样例](https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/colorspace_issue_sample.pdf)
 
+我帮你编写字体优化相关的说明：
+
+中文版：
+### 字体优化
+当前在 `main.py` 的 `start` 函数中，文本插入使用了默认字体配置：
+```python
+# 当前配置
+css=f"* {{font-family:{get_font_by_language(self.target_language)};font-size:auto;color: #111111 ;font-weight:normal;}}"
+```
+
+你可以通过以下方式优化字体显示：
+
+1. **修改默认字体配置**
+```python
+# 自定义字体样式
+css=f"""* {{
+    font-family: {get_font_by_language(self.target_language)};
+    font-size: auto;
+    color: #111111;
+    font-weight: normal;
+    letter-spacing: 0.5px;  # 调整字间距
+    line-height: 1.5;      # 调整行高
+}}"""
+```
+
+2. **嵌入自定义字体**
+你可以通过以下步骤嵌入自定义字体：
+- 将字体文件（如.ttf，.otf）放置在项目的 `fonts` 目录下
+- 在CSS中使用 `@font-face` 声明自定义字体
+```python
+css=f"""
+@font-face {{
+    font-family: 'CustomFont';
+    src: url('fonts/your-font.ttf') format('truetype');
+}}
+* {{
+    font-family: 'CustomFont', {get_font_by_language(self.target_language)};
+    font-size: auto;
+    font-weight: normal;
+}}
+"""
+```
+
