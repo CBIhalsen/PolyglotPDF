@@ -694,8 +694,8 @@ input:checked + .slider:before {
                 <div class="source-lang" style="flex: 1;">
                     <select id="sourceLang" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
                         <option value="auto" selected>auto</option>
+                         <option value="zh">zh</option>
                         <option value="en">en</option>
-                        <option value="zh">zh</option>
                         <option value="ja">ja</option>
                         <option value="ko">ko</option>
                         <option value="fr">fr</option>
@@ -721,8 +721,8 @@ input:checked + .slider:before {
                 </div>
                 <div class="target-lang" style="flex: 1;">
                     <select id="targetLang" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
-                        <option value="en">en</option>
                         <option value="zh">zh</option>
+                        <option value="en">en</option>
                         <option value="ja">ja</option>
                         <option value="ko">ko</option>
                         <option value="fr">fr</option>
@@ -822,7 +822,7 @@ input:checked + .slider:before {
 <div class="ocr-toggle">
     <span>OCR Global Mode Disabled by Default</span>
     <label class="switch">
-        <input type="checkbox" id="ocrToggle" data-on="true" data-off="false" checked>
+        <input type="checkbox" id="ocrToggle" data-on="false" data-off="true" checked>
         <span class="slider round"></span>
     </label>
 </div>
@@ -935,7 +935,7 @@ try {
         const infoDiv = document.createElement('div');
         infoDiv.className = 'article-info';
         infoDiv.innerHTML = `
-            <span class="author">${article.author || '未知作者'}</span>
+            <span class="author">${article.author || 'Unknown author'}</span>
             <span class="date">${article.date}</span>
             <span class="language">${article.original_language} - ${article.target_language}</span>
         `;
@@ -1084,7 +1084,7 @@ function showToast(message) {
 }
 
 
-        
+
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
             showHome();
@@ -1161,6 +1161,7 @@ async function saveSettings() {
 
     try {
         // 发送数据到后端
+        console.log(value2,value,'send')
         const response = await fetch('/api/save-settings', {
             method: 'POST',
             headers: {
@@ -1183,7 +1184,7 @@ async function saveSettings() {
 
         // 2秒后恢复按钮状态
         setTimeout(() => {
-            saveBtn.innerHTML = '保存设置';
+            saveBtn.innerHTML = 'Save Settings';
             saveBtn.classList.remove('success');
         }, 2000);
 
