@@ -6,8 +6,7 @@ import time
 import baidu_translation as bt
 import os
 import Deepl_Translation as dt
-import YoudaoTranslate as yt
-
+import YouDao_translation as yt
 # #
 # Get the encoder of a specific model, assume gpt3.5, tiktoken is extremely fast,
 # and the error of this statistical token method is small and can be ignored
