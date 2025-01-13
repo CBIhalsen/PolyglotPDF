@@ -74,5 +74,10 @@ This project leverages PyMuPDF's capabilities for efficient PDF processing and l
 - Academic PDF search integration
 - Optimization for even faster processing speeds
 
-
+### Known Issues
+- **Issue Description**: Error during text re-editing: `code=4: only Gray, RGB, and CMYK colorspaces supported`
+- **Symptom**: Unsupported color space encountered during text block editing
+- **Current Workaround**: Skip text blocks with unsupported color spaces
+- **Proposed Solution**: Switch to OCR mode for entire pages containing unsupported color spaces
+- **Example**: [View PDF sample with unsupported color spaces](https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/colorspace_issue_sample.pdf)
 

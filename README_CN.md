@@ -71,3 +71,11 @@ python app.py
 - PDF 聊天功能
 - 学术 PDF 搜索集成
 - 进一步提升处理速度
+
+### 待修复问题
+- **问题描述**：应用重编辑时发生错误: `code=4: only Gray, RGB, and CMYK colorspaces supported`
+- **现象**：文本块应用编辑时遇到不支持的色彩空间
+- **当前解决方案**：遇到不支持的色彩空间时跳过该文本块
+- **待解决思路**：对于包含不支持色彩空间的页面，整页切换至OCR模式处理
+- **复现示例**：[查看不支持色彩空间的PDF样例](https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/colorspace_issue_sample.pdf)
+
