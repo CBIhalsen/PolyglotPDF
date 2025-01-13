@@ -121,3 +121,46 @@ css=f"""
 }}
 """
 ```
+
+### Basic Principles
+This project follows similar basic principles as Adobe Acrobat DC's PDF editing, using PyMuPDF for text block recognition and manipulation:
+
+- **Core Process**:
+```python
+# Get text blocks from the page
+blocks = page.get_text("dict")["blocks"]
+
+# Process each text block
+for block in blocks:
+    if block.get("type") == 0:  # text block
+        bbox = block["bbox"]     # get text block boundary
+        text = ""
+        font_info = None
+        # Collect text and font information
+        for line in block["lines"]:
+            for span in line["spans"]:
+                text += span["text"] + " "
+```
+This approach directly processes PDF text blocks, maintaining the original layout while achieving efficient text extraction and modification.
+
+- **Technical Choices**:
+  - Utilizes PyMuPDF for PDF parsing and editing
+  - Focuses on text processing
+  - Avoids complex operations like AI formula recognition, table processing, or page restructuring
+
+- **Why Avoid Complex Processing**:
+  - AI recognition of formulas, tables, and PDF restructuring faces severe performance bottlenecks
+  - Complex AI processing leads to high computational costs
+  - Significantly increased processing time (potentially tens of seconds or more)
+  - Difficult to deploy at scale with low costs in production environments
+  - Not suitable for online services requiring quick response times
+
+- **Project Scope**:
+  - Primary focus on layout-preserved PDF translation
+  - Provides efficient approach for AI-assisted PDF reading
+  - Aims for optimal performance-to-cost ratio
+
+- **Performance**:
+  - PolyglotPDF API response time: ~1 second per page
+  - Low computational resource requirements, suitable for scale deployment
+  - High cost-effectiveness for commercial applications
