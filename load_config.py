@@ -192,11 +192,11 @@ def delete_entry(index: int) -> bool:
             # 删除原始文件（保持原始扩展名）
             original_file = os.path.join('static', 'original', target_entry['name'])
             print(f"原始文件路径: {original_file}")
-            if os.path.exists(original_file):
-                os.remove(original_file)
-                print(f"成功删除原始文件: {original_file}")
-            else:
-                print(f"原始文件不存在: {original_file}")
+            # if os.path.exists(original_file):
+            #     os.remove(original_file)
+            #     print(f"成功删除原始文件: {original_file}")
+            # else:
+            #     print(f"原始文件不存在: {original_file}")
 
             # 删除翻译后的文件（始终使用.pdf扩展名）
             filename_without_ext = os.path.splitext(target_entry['name'])[0]
