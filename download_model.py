@@ -72,5 +72,8 @@ def download_model_files(model_name):
         download_file(download_url, model_folder, file_name)
 
 # 示例使用
-model_name = "Helsinki-NLP/opus-mt-en-es"
-download_model_files(model_name)
+if __name__ == '__main__':
+
+    model_name = "Helsinki-NLP/opus-mt-en-es"
+    download_model_files(model_name)
+
