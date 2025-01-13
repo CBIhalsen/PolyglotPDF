@@ -49,7 +49,7 @@ def get_access_token():
     return str(requests.post(url, params=params).json().get("access_token"))
 
 
-def batch_translate(text_list,target_lang ):
+def batch_translate(text_list,original_lang,target_lang ):
     """
     分批处理大量文本
     :param text_list: 要翻译的完整文本列表
@@ -60,7 +60,7 @@ def batch_translate(text_list,target_lang ):
     all_translations = []
     for i in range(0, len(text_list), batch_size):
         batch = text_list[i:i + batch_size]
-        translations = translate_batch(batch)
+        translations = translate_batch(original_lang=original_lang,target_lang=target_lang,text_list=text_list)
         all_translations.extend(translations)
     return all_translations
 
