@@ -248,10 +248,10 @@ class main_function:
                         for span in line["spans"]:
                             text += span["text"] + " "
                             font_size = span["size"]
-                            print("字体大小",font_size)
+                            # print("字体大小",font_size)
                             if not font_info and "font" in span:
                                 font_info = span["font"]
-                                print('字体信息',font_info)
+                                # print('字体信息',font_info)
                                 if font_info and font_info not in font_collection:
                                     font_collection.append(font_info)
 
@@ -383,8 +383,12 @@ class main_function:
         for idx, item in enumerate(text_rect):
             first_strings.append(item[0])
             rect = fitz.Rect(item[1]) if use_mupdf else fitz.Rect(*item[1])
-            page.add_redact_annot(rect)
-            page.apply_redactions()
+            try:
+                page.add_redact_annot(rect)
+                page.apply_redactions()
+            except Exception as e:
+                print(f"应用重编辑时发生错误: {e}")
+                continue
 
             if self.translation:
                 page.insert_htmlbox(
