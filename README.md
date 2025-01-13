@@ -156,11 +156,12 @@ This approach directly processes PDF text blocks, maintaining the original layou
   - Not suitable for online services requiring quick response times
 
 - **Project Scope**:
-  - Primary focus on layout-preserved PDF translation
-  - Provides efficient approach for AI-assisted PDF reading
+  - This project only serves to demonstrate the correct approach for layout-preserved PDF translation and AI-assisted PDF reading. Converting PDF files to markdown format for large language models to read, in my opinion, is not a wise approach.
   - Aims for optimal performance-to-cost ratio
 
 - **Performance**:
   - PolyglotPDF API response time: ~1 second per page
   - Low computational resource requirements, suitable for scale deployment
   - High cost-effectiveness for commercial applications
+
+
