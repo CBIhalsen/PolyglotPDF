@@ -1392,44 +1392,6 @@ function removeFile(fileId) {
 }
 
 // 上传文件
-async function uploadFile(fileId) {
-    const fileData = uploadFiles.get(fileId);
-    if (!fileData) return;
-
-    const fileItem = document.getElementById(`file-${fileId}`);
-    const statusElement = fileItem.querySelector('.file-status');
-    const progressBar = fileItem.querySelector('.progress-bar');
-
-    try {
-        // 创建 FormData
-        const formData = new FormData();
-        formData.append('file', fileData.file);
-
-        // 发送上传请求
-        const response = await fetch('/upload', {
-            method: 'POST',
-            body: formData,
-            onUploadProgress: (progressEvent) => {
-                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                progressBar.style.width = percentCompleted + '%';
-                statusElement.textContent = 'Uploading ' + percentCompleted + '%';
-            }
-        });
-
-        if (response.ok) {
-            statusElement.textContent = 'Upload Success';
-            fileData.status = 'success';
-            progressBar.style.backgroundColor = '#4CAF50';
-        } else {
-            throw new Error('Upload failed');
-        }
-    } catch (error) {
-        statusElement.textContent = 'Upload failure';
-        fileData.status = 'error';
-        progressBar.style.backgroundColor = '#f44336';
-        showError(`Upload failure: ${fileData.file.name}`);
-    }
-}
 
 // 显示错误信息
 function showError(message) {
