@@ -3,6 +3,7 @@ import All_Translation as at
 from PIL import Image
 import pytesseract
 import time
+# import YoudaoTranslate as yt
 import fitz
 import os
 import download_model
@@ -15,6 +16,7 @@ config = load_config.load_config()
 translation_type = config['default_services']['translation_service']
 translation = config['default_services']['translation']
 use_mupdf = not config['default_services']['ocr_modle']
+print(use_mupdf,'mupdf值')
 print('当前',config['count'])
 
 
@@ -179,7 +181,7 @@ class main_function:
             "index": count,
             "date": current_time,
             "name": self.pdf_path,
-            "original_language": "auto",
+            "original_language": self.original_language,
             "target_language": self.target_language,
             "read": "0",
             "statue": "0"
@@ -188,6 +190,7 @@ class main_function:
     # 遍历每一页
         # 使用PyMuPDF直接获取文本块
         if use_mupdf:
+
             for i in range(self.doc.page_count):
                 self.start(image=None, pag_num=i)
         else:
@@ -244,17 +247,16 @@ class main_function:
                     for line in block["lines"]:
                         for span in line["spans"]:
                             text += span["text"] + " "
+                            font_size = span["size"]
+                            print("字体大小",font_size)
                             if not font_info and "font" in span:
                                 font_info = span["font"]
+                                print('字体信息',font_info)
                                 if font_info and font_info not in font_collection:
                                     font_collection.append(font_info)
 
                     text = text.strip()
-                    # print('===== 文本块信息 =====')
-                    # print(f'文本内容: {text}')
-                    # print(f'使用字体: {font_info}')
-                    # print(f'当前所有字体: {", ".join(font_collection)}')
-                    # print('===================')
+
 
                     # 只有不是公式的文本才添加到处理列表
                     if text and not is_math(text, pag_num,font_info) and  not is_non_text(text):
@@ -394,7 +396,7 @@ class main_function:
                 page.insert_htmlbox(
                     rect,
                     texts_list[idx],
-                    css=f"* {{font-family:{get_font_by_language(self.target_language)}; font-size:auto; color: #111111 ;font-weight:normal;}}"
+                    css=f"* {{font-family:{get_font_by_language(self.target_language)}; font-size:auto; font-weight:normal;}}"
                 )
 if __name__ == '__main__':
 
