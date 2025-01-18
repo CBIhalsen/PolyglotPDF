@@ -39,7 +39,7 @@ cd polyglotpdf
 ```bash
 pip install -r requirements.txt
 ```
-3. The API key is configured in config.json. The alicloud translation API is not recommended.
+3. Configure your API key in config.json. The alicloud translation API is not recommended.
 
 4. Run the application:
 ```bash
