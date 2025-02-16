@@ -23,11 +23,11 @@
       "access_key_secret": "XX"
     },
     "openai": {
-      "auth_key": "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",
+      "auth_key": "",
       "model_name": "gpt-4o-mini"
     },
     "deepseek": {
-      "auth_key": "sk-kvkjntuwiwqqamrczaphssjrpshexkajqteddcqnqfsqonti",
+      "auth_key": "",
       "model_name": "deepseek-ai/DeepSeek-V3"
     }
   },
