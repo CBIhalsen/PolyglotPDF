@@ -21,6 +21,14 @@
     "alicloud": {
       "access_key_id": "XX",
       "access_key_secret": "XX"
+    },
+    "openai": {
+      "auth_key": "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",
+      "model_name": "gpt-4o-mini"
+    },
+    "deepseek": {
+      "auth_key": "sk-kvkjntuwiwqqamrczaphssjrpshexkajqteddcqnqfsqonti",
+      "model_name": "deepseek-ai/DeepSeek-V3"
     }
   },
   "ocr_services": {

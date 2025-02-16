@@ -376,8 +376,6 @@ class main_function:
                 texts_to_process=texts_list
             ).translation()
 
-
-
         # 处理每个文本块
         for idx, item in enumerate(text_rect):
             first_strings.append(item[0])
@@ -388,26 +386,19 @@ class main_function:
                 page.apply_redactions()
             except Exception as e:
                 annots = list(page.annots())  # 转换为列表
+                # + 白板画布
                 if annots:
                     page.delete_annot(annots[-1])
+                try:
+                    # 使用白色填充矩形区域
+                    page.draw_rect(rect, color=(1, 1, 1), fill=(1, 1, 1))
+                except Exception as e2:
+                    print(f"创建白色画布时发生错误: {e2}")
 
                 print(f"应用重编辑时发生错误: {e}")
-                continue
+                # continue
 
 
-
-            if self.translation:
-                page.insert_htmlbox(
-                    rect,
-                    translation_list[idx],
-                    css=f"* {{font-family:{get_font_by_language(self.target_language)};font-size:auto;color: #111111 ;font-weight:normal;}}"
-                )
-            else:
-                page.insert_htmlbox(
-                    rect,
-                    texts_list[idx],
-                    css=f"* {{font-family:{get_font_by_language(self.target_language)}; font-size:auto; font-weight:normal;}}"
-                )
 if __name__ == '__main__':
 
     main_function(original_language='auto', target_language='zh', pdf_path='2403.20127v1.pdf').main()

@@ -7,6 +7,10 @@ import baidu_translation as bt
 import os
 import Deepl_Translation as dt
 import YouDao_translation as yt
+import LLMS_translation as lt
+import asyncio
+
+
 # #
 # Get the encoder of a specific model, assume gpt3.5, tiktoken is extremely fast,
 # and the error of this statistical token method is small and can be ignored
@@ -33,29 +37,44 @@ class Offline_translation:
         return translated_texts
 
 class Online_translation:
-
-
-    def __init__(self,original_language,target_language,translation_type,texts_to_process=[]):
-
+    def __init__(self, original_language, target_language, translation_type, texts_to_process=[]):
         self.model_name = f"opus-mt-{original_language}-{target_language}"
         self.original_text = texts_to_process
         self.target_language = target_language
         self.original_lang = original_language
         self.translation_type = translation_type
 
+    def run_async(self, coro):
+        """运行异步函数的同步包装器"""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            return loop.run_until_complete(coro)
+        finally:
+            loop.close()
+
     def translation(self):
         if self.translation_type == 'deepl':
-            translated_list =self.deepl_translation()
+            translated_list = self.deepl_translation()
         elif self.translation_type == 'youdao':
-            translated_list =self.youdao_translation()
+            translated_list = self.youdao_translation()
         elif self.translation_type == 'aliyun':
-            translated_list =self.alicloud_translation()
+            translated_list = self.alicloud_translation()
         elif self.translation_type == 'tencent':
-            translated_list =self.tencent_translation()
+            translated_list = self.tencent_translation()
         elif self.translation_type == 'google':
-            translated_list =self.google_translation()
+            translated_list = self.google_translation()
         elif self.translation_type == 'baidu':
-            translated_list =self.baidu_translation()
+            translated_list = self.baidu_translation()
+        elif self.translation_type == 'openai':
+            # 使用同步包装器运行异步函数
+            translated_list = self.run_async(self.openai_translation())
+        elif self.translation_type == 'deepseek':
+            # 使用同步包装器运行异步函数
+            translated_list = self.run_async(self.deepseek_translation())
+
+        return translated_list
+
 
         return translated_list
 
@@ -91,6 +110,23 @@ class Online_translation:
 
         return translated_texts
 
+    async def openai_translation(self):
+        translator = lt.Openai_translation("gpt-3.5-turbo")
+        translated_texts = await translator.translate(
+            texts=self.original_text,
+            original_lang=self.original_lang,
+            target_lang=self.target_language
+        )
+        return translated_texts
+
+    async def deepseek_translation(self):
+        translator = lt.Deepseek_translation()
+        translated_texts = await translator.translate(
+            texts=self.original_text,
+            original_lang=self.original_lang,
+            target_lang=self.target_language
+        )
+        return translated_texts
 
 
 
