@@ -784,6 +784,16 @@ input:checked + .slider:before {
 
         <div class="api-selection">
             <div class="api-option">
+                <input type="radio" id="openai" name="api" value="openai" onchange="showApiKey('openai')">
+                <label for="openai">Openai API</label>
+
+            </div>
+            <div class="api-option">
+                <input type="radio" id="deepseek" name="api" value="deepseek" onchange="showApiKey('deepseek')">
+                <label for="deepseek">Deepseek API</label>
+
+            </div>
+            <div class="api-option">
                 <input type="radio" id="deepl" name="api" value="deepl" onchange="showApiKey('deepl')">
                 <label for="deepl">DeepL API</label>
 
