@@ -23,11 +23,11 @@
       "access_key_secret": "XX"
     },
     "openai": {
-      "auth_key": "",
+      "auth_key": "xxx",
       "model_name": "gpt-4o-mini"
     },
     "deepseek": {
-      "auth_key": "",
+      "auth_key": "xxxx",
       "model_name": "deepseek-ai/DeepSeek-V3"
     }
   },
