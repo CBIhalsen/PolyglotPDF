@@ -12,7 +12,10 @@
 <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/demo.gif?raw=true" width="80%" height="40%">
 
 ### [🎬 Watch Full Video](https://github.com/CBIhalsen/PolyglotPDF/blob/main/demo.mp4)
- llms has been added as the translation api of choice, gpt4-o-mini is recommended
+ llms has been added as the translation api of choice, gpt4-o-mini is recommended. The color space error can be resolved by filling the white areas in PDF files.
+
+In addition, consider adding arxiv search function and rendering arxiv papers after latex translation.
+
 ## Overview
 PolyglotPDF is an advanced PDF processing tool that employs specialized techniques for ultra-fast text, table, and formula recognition in PDF documents, typically completing processing within 1 second. It features OCR capabilities and layout-preserving translation, with full document translations usually completed within 10 seconds (speed may vary depending on the translation API provider).
 
@@ -163,5 +166,4 @@ This approach directly processes PDF text blocks, maintaining the original layou
   - PolyglotPDF API response time: ~1 second per page
   - Low computational resource requirements, suitable for scale deployment
   - High cost-effectiveness for commercial applications
-
 
