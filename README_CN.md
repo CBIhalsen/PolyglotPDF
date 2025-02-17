@@ -33,7 +33,7 @@ PolyglotPDF 是一款先进的 PDF 处理工具，采用特殊技术实现对 PD
 
 1. 克隆仓库：
 ```bash
-git clone https://github.com/yourusername/polyglotpdf.git
+git clone https://github.com/CBIhalsen/Polyglotpdf.git
 cd polyglotpdf
 ```
 
