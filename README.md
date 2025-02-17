@@ -34,7 +34,7 @@ PolyglotPDF is an advanced PDF processing tool that employs specialized techniqu
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/polyglotpdf.git
+git clone https://github.com/CBIhalsen/PolyglotPDF.git
 cd polyglotpdf
 ```
 
