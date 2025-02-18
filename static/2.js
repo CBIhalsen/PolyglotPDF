@@ -124,6 +124,22 @@ function initSettings() {
         });
 }
 
+function getecount() {
+    fetch('/api/get-default-services')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.data) {
+                const settings = data.data;
+
+                document.getElementById('count_article').textContent = ` Articles in Total: ${settings.count} `;
+            }
+        })
+        .catch(error => {
+            console.error('获取设置失败:', error);
+            alert('获取设置失败，请稍后重试');
+        });
+}
+
 
 // 页面加载时初始化设置
 document.addEventListener('DOMContentLoaded', initSettings);

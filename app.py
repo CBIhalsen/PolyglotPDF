@@ -206,7 +206,9 @@ def delete_article():
             return jsonify({'error': 'Missing article ID'}), 400
 
         # 调用删除函数
-        success = delete_entry(int(article_id)),decrease_count()
+        print('删除',article_id)
+        success = delete_entry(int(article_id)) and decrease_count()
+        print('zzz',success)
 
         if success:
             return jsonify({'message': 'Article deleted successfully'}), 200

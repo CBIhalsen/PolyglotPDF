@@ -4,18 +4,44 @@
 
         // 显示主页
         function showHome() {
+            document.getElementById('recentread').innerHTML = 'Recent Reading';
+            document.getElementById('articleContainer').style.display = '';
             document.getElementById('viewAllSection').style.display = 'flex';
             document.querySelector('.sidebar-menu a[onclick="showHome()"]').classList.add('active');
             document.querySelector('.sidebar-menu a[onclick="showAllRecent()"]').classList.remove('active');
-            loadArticles(true,true); // true表示只显示前3条
+            document.querySelector('.sidebar-menu a[onclick="showSetup()"]').classList.remove('active'); // 添加这行
+            loadArticles(true,true);
+              document.getElementById('t-container').style.display = '';
         }
 
-        // 显示所有最近阅读
         function showAllRecent() {
+            document.getElementById('recentread').innerHTML = 'Recent Reading';
+
+            document.getElementById('articleContainer').style.display = '';
             document.getElementById('viewAllSection').style.display = 'none';
             document.querySelector('.sidebar-menu a[onclick="showHome()"]').classList.remove('active');
             document.querySelector('.sidebar-menu a[onclick="showAllRecent()"]').classList.add('active');
-            loadArticles(false,true); // false表示显示所有数据
+            document.querySelector('.sidebar-menu a[onclick="showSetup()"]').classList.remove('active'); // 添加这行
+            loadArticles(false,true);
+            document.getElementById('t-container').style.display = '';
+        }
+        // 添加新的函数处理 Setup steps
+        function showSetup() {
+            // 隐藏其他部分（如果需要的话）
+
+
+            document.getElementById('recentread').innerHTML = 'config.json';
+            document.getElementById('articleContainer').style.display = 'none';
+             document.getElementById('viewAllSection').style.display = 'none';
+
+
+            // 移除其他菜单项的 active 类
+            document.querySelector('.sidebar-menu a[onclick="showHome()"]').classList.remove('active');
+            document.querySelector('.sidebar-menu a[onclick="showAllRecent()"]').classList.remove('active');
+
+            // 给 Setup steps 添加 active 类
+            document.querySelector('.sidebar-menu a[onclick="showSetup()"]').classList.add('active');
+            document.getElementById('t-container').style.display = 'block';
         }
 
         // 显示上传模态框
@@ -25,6 +51,8 @@
             document.getElementById('upload_content-2').style.display = 'none';
 
         }
+
+
 
         // 显示设置模态框
         function showSettings() {

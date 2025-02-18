@@ -423,6 +423,7 @@ function deleteArticle(articleId) {
 
                 const value = document.getElementById('record_show_staute').getAttribute('data-value') === 'true';
                 loadArticles(value,false)
+                getecount()
             } else {
                 throw new Error('删除失败');
             }
