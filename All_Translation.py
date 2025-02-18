@@ -1,9 +1,7 @@
-import Google_translation as gt
-import Alicloud_translation as at
-import Tencent_translation as tt
+
 import tiktoken
 import time
-import baidu_translation as bt
+
 import os
 import Deepl_Translation as dt
 import YouDao_translation as yt
@@ -58,20 +56,18 @@ class Online_translation:
             translated_list = self.deepl_translation()
         elif self.translation_type == 'youdao':
             translated_list = self.youdao_translation()
-        elif self.translation_type == 'aliyun':
-            translated_list = self.alicloud_translation()
-        elif self.translation_type == 'tencent':
-            translated_list = self.tencent_translation()
-        elif self.translation_type == 'google':
-            translated_list = self.google_translation()
-        elif self.translation_type == 'baidu':
-            translated_list = self.baidu_translation()
         elif self.translation_type == 'openai':
             # 使用同步包装器运行异步函数
             translated_list = self.run_async(self.openai_translation())
         elif self.translation_type == 'deepseek':
             # 使用同步包装器运行异步函数
             translated_list = self.run_async(self.deepseek_translation())
+        elif self.translation_type == 'Doubao':
+            # 使用同步包装器运行异步函数
+            translated_list = self.run_async(self.Doubao_translation())
+        elif self.translation_type == 'Qwen':
+            # 使用同步包装器运行异步函数
+            translated_list = self.run_async(self.Qwen_translation())
 
         return translated_list
 
@@ -84,31 +80,14 @@ class Online_translation:
 
         return translated_texts
 
-    def google_translation(self):
 
-        translated_texts = gt.translate(self.original_text,self.original_lang,self.target_language)
-
-        return translated_texts
     def youdao_translation(self):
 
         translated_texts = yt.translate(texts=self.original_text,original_lang=self.original_lang,target_lang=self.target_language)
 
         return translated_texts
-    def alicloud_translation(self):
 
-        translated_texts = at.translate(texts=self.original_text,original_lang=self.original_lang,target_lang=self.target_language)
 
-        return translated_texts
-    def tencent_translation(self):
-
-        translated_texts = tt.translate(source_text_list=self.original_text,original_lang=self.original_lang,target_lang=self.target_language)
-
-        return translated_texts
-    def baidu_translation(self):
-
-        translated_texts = bt.translate(texts=self.original_text,original_lang=self.original_lang,target_lang=self.target_language)
-
-        return translated_texts
 
     async def openai_translation(self):
         translator = lt.Openai_translation("gpt-3.5-turbo")
@@ -121,6 +100,22 @@ class Online_translation:
 
     async def deepseek_translation(self):
         translator = lt.Deepseek_translation()
+        translated_texts = await translator.translate(
+            texts=self.original_text,
+            original_lang=self.original_lang,
+            target_lang=self.target_language
+        )
+        return translated_texts
+    async def Doubao_translation(self):
+        translator = lt.Doubao_translation()
+        translated_texts = await translator.translate(
+            texts=self.original_text,
+            original_lang=self.original_lang,
+            target_lang=self.target_language
+        )
+        return translated_texts
+    async def Qwen_translation(self):
+        translator = lt.Qwen_translation()
         translated_texts = await translator.translate(
             texts=self.original_text,
             original_lang=self.original_lang,
