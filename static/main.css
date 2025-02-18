@@ -1,0 +1,786 @@
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background-color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 10px 0;
+        }
+
+        .sidebar-menu a {
+            text-decoration: none;
+            color: #666;
+            display: block;
+            padding: 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a.active {
+            background-color: #6366f1;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 240px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .batch-button,
+.settings-content {
+    position: relative;
+    padding: 30px;
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+    color: #666;
+}
+
+.close-btn:hover {
+    color: #000;
+}
+
+
+
+.api-selection {
+    margin: 20px 0;
+}
+
+.api-option {
+    margin: 15px 0;
+}
+
+
+
+
+.settings-footer {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.save-btn {
+    background-color: #6366f1;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.save-btn:hover {
+    background-color: #4f46e5;
+}
+
+.save-btn.success {
+    background-color: #22c55e;
+}
+
+        .recent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .view-all {
+            color: #6366f1;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .view-all:hover {
+            text-decoration: underline;
+        }
+
+        .add-button {
+            background-color: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .article-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+      .article-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.article-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.article-top img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.article-bottom {
+    margin-top: 15px;
+    position: relative;
+}
+
+.article-title h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+}
+
+.article-info {
+    display: flex;
+    gap: 15px;
+    color: #666;
+    font-size: 14px;
+}
+
+.status-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.read-status {
+    position: absolute;
+    top: 10px;
+    right: 40px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    display: none;
+}
+
+.article-card:hover .read-status {
+    display: block;
+}
+
+.unread {
+    background-color: #ff4d4f;
+    color: white;
+}
+
+.read {
+    background-color: #52c41a;
+    color: white;
+}
+
+.menu-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+
+.article-menu {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 1000;
+    transform: translateX(-80px);  /* 向左位移20px */
+    width: 80px;
+}
+
+
+.menu-item {
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background-color: #f5f5f5;
+}
+
+
+        .upload-container,
+        .settings-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .upload-content,
+        .settings-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 800px;
+        }
+
+        .settings-content {
+            max-width: 400px;
+        }
+
+        .settings-option {
+            margin: 20px 0;
+        }
+
+        .settings-option label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #6366f1;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+.upload-area {
+    border: 2px dashed #e0e0e0;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    background-color: #fafafa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+    border-color: #1a73e8;
+    background-color: #f8f9fe;
+}
+
+.upload-area i {
+    font-size: 48px;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+.upload-text {
+    font-size: 16px;
+    color: #333;
+    margin: 12px 0;
+}
+
+.upload-link {
+    color: #1a73e8;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.upload-link:hover {
+    text-decoration: underline;
+}
+
+.upload-hint {
+    font-size: 14px;
+    color: #666;
+    margin: 8px 0;
+}
+
+.upload-formats {
+    font-size: 14px;
+    color: #666;
+    margin: 8px 0;
+}
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            text-align: center;
+            padding: 20px;
+            color: #dc2626;
+        }
+        .upload-files-list {
+    margin: 20px 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.upload-file-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.upload-file-info {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.upload-file-name {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.upload-file-meta {
+    font-size: 12px;
+    color: #666;
+}
+
+.upload-status {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 3px;
+}
+
+.status-pending {
+    background: #e5e7eb;
+}
+
+.status-uploading {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.status-success {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.status-error {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.upload-link {
+    color: #6366f1;
+    cursor: pointer;
+}
+
+.upload-link:hover {
+    text-decoration: underline;
+}
+
+.upload-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+.language-selection {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px dashed #e5e7eb;
+    display: flex;
+    gap: 20px;
+}
+
+.source-lang, .target-lang {
+    flex: 1;
+}
+
+select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 14px;
+}
+.next-step-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.next-step-btn {
+    padding: 10px 30px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.next-step-btn:hover {
+    background-color: #45a049;
+}
+
+.success-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.success-icon {
+    font-size: 80px;
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+.success-text {
+    font-size: 18px;
+    color: #333;
+}
+
+.ocr-toggle {
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+}
+
+.slider.round {
+    border-radius: 24px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #6366f1; /* 使用图片中的紫色 */
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* CSS */
+.button-group {
+    display: flex;
+    gap: 8px;
+}
+
+.action-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: white;
+    color: #666;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.action-button:hover {
+    background-color: #f5f5f5;
+}
+
+.action-button i {
+    font-size: 14px;
+}
+
+.action-button span {
+    vertical-align: middle;
+}
+#batchModal {
+  display: none; /* 初始隐藏，与原有modal逻辑一致 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 2000; /* 设大一点以免被其他遮罩挡住 */
+}
+
+/* 弹窗内容区域 */
+.batch-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 900px;
+  max-height: 80%;
+  overflow: hidden; /* 超出部分滚动 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 弹窗头部 */
+.batch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.batch-header h2 {
+  margin: 0;
+}
+
+.batch-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* 卡片区域 */
+.batch-grid {
+  flex: 1; /* 占满剩余可用空间 */
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+/* 卡片本身 */
+.batch-card {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.batch-card:hover {
+  background-color: #f5f5f5;
+}
+
+/* 卡片选中状态 */
+.batch-card.selected {
+  background-color: #ffdddd; /* 选中后变红色或你想要的颜色 */
+  border-color: #f00;
+}
+
+/* 卡片底部信息 */
+.batch-card-info {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* 批量操作弹窗整体，可以复用已有的 .upload-container 样式，这里只是示例 */
+#batchModal {
+  display: none; /* 初始隐藏，与原有modal逻辑一致 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 2000; /* 设大一点以免被其他遮罩挡住 */
+}
+
+/* 弹窗内容区域 */
+.batch-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 900px;
+  max-height: 80%;
+  overflow: hidden; /* 超出部分滚动 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 弹窗头部 */
+.batch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.batch-header h2 {
+  margin: 0;
+}
+
+.batch-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* 卡片区域 */
+.batch-grid {
+  flex: 1; /* 占满剩余可用空间 */
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+/* 卡片本身 */
+.batch-card {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.batch-card:hover {
+  background-color: #f5f5f5;
+}
+
+/* 卡片选中状态 */
+.batch-card.selected {
+  background-color: #ffdddd; /* 选中后变红色或你想要的颜色 */
+  border-color: #f00;
+}
+
+/* 卡片底部信息 */
+.batch-card-info {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}
