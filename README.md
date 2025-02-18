@@ -16,6 +16,19 @@
 
 In addition, consider adding arxiv search function and rendering arxiv papers after latex translation.
 
+# Chinese LLM API Application
+
+## Doubao & Deepseek
+Apply through Volcengine platform:
+- Application URL: [Volcengine-Doubao](https://www.volcengine.com/product/doubao/)
+- Available Models: Doubao, Deepseek series models
+
+## Tongyi Qwen
+Apply through Alibaba Cloud platform:
+- Application URL: [Alibaba Cloud-Tongyi Qwen](https://cn.aliyun.com/product/tongyi?from_alibabacloud=&utm_content=se_1019997984)
+- Available Models: Qwen-Max, Qwen-Plus series models
+
+
 ## Overview
 PolyglotPDF is an advanced PDF processing tool that employs specialized techniques for ultra-fast text, table, and formula recognition in PDF documents, typically completing processing within 1 second. It features OCR capabilities and layout-preserving translation, with full document translations usually completed within 10 seconds (speed may vary depending on the translation API provider).
 

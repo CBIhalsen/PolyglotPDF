@@ -15,6 +15,20 @@
 
 另外，考虑添加arxiv搜索功能及对arxiv论文进行latex翻译后渲染。
 
+
+# 国内大语言模型API申请
+
+## Doubao & Deepseek
+通过火山引擎平台申请:
+- 申请地址: [火山引擎-豆包](https://www.volcengine.com/product/doubao/)
+- 支持模型: 豆包(Doubao)、Deepseek系列模型
+
+## 通义千问(Qwen)
+通过阿里云平台申请:
+- 申请地址: [阿里云-通义千问](https://cn.aliyun.com/product/tongyi?from_alibabacloud=&utm_content=se_1019997984) 
+- 支持模型: Qwen-Max、Qwen-Plus等系列模型
+
+
 ## 概述
 PolyglotPDF 是一款先进的 PDF 处理工具，采用特殊技术实现对 PDF 文档中的文字、表格和公式的超快速识别，通常仅需 1 秒即可完成处理。它支持 OCR 功能和完美保留版面的翻译功能，整篇文档的翻译通常可在 10 秒内完成（具体速度取决于翻译 API 服务商）。
 
@@ -79,9 +93,9 @@ python app.py
 - **待解决思路**：对于包含不支持色彩空间的页面，整页切换至OCR模式处理
 - **复现示例**：[查看不支持色彩空间的PDF样例](https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/colorspace_issue_sample.pdf)
 
-我帮你编写字体优化相关的说明：
 
-中文版：
+
+
 ### 字体优化
 当前在 `main.py` 的 `start` 函数中，文本插入使用了默认字体配置：
 ```python
