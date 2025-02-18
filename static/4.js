@@ -46,13 +46,16 @@ async function loadBatchData() {
 
       // 注意：后端返回没有作者的话，可以用Unknown
       const author = item.author || "Unknown author";
+      const original_lan = item.original_language ;
+      const target_lan = item.target_language;
 
       card.innerHTML = `
         <div class="batch-card-title"><strong>${item.name}</strong></div>
         <div class="batch-card-info">
           <p>Date: ${item.date}</p>
           <p>Author: ${author}</p>
-          <p>Status: ${readStatus}</p>
+          <p>Status: ${readStatus}  ||  Convertion: ${original_lan} to ${target_lan}</p>
+     
         </div>
       `;
 
