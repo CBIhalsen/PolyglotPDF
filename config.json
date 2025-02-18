@@ -1,7 +1,7 @@
 {
   "count": 2,
   "translation_services": {
-      "doubao": {
+      "Doubao": {
           "auth_key": "XX",
           "model_name": "ep-20250218225515-k55kc"
       },

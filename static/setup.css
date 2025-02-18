@@ -127,14 +127,19 @@ select.t-input:focus {
 
         /* 保存按钮 */
         .t-save-btn {
-            background-color: #007bff;
+            background-color: #6366f1;
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s;
         }
+
         .t-save-btn:hover {
-            background-color: #0056b3;
+            background-color: #4f46e5;
+        }
+
+        .t-save-btn.success {
+            background-color: #22c55e;
         }

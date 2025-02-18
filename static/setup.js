@@ -129,7 +129,47 @@ function initializeUI(data) {
             }, 5000);
         }
     });
+async function saveall() {
+    const saveall = document.getElementById('saveall');
 
+
+// 添加切换事件监听
+
+
+    try {
+        // 发送数据到后端
+
+        const config = collectConfig();
+
+        const response = await fetch('/save_all', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+             body: JSON.stringify(config)
+        });
+
+        if (!response.ok) {
+            throw new Error('保存失败');
+        }
+
+        // 显示成功状态
+        saveall.innerHTML = '✓';
+        saveall.classList.add('success');
+
+        // 2秒后恢复按钮状态
+        setTimeout(() => {
+            saveall.innerHTML = '保存所有修改';
+            saveall.classList.remove('success');
+        }, 2000);
+
+
+
+    } catch (error) {
+        console.error('保存设置失败:', error);
+        alert('保存设置失败，请重试');
+    }
+}
     // 保存所有修改
     document.querySelector('.t-save-btn').addEventListener('click', function() {
         const config = collectConfig();
@@ -146,7 +186,6 @@ function initializeUI(data) {
     // 收集所有配置数据
 function collectConfig() {
     const config = {
-        count: document.getElementById('t-count').textContent,
         translation_services: {},
         ocr_services: {},
         default_services: {}
