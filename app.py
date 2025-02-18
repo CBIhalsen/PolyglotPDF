@@ -42,7 +42,7 @@ def read_index():
 def read_pdfviewer():
     # 获取 URL 参数
     index = request.args.get('index')
-    print(index,'打开')
+    # print(index,'打开')
 
 
     # 现在你可以使用这些参数了
@@ -285,6 +285,8 @@ def save_settings():
 
 @app.route('/api/get-default-services', methods=['GET'])
 def get_default_services_route():
+
+
     """
     获取默认服务配置的API路由
 
@@ -311,6 +313,66 @@ def get_default_services_route():
             'message': f'Error: {str(e)}'
         }), 500
 
+@app.route('/config_json', methods=['GET'])
+def get_config():
+    """
+    前端页面首次加载时，会通过 GET /config_json 获取配置信息。
+    返回的内容就是前端需要渲染的 config.json 数据结构。
+    """
+    config_data = load_config.load_config()
+    return jsonify(config_data)
+
+
+
+
+
+@app.route('/update_config', methods=['POST'])
+def update_config():
+    """处理单个配置更新"""
+    try:
+        new_config = request.get_json()
+        if not new_config:
+            return jsonify({'status': 'error', 'message': '无效的配置数据'}), 400
+
+        # 加载当前配置
+        current_config = load_config.load_config()
+
+        # 递归更新配置
+        def update_dict(current, new):
+            for key, value in new.items():
+                if isinstance(value, dict) and key in current and isinstance(current[key], dict):
+                    update_dict(current[key], value)
+                else:
+                    current[key] = value
+
+        update_dict(current_config, new_config)
+
+        # 保存更新后的配置
+        if load_config.save_config(current_config):
+            return jsonify({'status': 'success', 'message': '配置已更新'}), 200
+        else:
+            return jsonify({'status': 'error', 'message': '保存配置失败'}), 500
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/save_all', methods=['POST'])
+def save_all():
+    """完全覆盖保存所有配置"""
+    try:
+        new_config = request.get_json()
+        if not new_config:
+            return jsonify({'status': 'error', 'message': '无效的配置数据'}), 400
+
+        # 直接保存新配置
+        if load_config.save_config(new_config):
+            return jsonify({'status': 'success', 'message': '所有配置已保存'}), 200
+        else:
+            return jsonify({'status': 'error', 'message': '保存配置失败'}), 500
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == "__main__":
     print(f"Current directory: {current_dir}")

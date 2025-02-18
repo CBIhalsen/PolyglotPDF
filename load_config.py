@@ -2,7 +2,7 @@ import json
 import os
 from typing import Any, Dict, List, Optional
 from pathlib import Path
-
+import tempfile
 
 class ConfigError(Exception):
     """配置文件操作相关的自定义异常"""
@@ -288,9 +288,9 @@ def update_default_services(translation: Optional[bool] = None,
 
         # 只更新提供的参数
         if translation is not None:
-            config["default_services"]["translation"] = str(translation).lower() == 'true'
+            config["default_services"]["Enable_translation"] = str(translation).lower() == 'true'
         if translation_service is not None:
-            config["default_services"]["translation_service"] = translation_service
+            config["default_services"]["Translation_api"] = translation_service
         if ocr_modle is not None:
             config["default_services"]["ocr_modle"] = str(ocr_modle).lower() == 'true'
 
@@ -320,14 +320,47 @@ def get_default_services() -> Optional[Dict]:
             return None
 
         return {
-            "translation": config["default_services"]["translation"],
-            "translation_service": config["default_services"]["translation_service"],
+            "translation": config["default_services"]["Enable_translation"],
+            "translation_service": config["default_services"]["Translation_api"],
             "ocr_modle": config["default_services"]["ocr_modle"],
             "count": config["count"],
         }
     except ConfigError as e:
         print(f"Error getting default services: {str(e)}")
         return None
+
+def save_config(config):
+    """保存配置文件"""
+    # 创建备份
+    CONFIG_FILE = 'config.json'
+    if os.path.exists(CONFIG_FILE):
+        backup_file = f"{CONFIG_FILE}.bak"
+        try:
+            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+                original_content = f.read()
+            with open(backup_file, 'w', encoding='utf-8') as f:
+                f.write(original_content)
+        except Exception as e:
+            print(f"创建备份文件失败: {e}")
+
+    # 保存新配置
+    try:
+        with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=4, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print(f"保存配置文件失败: {e}")
+        # 如果保存失败且存在备份，尝试恢复
+        if os.path.exists(f"{CONFIG_FILE}.bak"):
+            try:
+                with open(f"{CONFIG_FILE}.bak", 'r', encoding='utf-8') as f:
+                    backup_content = f.read()
+                with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+                    f.write(backup_content)
+            except Exception as restore_error:
+                print(f"恢复备份失败: {restore_error}")
+        return False
+
 # if __name__ == "__main__":
 #     # 确保目录存在
 #     os.makedirs('static/original', exist_ok=True)

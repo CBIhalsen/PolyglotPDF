@@ -12,11 +12,11 @@ from datetime import datetime
 import pdf_thumbnail
 
 config = load_config.load_config()
-translation_type = config['default_services']['translation_service']
-translation = config['default_services']['translation']
+translation_type = config['default_services']['Translation_api']
+translation = config['default_services']['Enable_translation']
 use_mupdf = not config['default_services']['ocr_modle']
-print(use_mupdf,'mupdf值')
-print('当前',config['count'])
+# print(use_mupdf,'mupdf值')
+# print('当前',config['count'])
 
 
 
@@ -169,10 +169,10 @@ class main_function:
         print("更新后", count)
 
         # 获取当前时间并格式化
-        print('kk')
-        print(self.full_path)
+        # print('kk')
+        # print(self.full_path)
         pdf_thumbnail.create_pdf_thumbnail(self.full_path,width=400)
-        print(self.original_language,self.target_language,self.full_path,len(self.original_language),'路线信息')
+        # print(self.original_language,self.target_language,self.full_path,len(self.original_language),'路线信息')
         # pdf_thumbnail.create_pdf_thumbnail(self.full_path, width=400)
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -245,7 +245,9 @@ class main_function:
                     for line in block["lines"]:
                         for span in line["spans"]:
                             text += span["text"] + " "
-                            # font_size = span["size"]
+                            font_size = span["size"]
+                            # print(text)
+
 
                             # print("字体大小",font_size)
                             if not font_info and "font" in span:
@@ -255,6 +257,7 @@ class main_function:
                                     font_collection.append(font_info)
 
                     text = text.strip()
+
 
 
                     # 只有不是公式的文本才添加到处理列表
@@ -376,6 +379,8 @@ class main_function:
                 texts_to_process=texts_list
             ).translation()
 
+
+
         # 处理每个文本块
         for idx, item in enumerate(text_rect):
             first_strings.append(item[0])
@@ -399,6 +404,26 @@ class main_function:
                 # continue
 
 
+
+            if self.translation:
+                page.insert_htmlbox(
+                    rect,
+                    translation_list[idx],
+                    css=f"""
+                    * {{
+                        font-family: {get_font_by_language(self.target_language)};
+                        font-size: auto;
+                        color: #111111;
+                        font-weight: normal;
+                    }}
+                    """
+                )
+            else:
+                page.insert_htmlbox(
+                    rect,
+                    texts_list[idx],
+                    css=f"* {{font-family:{get_font_by_language(self.target_language)}; font-size:auto; font-weight:normal;}}"
+                )
 if __name__ == '__main__':
 
-    main_function(original_language='auto', target_language='zh', pdf_path='2403.20127v1.pdf').main()
+    main_function(original_language='auto', target_language='zh', pdf_path='colorspace_issue_sample.pdf').main()

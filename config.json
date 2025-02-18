@@ -1,38 +1,38 @@
 {
+  "count": "44",
   "translation_services": {
-    "youdao": {
-      "app_key": "XX",
-      "app_secret": "XX"
-    },
-    "deepl": {
-      "auth_key": "0b28a8df-4075-421d-9b8f-8921220b70e5"
-    },
-    "openai": {
-      "auth_key": "XX",
-      "model_name": "gpt-4o-mini"
-    },
-    "deepseek": {
-      "auth_key": "XX",
-      "model_name": "ep-20250218224909-gps4n"
-    },
-    "doubao": {
-      "auth_key": "XX",
-      "model_name": "ep-20250218225515-k55kc"
-    },
-    "Qwen": {
-      "auth_key": "XX",
-      "model_name": "qwen-plus"
-    }
+      "doubao": {
+          "auth_key": "XX",
+          "model_name": "ep-20250218225515-k55kc"
+      },
+      "Qwen": {
+          "auth_key": "XX",
+          "model_name": "qwen-plus"
+      },
+      "deepseek": {
+          "auth_key": "XX",
+          "model_name": "ep-20250218224909-gps4n"
+      },
+      "openai": {
+          "auth_key": "XX",
+          "model_name": "gpt-4o-mini"
+      },
+      "deepl": {
+          "auth_key": "XX"
+      },
+      "youdao": {
+          "app_key": "XX",
+          "app_secret": "XX"
+      }
   },
   "ocr_services": {
-    "tesseract": {
-      "path": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
-    }
+      "tesseract": {
+          "path": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+      }
   },
   "default_services": {
-    "translation": true,
-    "translation_service": "openai",
-    "ocr_modle": false
-  },
-  "count": 45
+      "ocr_modle": "true",
+      "Enable_translation": "true",
+      "Translation_api": "Doubao"
+  }
 }

@@ -1,0 +1,140 @@
+
+        select.t-input {
+    width: 300px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+select.t-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+        /* 容器与标题等基础样式 */
+        .t-container {
+            display: none;
+           max-width: 90%;
+
+            margin: 0 auto;
+            font-family: Arial, sans-serif;
+        }
+        .t-header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .t-section {
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        /* 展开/折叠区域的基础样式 */
+        .t-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+
+        }
+
+        /* 展开/折叠按钮：这里使用了一个“加号”图标，有旋转和淡入效果 */
+        .t-toggle-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+             color: #000;
+            position: relative;
+        }
+        .t-toggle-btn:hover {
+            background: #f0f0f0;
+        }
+        .t-toggle-btn.t-active {
+            transform: rotate(45deg);
+            color: #007bff;
+        }
+
+        /* 用于内容区域的动画展开：max-height + 透明度平滑过渡 */
+        .t-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.4s ease;
+            opacity: 0;
+        }
+        .t-content.t-active {
+            max-height: 1000px; /* 根据内容高度可适度加大 */
+            opacity: 1;
+        }
+
+        /* 子区域卡片 */
+        .t-sub-section {
+            margin-left: 20px;
+            padding: 10px;
+            border: 2px solid #eee;
+            margin-top: 10px;
+            border-radius: 4px;
+            background-color: white;
+        }
+
+        /* 输入框分组与标签 */
+        .t-input-group {
+            margin: 10px 0;
+        }
+        .t-input-group label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* 数量显示 */
+        .t-count-display {
+            padding: 5px 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        /* 美化输入框 */
+        .t-input {
+            width: 300px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .t-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+        }
+
+        /* 保存按钮 */
+        .t-save-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .t-save-btn:hover {
+            background-color: #0056b3;
+        }
