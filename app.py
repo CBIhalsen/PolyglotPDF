@@ -1,17 +1,17 @@
 
 from flask import Flask, request, send_file, jsonify, send_from_directory
-from werkzeug.utils import secure_filename
+
 import json
 from pathlib import Path
 import os
-import shutil
+
 from main import main_function
 import load_config
 from flask_cors import CORS
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 from load_config import delete_entry, decrease_count,get_default_services,update_default_services
-
+from convert2pdf import convert_to_pdf
 app = Flask(__name__)
 CORS(app)
 
@@ -62,7 +62,6 @@ def get_recent():
         return jsonify({"error": "Invalid JSON format"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 @app.route('/upload/', methods=['POST'])
 def upload_file():
     try:
@@ -79,23 +78,51 @@ def upload_file():
                 "message": "No selected file"
             }), 400
 
-        filename = secure_filename(file.filename)
+        # 直接使用原始文件名，不使用 secure_filename
+        filename = file.filename
+        file_extension = os.path.splitext(filename)[1].lower()
+        print(filename, '文件名')
         file_path = os.path.join(UPLOAD_DIR, filename)
 
         file.save(file_path)
 
-        return jsonify({
-            "success": True,
-            "message": "文件上传成功",
-            "filename": filename
-        })
+        # 如果不是PDF，进行转换
+        if file_extension != '.pdf':
+            # 创建PDF文件名
+            pdf_filename = os.path.splitext(filename)[0] + '.pdf'
+            pdf_file_path = os.path.join(UPLOAD_DIR, pdf_filename)
+
+            # 转换文件
+            if convert_to_pdf(input_file=file_path, output_file=pdf_file_path):
+                # 转换成功后删除原始文件
+                os.remove(file_path)
+
+
+                return jsonify({
+                    "success": True,
+                    "message": "文件已成功转换为PDF并保存",
+                    "filename": filename
+                })
+            else:
+                # 转换失败，删除原始文件
+                os.remove(file_path)
+                return jsonify({
+                    "success": False,
+                    "message": "PDF转换失败"
+                }), 500
+        else:
+            # 如果是PDF文件，直接返回成功
+            return jsonify({
+                "success": True,
+                "message": "PDF文件上传成功",
+                "filename": filename
+            })
 
     except Exception as e:
         return jsonify({
             "success": False,
             "message": f"上传失败: {str(e)}"
         }), 500
-
 
 @app.route('/translation', methods=['POST'])
 def translate_files():
@@ -117,7 +144,6 @@ def translate_files():
         def translate_single_file(filename):
             try:
                 # 直接使用 main_function 而不是 start
-                print('传入值',original_lang,target_lang,filename)
                 translator = main_function(
                     original_language=original_lang,
                     target_language=target_lang,
@@ -131,6 +157,12 @@ def translate_files():
         # 使用线程池并行处理翻译
         futures = []
         for filename in files:
+            # 分离文件名和扩展名
+            name, ext = os.path.splitext(filename)
+
+            # 如果扩展名不是 .pdf，则改为 .pdf
+            if ext.lower() != '.pdf':
+                filename = name + '.pdf'
             print(f"Submitting translation task for: {filename}")
             future = executor.submit(translate_single_file, filename)
             futures.append(future)
@@ -184,7 +216,49 @@ def delete_article():
     except Exception as e:
         print(f"Error deleting article: {str(e)}")
         return jsonify({'error': 'Server error'}), 500
+@app.route('/delete_batch', methods=['POST'])
+def delete_batch():
+    """
+    处理批量删除文章的请求
+    :return: JSON 响应
+    """
+    try:
+        data = request.get_json()
+        # 前端传来一个数组，例如 { "articleIds": [1,3,5] }
+        article_ids = data.get('articleIds', [])
+        if not article_ids:
+            return jsonify({'error': 'No article IDs provided'}), 400
 
+        # 用于统计删除成功/失败的数量
+        total = len(article_ids)
+        success_count = 0
+        failed_list = []
+
+        for article_id in article_ids:
+            try:
+                # 调用单条删除函数
+                success = delete_entry(int(article_id))
+                if success:
+                    # 如果删除成功也需要更新计数
+                    decrease_count()  # 假设你有一个 decrease_count() 函数
+                    success_count += 1
+                else:
+                    failed_list.append(article_id)
+            except Exception as e:
+                print(f"Error deleting article {article_id}: {str(e)}")
+                failed_list.append(article_id)
+
+        # 如果所有都成功，success_count == total
+        return jsonify({
+            'message': 'Batch delete attempted.',
+            'total': total,
+            'success_count': success_count,
+            'failed_list': failed_list
+        }), 200
+
+    except Exception as e:
+        print(f"Error in batch delete: {str(e)}")
+        return jsonify({'error': 'Server error'}), 500
 
 @app.route('/api/save-settings', methods=['POST'])
 def save_settings():
