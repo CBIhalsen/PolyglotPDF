@@ -1,34 +1,27 @@
 {
   "translation_services": {
     "youdao": {
-      "app_key": "XXX",
+      "app_key": "XX",
       "app_secret": "XX"
     },
     "deepl": {
-      "auth_key": "XX"
-    },
-    "baidu": {
-      "api_key": "XX",
-      "secret_key": "XX"
-    },
-    "google": {
-      "api_key": "XX"
-    },
-    "tencent": {
-      "SecretId": "XXW",
-      "SecretKey": "XX"
-    },
-    "alicloud": {
-      "access_key_id": "XX",
-      "access_key_secret": "XX"
+      "auth_key": "0b28a8df-4075-421d-9b8f-8921220b70e5"
     },
     "openai": {
-      "auth_key": "xxx",
+      "auth_key": "XX",
       "model_name": "gpt-4o-mini"
     },
     "deepseek": {
-      "auth_key": "xxxx",
-      "model_name": "deepseek-ai/DeepSeek-V3"
+      "auth_key": "XX",
+      "model_name": "ep-20250218224909-gps4n"
+    },
+    "doubao": {
+      "auth_key": "XX",
+      "model_name": "ep-20250218225515-k55kc"
+    },
+    "Qwen": {
+      "auth_key": "XX",
+      "model_name": "qwen-plus"
     }
   },
   "ocr_services": {
@@ -38,8 +31,8 @@
   },
   "default_services": {
     "translation": true,
-    "translation_service": "deepl",
+    "translation_service": "openai",
     "ocr_modle": false
   },
-  "count": 2
+  "count": 45
 }
