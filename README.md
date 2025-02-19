@@ -17,10 +17,15 @@
 In addition, consider adding arxiv search function and rendering arxiv papers after latex translation.
 
 ### Pasges show
-<img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page1.png?raw=true" width="40%" height="20%">
-<img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page2.png?raw=true" width="40%" height="20%">
-<img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page3.png?raw=true" width="40%" height="20%">
-<img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page4.png?raw=true" width="40%" height="20%">
+<div style="display: flex; margin-bottom: 20px;">
+    <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page1.png?raw=true" width="40%" height="20%" style="margin-right: 20px;">
+    <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page2.jpeg?raw=true" width="40%" height="20%">
+</div>
+<div style="display: flex;">
+    <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page3.png?raw=true" width="40%" height="20%" style="margin-right: 20px;">
+    <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page4.png?raw=true" width="40%" height="20%">
+</div>
+
 
 # Chinese LLM API Application
 
