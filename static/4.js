@@ -54,7 +54,9 @@ async function loadBatchData() {
         <div class="batch-card-info">
           <p>Date: ${item.date}</p>
           <p>Author: ${author}</p>
-          <p>Status: ${readStatus}  ||  Convertion: ${original_lan} to ${target_lan}</p>
+          <p>Status: ${readStatus}  ||  Convertion: 
+
+${original_lan} to ${target_lan}</p>
      
         </div>
       `;

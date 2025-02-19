@@ -177,7 +177,7 @@ def delete_entry(index: int) -> bool:
     """
     try:
         data = read_json_file('recent.json')
-        print(f"读取到的数据: {data}")
+        # print(f"读取到的数据: {data}")
 
         # 找到要删除的记录
         target_entry = None
@@ -269,14 +269,14 @@ def decrease_count() -> bool:
         return False
 def update_default_services(translation: Optional[bool] = None,
                           translation_service: Optional[str] = None,
-                          ocr_modle: Optional[bool] = None) -> bool:
+                          ocr_model: Optional[bool] = None) -> bool:
     """
     更新默认服务配置
 
     Args:
         translation: 是否启用翻译
         translation_service: 翻译服务提供商
-        ocr_modle: 是否启用OCR模块
+        ocr_model: 是否启用OCR模块
 
     Returns:
         bool: 操作是否成功
@@ -291,8 +291,8 @@ def update_default_services(translation: Optional[bool] = None,
             config["default_services"]["Enable_translation"] = str(translation).lower() == 'true'
         if translation_service is not None:
             config["default_services"]["Translation_api"] = translation_service
-        if ocr_modle is not None:
-            config["default_services"]["ocr_modle"] = str(ocr_modle).lower() == 'true'
+        if ocr_model is not None:
+            config["default_services"]["ocr_model"] = str(ocr_model).lower() == 'true'
 
         write_json_file('config.json', config)
         return True
@@ -310,7 +310,7 @@ def get_default_services() -> Optional[Dict]:
         {
             "translation": bool,
             "translation_service": str,
-            "ocr_modle": bool
+            "ocr_model": bool
         }
         如果获取失败则返回None
     """
@@ -322,7 +322,7 @@ def get_default_services() -> Optional[Dict]:
         return {
             "translation": config["default_services"]["Enable_translation"],
             "translation_service": config["default_services"]["Translation_api"],
-            "ocr_modle": config["default_services"]["ocr_modle"],
+            "ocr_model": config["default_services"]["ocr_model"],
             "count": config["count"],
         }
     except ConfigError as e:

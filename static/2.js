@@ -104,8 +104,8 @@ function initSettings() {
                 // 设置OCR模式开关
                 const ocrToggle = document.getElementById('ocrToggle');
                 if (ocrToggle) {
-                    ocrToggle.checked = !settings.ocr_modle;
-                        console.log(settings.ocr_modle,66)
+                    ocrToggle.checked = !settings.ocr_model;
+                        console.log(settings.ocr_model,66)
                 }
 
                 // 设置翻译模式开关

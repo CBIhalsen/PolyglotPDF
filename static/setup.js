@@ -30,10 +30,10 @@ function initializeUI(data) {
     // 初始化默认配置
     const defaultServices = document.getElementById('t-default-services');
     const defaultConfig = {
-        'ocr_modle': {
+        'ocr_model': {
             type: 'select',
             options: ['true', 'false'],
-            value: data.default_services.ocr_modle
+            value: data.default_services.ocr_model
         },
         'Enable_translation': {
             type: 'select',
@@ -226,7 +226,7 @@ function collectConfig() {
             let value = group.querySelector('select').value;
 
             // 对特定key进行布尔值转换
-            if(key === 'ocr_modle' || key === 'Enable_translation') {
+            if(key === 'ocr_model' || key === 'Enable_translation') {
                 value = value === 'true' ? true : false;
             }
 

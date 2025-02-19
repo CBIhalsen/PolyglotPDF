@@ -14,7 +14,7 @@ import pdf_thumbnail
 config = load_config.load_config()
 translation_type = config['default_services']['Translation_api']
 translation = config['default_services']['Enable_translation']
-use_mupdf = not config['default_services']['ocr_modle']
+use_mupdf = not config['default_services']['ocr_model']
 # print(use_mupdf,'mupdf值')
 # print('当前',config['count'])
 
