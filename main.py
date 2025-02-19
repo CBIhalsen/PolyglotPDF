@@ -144,38 +144,48 @@ font_collection = []
 
 
 class main_function:
+    def __init__(self, pdf_path,
+                 original_language, target_language,
+                 DPI=72,):
+        """
+        这里的参数与原来保持一致或自定义。主要多加一个 self.pages_data 用于存储所有页面的提取结果。
+        """
 
-    def __init__(self,original_language,target_language,pdf_path,index=0,DPI=150,):
-
-
-        self.original_language = original_language
-        self.target_language = target_language
+        self.pdf_path = pdf_path
         self.pdf_path = pdf_path
         self.full_path ='./static/original/' + pdf_path
         self.doc = fitz.open(self.full_path)
+
+        self.original_language = original_language
+        self.target_language = target_language
         self.DPI = DPI
-        # self.pages = convert_from_path(self.full_path, DPI)  # 第二个参数是DPI（点每英寸）
-        self.t = time.time()
         self.translation = translation
         self.translation_type = translation_type
-        self.index = index+1
+        self.use_mupdf = use_mupdf
 
+        self.t = time.time()
+        # 新增一个全局列表，用于存所有页面的 [文本, bbox]，以及翻译后结果
+        # 形式: self.pages_data[page_index] = [ [原文, bbox], [原文, bbox], ... ]
+        self.pages_data = []
 
-    def main(self,):
-        # 直接调用函数执行
+    def main(self):
+        """
+        主流程函数。只做“计数更新、生成缩略图、建条目”等老逻辑，替换原来在这里的逐页翻译写入。
+        但是保留 if use_mupdf: for... self.start(...) else: for... self.start(...)
+        不做“翻译和写入”的动作，而是只做“提取文本”。
+        提取完所有页面后，批量翻译，再统一写入 PDF。
+        """
+        # 1. 计数和配置信息
         load_config.update_count()
         config = load_config.load_config()
         count = config["count"]
         print("更新后", count)
 
-        # 获取当前时间并格式化
-        # print('kk')
-        # print(self.full_path)
-        pdf_thumbnail.create_pdf_thumbnail(self.full_path,width=400)
-        # print(self.original_language,self.target_language,self.full_path,len(self.original_language),'路线信息')
-        # pdf_thumbnail.create_pdf_thumbnail(self.full_path, width=400)
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # 2. 生成 PDF 缩略图 (保留原逻辑)
+        pdf_thumbnail.create_pdf_thumbnail(self.full_path, width=400)
 
+        # 3. 创建新条目（保留原逻辑）
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         new_entry = {
             "index": count,
             "date": current_time,
@@ -186,244 +196,271 @@ class main_function:
             "statue": "0"
         }
         load_config.add_new_entry(new_entry)
-    # 遍历每一页
-        # 使用PyMuPDF直接获取文本块
-        if use_mupdf:
 
+        # 4. 保留原先判断是否 use_mupdf 的代码，以便先提取文本
+        if self.use_mupdf:
+            # 使用 PyMuPDF 直接获取文本块 (不要改动这段判断逻辑)
             for i in range(self.doc.page_count):
-                self.start(image=None, pag_num=i)
+                self.start(image=None, pag_num=i)   # 只做提取，不做翻译写入
         else:
-            zoom = self.DPI / 72  # 将 DPI 从默认的 72 调整到指定 DPI
+            # OCR 模式
+            zoom = self.DPI / 72
             mat = fitz.Matrix(zoom, zoom)
             for i, page in enumerate(self.doc):
                 pix = page.get_pixmap(matrix=mat)
-                # 转换为 PIL Image 对象
                 image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-                # 如果需要保存图像到文件
+                # 如果需要保存图像到文件，可自行保留或注释
                 # image.save(f'page_{i}.jpg', 'JPEG')
-                self.start(image=image, pag_num=i)
+                self.start(image=image, pag_num=i)  # 只做提取，不做翻译写入
 
+        # 5. 若开启翻译，则批量翻译所有提取的文本
+        if self.translation:
+            self.batch_translate_pages_data(
+                original_language=self.original_language,
+                target_language=self.target_language,
+                translation_type=self.translation_type,
+                batch_size=20
+            )
 
+        # 6. 将翻译结果统一写入 PDF（覆盖+插入译文）
+        self.apply_translations_to_pdf()
 
-
-
-    # 使用 os.path.splitext() 来分割路径和扩展名
+        # 7. 保存 PDF、更新状态
         pdf_name, _ = os.path.splitext(self.pdf_path)
-        self.doc.ez_save(f"./static/target/{pdf_name}_{self.target_language}.pdf", garbage=4, deflate=True)
-        load_config.update_file_status(count, statue="1")# 更新index为2的条目的statue值为"1"
-        # print(self.index)
+        self.doc.ez_save(
+            f"./static/target/{pdf_name}_{self.target_language}.pdf",
+            garbage=4,
+            deflate=True
+        )
+        load_config.update_file_status(count, statue="1")  # statue = "1"
 
-        e = time.time()
-        print(e - self.t)
-
-
+        # 8. 打印耗时
+        end_time = time.time()
+        print(end_time - self.t)
 
     def start(self, image, pag_num):
         """
-        处理单页PDF的函数
-        Args:
-            image: PDF页面的图像（用于OCR方式）
-            pag_num: 页面编号
-            use_mupdf: 是否使用PyMuPDF直接提取文本块（True）或使用OCR（False）
+        原先逐页处理的函数，现仅负责“提取文本并存储在 self.pages_data[pag_num]”。
+        不在这里直接翻译或写回 PDF。
         """
-        text_rect = []
+        # 确保 self.pages_data 有 pag_num 对应的列表
+        while len(self.pages_data) <= pag_num:
+            self.pages_data.append([])  # 每个元素是 [ [text, (x0,y0,x1,y1)], ... ]
+
         page = self.doc.load_page(pag_num)
 
-
-        #
-        if use_mupdf:
-            # 使用PyMuPDF直接获取文本块
+        # 如果用 PyMuPDF 提取文字
+        if self.use_mupdf and image is None:
             blocks = page.get_text("dict")["blocks"]
-
             for block in blocks:
                 if block.get("type") == 0:  # 文本块
                     bbox = block["bbox"]
                     text = ""
                     font_info = None
-                    # 收集文本和字体信息
-                    # print(pag_num, '当前页面号')
                     for line in block["lines"]:
                         for span in line["spans"]:
-                            text += span["text"] + " "
-                            font_size = span["size"]
-                            # print(text)
-
-
-                            # print("字体大小",font_size)
-                            if not font_info and "font" in span:
-                                font_info = span["font"]
-                                # print('字体信息',font_info)
-                                if font_info and font_info not in font_collection:
-                                    font_collection.append(font_info)
-
+                            span_text = span["text"].strip()
+                            if span_text:
+                                text += span_text + " "
+                                if not font_info and "font" in span:
+                                    font_info = span["font"]
                     text = text.strip()
-
-
-
-                    # 只有不是公式的文本才添加到处理列表
-                    if text and not is_math(text, pag_num,font_info) and  not is_non_text(text):
-                        text_rect.append([text, bbox])
+                    if text and not is_math(text, pag_num, font_info) and not is_non_text(text):
+                        self.pages_data[pag_num].append([text, tuple(bbox)])
 
         else:
-            # OCR方式
-            Full_width, Full_height = image.size
-
+            # OCR 提取文字
+            config = load_config.load_config()
             tesseract_path = config['ocr_services']['tesseract']['path']
             pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
-            # pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+            Full_width, Full_height = image.size
             ocr_result = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT)
 
             current_paragraph_text = ''
-            current_block_num = 0
-            last_block_left = 0
-            last_block_right = 0
-            last_block_height = 0
-            paragraph_bbox = {'left': float('inf'), 'top': float('inf'), 'right': 0, 'bottom': 0}
+            paragraph_bbox = {
+                'left': float('inf'),
+                'top': float('inf'),
+                'right': 0,
+                'bottom': 0
+            }
+            current_block_num = None
             Threshold_width = 0.06 * Full_width
             Threshold_height = 0.006 * Full_height
 
             for i in range(len(ocr_result['text'])):
                 block_num = ocr_result['block_num'][i]
-                text = ocr_result['text'][i].strip()
-
-                # 跳过公式
-                if text and not is_math(text, pag_num,font_info='22') and  not is_non_text(text):
-                    continue
-
+                text_ocr = ocr_result['text'][i].strip()
                 left = ocr_result['left'][i]
                 top = ocr_result['top'][i]
                 width = ocr_result['width'][i]
                 height = ocr_result['height'][i]
 
-                if block_num != current_block_num or (abs(left - last_block_right) > Threshold_width and
-                                                      abs(height - last_block_height) > Threshold_height and
-                                                      abs(left - last_block_left) > Threshold_width):
+                if text_ocr and not is_math(text_ocr, pag_num, font_info='22') and not is_non_text(text_ocr):
 
-                    if current_paragraph_text != '':
-                        x0_ratio = paragraph_bbox['left'] / Full_width
-                        y0_ratio = paragraph_bbox['top'] / Full_height
-                        x1_ratio = paragraph_bbox['right'] / Full_width
-                        y1_ratio = paragraph_bbox['bottom'] / Full_height
+                    # 若换 block 或段落间隔较大，则保存上一段
+                    if (block_num != current_block_num or
+                       (abs(left - paragraph_bbox['right']) > Threshold_width and
+                        abs(height - (paragraph_bbox['bottom'] - paragraph_bbox['top'])) > Threshold_height and
+                        abs(left - paragraph_bbox['left']) > Threshold_width)):
 
-                        Full_rect = page.rect
-                        width_points = Full_rect.width
-                        height_points = Full_rect.height
+                        if current_paragraph_text:
+                            # 转换到 PDF 坐标
+                            Full_rect = page.rect
+                            w_points = Full_rect.width
+                            h_points = Full_rect.height
 
-                        coordinates_ratio = (x0_ratio, y0_ratio, x1_ratio, y1_ratio)
-                        x0_pdf = coordinates_ratio[0] * width_points
-                        y0_pdf = coordinates_ratio[1] * height_points
-                        x1_pdf = coordinates_ratio[2] * width_points
-                        y1_pdf = coordinates_ratio[3] * height_points
+                            x0_ratio = paragraph_bbox['left'] / Full_width
+                            y0_ratio = paragraph_bbox['top'] / Full_height
+                            x1_ratio = paragraph_bbox['right'] / Full_width
+                            y1_ratio = paragraph_bbox['bottom'] / Full_height
 
-                        text_rect.append([current_paragraph_text, (x0_pdf, y0_pdf, x1_pdf, y1_pdf)])
+                            x0_pdf = x0_ratio * w_points
+                            y0_pdf = y0_ratio * h_points
+                            x1_pdf = x1_ratio * w_points
+                            y1_pdf = y1_ratio * h_points
 
+                            self.pages_data[pag_num].append([
+                                current_paragraph_text.strip(),
+                                (x0_pdf, y0_pdf, x1_pdf, y1_pdf)
+                            ])
+
+                        # 重置
                         current_paragraph_text = ''
-                        paragraph_bbox = {'left': float('inf'), 'top': float('inf'), 'right': 0, 'bottom': 0}
+                        paragraph_bbox = {
+                            'left': float('inf'),
+                            'top': float('inf'),
+                            'right': 0,
+                            'bottom': 0
+                        }
+                        current_block_num = block_num
 
-                    current_block_num = block_num
-
-                if text:
-                    current_paragraph_text += text + ' '
-                    last_block_left = paragraph_bbox['left']
-
+                    # 继续累加文本
+                    current_paragraph_text += text_ocr + " "
                     paragraph_bbox['left'] = min(paragraph_bbox['left'], left)
                     paragraph_bbox['top'] = min(paragraph_bbox['top'], top)
                     paragraph_bbox['right'] = max(paragraph_bbox['right'], left + width)
                     paragraph_bbox['bottom'] = max(paragraph_bbox['bottom'], top + height)
-                    last_block_right = left + width
-                    last_block_height = height
 
-            # 处理最后一个段落
+            # 收尾：最后一段存入
             if current_paragraph_text:
+                Full_rect = page.rect
+                w_points = Full_rect.width
+                h_points = Full_rect.height
+
                 x0_ratio = paragraph_bbox['left'] / Full_width
                 y0_ratio = paragraph_bbox['top'] / Full_height
                 x1_ratio = paragraph_bbox['right'] / Full_width
                 y1_ratio = paragraph_bbox['bottom'] / Full_height
 
-                Full_rect = page.rect
-                width_points = Full_rect.width
-                height_points = Full_rect.height
+                x0_pdf = x0_ratio * w_points
+                y0_pdf = y0_ratio * h_points
+                x1_pdf = x1_ratio * w_points
+                y1_pdf = y1_ratio * h_points
 
-                coordinates_ratio = (x0_ratio, y0_ratio, x1_ratio, y1_ratio)
-                x0_pdf = coordinates_ratio[0] * width_points
-                y0_pdf = coordinates_ratio[1] * height_points
-                x1_pdf = coordinates_ratio[2] * width_points
-                y1_pdf = coordinates_ratio[3] * height_points
+                self.pages_data[pag_num].append([
+                    current_paragraph_text.strip(),
+                    (x0_pdf, y0_pdf, x1_pdf, y1_pdf)
+                ])
 
-                text_rect.append([current_paragraph_text, (x0_pdf, y0_pdf, x1_pdf, y1_pdf)])
+        # 注意：这里不做翻译、不插入 PDF，只负责“收集文本”到 self.pages_data
 
-        # 处理翻译和文本插入
-        first_strings = []
-        texts_list = [item[0] for item in text_rect]
+    def batch_translate_pages_data(self, original_language, target_language,
+                                   translation_type, batch_size=10):
+        """
+        分批翻译 pages_data，每次处理最多 batch_size 页的文本，避免一次性过多。
+        将译文存回 self.pages_data 的第三个元素，如 [原文, bbox, 译文]
+        """
+        total_pages = len(self.pages_data)
+        start_idx = 0
 
+        while start_idx < total_pages:
+            end_idx = min(start_idx + batch_size, total_pages)
 
+            # 收集该批次的所有文本
+            batch_texts = []
+            for i in range(start_idx, end_idx):
+                for block in self.pages_data[i]:
+                    batch_texts.append(block[0])  # block[0] = 原文
 
-        if not texts_list:
-            # print("Warning: No text found to translate!")
-            return
-
-        if self.translation and use_mupdf:
-            # print(texts_list)
-            translation_list = at.Online_translation(
-                original_language=self.original_language,
-                target_language=self.target_language,
-                translation_type=self.translation_type,
-                texts_to_process=texts_list
-            ).translation()
-        if self.translation and not use_mupdf:
-            # print(texts_list)
-            translation_list = at.Offline_translation(
-                original_language=self.original_language,
-                target_language=self.target_language,
-                texts_to_process=texts_list
-            ).translation()
+            # 翻译
 
 
+            if self.translation and use_mupdf:
+                translation_list = at.Online_translation(
+                    original_language=original_language,
+                    target_language=target_language,
+                    translation_type=translation_type,
+                    texts_to_process=batch_texts
+                ).translation()
+            else:
+                # 离线翻译
+                translation_list = at.Offline_translation(
+                    original_language=original_language,
+                    target_language=target_language,
+                    texts_to_process=batch_texts
+                ).translation()
 
-        # 处理每个文本块
-        for idx, item in enumerate(text_rect):
-            first_strings.append(item[0])
-            rect = fitz.Rect(item[1]) if use_mupdf else fitz.Rect(*item[1])
+            # 回填译文
+            idx_t = 0
+            for i in range(start_idx, end_idx):
+                for block in self.pages_data[i]:
+                    # 在第三个位置添加翻译文本
+                    block.append(translation_list[idx_t])
+                    idx_t += 1
 
-            try:
-                page.add_redact_annot(rect)
-                page.apply_redactions()
-            except Exception as e:
-                annots = list(page.annots())  # 转换为列表
-                # + 白板画布
-                if annots:
-                    page.delete_annot(annots[-1])
+            start_idx += batch_size
+
+    def apply_translations_to_pdf(self):
+        """
+        统一对 PDF 做“打码/打白 + 插入译文”操作
+        """
+        for page_index, blocks in enumerate(self.pages_data):
+            page = self.doc.load_page(page_index)
+
+            for block in blocks:
+                original_text = block[0]
+                coords = block[1]  # (x0, y0, x1, y1)
+                # 如果第三个元素是译文，则用之，否则用原文
+                translated_text = block[2] if len(block) >= 3 else original_text
+
+                rect = fitz.Rect(*coords)
+
+                # 先尝试使用 Redact 遮盖
                 try:
-                    # 使用白色填充矩形区域
-                    page.draw_rect(rect, color=(1, 1, 1), fill=(1, 1, 1))
-                except Exception as e2:
-                    print(f"创建白色画布时发生错误: {e2}")
+                    page.add_redact_annot(rect)
+                    page.apply_redactions()
+                except Exception as e:
+                    # 若 Redact 失败，改用白色方块覆盖
+                    annots = list(page.annots() or [])
+                    if annots:
+                        page.delete_annot(annots[-1])
+                    try:
+                        page.draw_rect(rect, color=(1, 1, 1), fill=(1, 1, 1))
+                    except Exception as e2:
+                        print(f"创建白色画布时发生错误: {e2}")
+                    print(f"应用重编辑时发生错误: {e}")
 
-                print(f"应用重编辑时发生错误: {e}")
-                # continue
+                # 插入文本(译文或原文)
+                # 方法1：创建字体对象时设置
 
-
-
-            if self.translation:
                 page.insert_htmlbox(
                     rect,
-                    translation_list[idx],
-                    css=f"""
-                    * {{
-                        font-family: {get_font_by_language(self.target_language)};
-                        font-size: auto;
-                        color: #111111;
-                        font-weight: normal;
-                    }}
+                    translated_text,
+                    css="""
+                    * {
+                        font-family: "Microsoft YaHei";
+                        /* 这行可把内容改成粗体, 可写 "bold" 或数字 (100–900) */
+                        font-weight: 100;
+                        /* 这里可以使用标准 CSS 颜色写法, 例如 #FF0000、rgb() 等 */
+                        color:  #333333;
+                    }
                     """
                 )
-            else:
-                page.insert_htmlbox(
-                    rect,
-                    texts_list[idx],
-                    css=f"* {{font-family:{get_font_by_language(self.target_language)}; font-size:auto; font-weight:normal;}}"
-                )
+
+
+        # 完成后不会立即保存，需要在 main(...) 里 self.doc.ez_save(...)
+
 if __name__ == '__main__':
 
-    main_function(original_language='auto', target_language='zh', pdf_path='colorspace_issue_sample.pdf').main()
+    main_function(original_language='auto', target_language='ja', pdf_path='demo.pdf').main()
