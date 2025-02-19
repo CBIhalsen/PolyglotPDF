@@ -10,6 +10,8 @@
   // 初始化UI
 function initializeUI(data) {
     document.getElementById('t-count').textContent = data.count;
+     document.getElementById('t-count').value = data.count;
+    console.log('count',data.count)
 
     // 初始化翻译服务
     const translationServices = document.getElementById('t-translation-services');
@@ -186,6 +188,7 @@ async function saveall() {
     // 收集所有配置数据
 function collectConfig() {
     const config = {
+      count: document.getElementById('t-count').value,
         translation_services: {},
         ocr_services: {},
         default_services: {}
@@ -216,12 +219,20 @@ function collectConfig() {
     });
 
     // 收集默认配置
-    const defaultServices = document.getElementById('t-default-services');
-    [...defaultServices.getElementsByClassName('t-input-group')].forEach(group => {
-        const key = group.querySelector('label').textContent.replace(':', '');
-        const value = group.querySelector('select').value;
-        config.default_services[key] = value;
-    });
+// 收集默认配置
+        const defaultServices = document.getElementById('t-default-services');
+        [...defaultServices.getElementsByClassName('t-input-group')].forEach(group => {
+            const key = group.querySelector('label').textContent.replace(':', '');
+            let value = group.querySelector('select').value;
+
+            // 对特定key进行布尔值转换
+            if(key === 'ocr_modle' || key === 'Enable_translation') {
+                value = value === 'true' ? true : false;
+            }
+
+            config.default_services[key] = value;
+        });
+
 
     return config;
 }
