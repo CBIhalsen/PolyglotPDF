@@ -8,19 +8,19 @@
 
     // 初始化UI
   // 初始化UI
-function initializeUI(data) {
+    function initializeUI(data) {
     document.getElementById('t-count').textContent = data.count;
-     document.getElementById('t-count').value = data.count;
-    console.log('count',data.count)
+    document.getElementById('t-count').value = data.count;
+    console.log('count', data.count);
 
-    // 初始化翻译服务
+    // 初始化翻译服务 (这部分代码保持不变)
     const translationServices = document.getElementById('t-translation-services');
     Object.entries(data.translation_services).forEach(([service, config]) => {
         const serviceDiv = createServiceSection(service, config);
         translationServices.appendChild(serviceDiv);
     });
 
-    // 初始化OCR服务
+    // 初始化OCR服务 (这部分代码保持不变)
     const ocrServices = document.getElementById('t-ocr-services');
     Object.entries(data.ocr_services).forEach(([service, config]) => {
         const serviceDiv = createServiceSection(service, config);
@@ -29,6 +29,7 @@ function initializeUI(data) {
 
     // 初始化默认配置
     const defaultServices = document.getElementById('t-default-services');
+    console.log('api',data.default_services.Translation_api)
     const defaultConfig = {
         'ocr_model': {
             type: 'select',
@@ -38,38 +39,48 @@ function initializeUI(data) {
         'Enable_translation': {
             type: 'select',
             options: ['true', 'false'],
-            value: data.default_services.translation
+            value: data.default_services.Enable_translation
         },
         'Translation_api': {
             type: 'select',
-            options: ['Doubao', 'Qwen', 'Deepseek', 'Openai', 'DeepL', 'Youdao'],
-            value: data.default_services.translation_service
+            options: ['Doubao', 'Qwen', 'deepseek', 'openai', 'deepL', 'youdao'],
+            value: data.default_services.Translation_api
         }
     };
 
-    Object.entries(defaultConfig).forEach(([key, config]) => {
-        const inputGroup = document.createElement('div');
-        inputGroup.className = 't-input-group';
+    // 在 initializeUI 函数中修改相关部分
+Object.entries(defaultConfig).forEach(([key, config]) => {
+    const inputGroup = document.createElement('div');
+    inputGroup.className = 't-input-group';
 
-        const select = document.createElement('select');
-        select.className = 't-input';
+    const select = document.createElement('select');
+    select.className = 't-input';
 
-        config.options.forEach(option => {
-            const optionElement = document.createElement('option');
-            optionElement.value = option;
-            optionElement.textContent = option;
-            if(option === config.value) {
-                optionElement.selected = true;
-            }
-            select.appendChild(optionElement);
-        });
+    config.options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option;
+        optionElement.textContent = option;
 
-        inputGroup.innerHTML = `<label>${key}:</label>`;
-        inputGroup.appendChild(select);
-        defaultServices.appendChild(inputGroup);
+        // 修改选项匹配逻辑
+        if (key === 'Translation_api') {
+            // 直接比较字符串值
+            optionElement.selected = (option === config.value);
+            console.log(`Translation API option: ${option}, config value: ${config.value}, selected: ${optionElement.selected}`);
+        } else if (key === 'ocr_model' || key === 'Enable_translation') {
+            // 布尔值的处理保持不变
+            const optionBool = option.toLowerCase() === 'true';
+            optionElement.selected = (optionBool === config.value);
+        }
+
+        select.appendChild(optionElement);
     });
-}
 
+    inputGroup.innerHTML = `<label>${key}:</label>`;
+    inputGroup.appendChild(select);
+    defaultServices.appendChild(inputGroup);
+});
+
+}
 
     // 创建服务配置区域
     function createServiceSection(serviceName, config) {
