@@ -15,6 +15,15 @@
 
 另外，考虑添加arxiv搜索功能及对arxiv论文进行latex翻译后渲染。
 
+### 页面展示
+<div style="display: flex; margin-bottom: 20px;">
+    <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page1.png?raw=true" width="40%" height="20%" style="margin-right: 20px;">
+    <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page2.jpeg?raw=true" width="40%" height="20%">
+</div>
+<div style="display: flex;">
+    <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page3.png?raw=true" width="40%" height="20%" style="margin-right: 20px;">
+    <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page4.png?raw=true" width="40%" height="20%">
+</div>
 
 # 国内大语言模型API申请
 
