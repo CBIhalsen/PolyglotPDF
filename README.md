@@ -16,6 +16,12 @@
 
 In addition, consider adding arxiv search function and rendering arxiv papers after latex translation.
 
+### Pasges show
+<img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page1.png?raw=true" width="40%" height="20%">
+<img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page2.png?raw=true" width="40%" height="20%">
+<img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page3.png?raw=true" width="40%" height="20%">
+<img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page4.png?raw=true" width="40%" height="20%">
+
 # Chinese LLM API Application
 
 ## Doubao & Deepseek
