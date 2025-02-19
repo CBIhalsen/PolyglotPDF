@@ -31,8 +31,8 @@
       }
   },
   "default_services": {
-      "ocr_modle": "true",
-      "Enable_translation": "true",
+      "ocr_modle": false,
+      "Enable_translation": true,
       "Translation_api": "Doubao"
   }
 }
