@@ -784,3 +784,54 @@ input:checked + .slider:before {
   font-size: 14px;
   color: #666;
 }
+.language-switch {
+  display: inline-block;
+  position: relative;
+}
+
+.nice-language-select {
+    display: inline-block;
+    padding: 6px 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: white; /* 白色背景 */
+    color: #666; /* 灰色字体 */
+    cursor: pointer;
+    font-size: 14px;
+    outline: none; /* 移除默认的黑色边框 */
+}
+
+.nice-language-select:hover {
+    background-color: #f5f5f5; /* 悬停时背景颜色稍微变灰 */
+
+}
+.info-box {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.info-box p,
+.info-box li {
+    color:  #666;
+    line-height: 1.6;
+}
+
+.info-box ul {
+    padding-left: 20px;
+    margin-top: 10px;
+}
+
+.info-box li {
+    margin-bottom: 8px;
+}
+
+.info-box a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.info-box a:hover {
+    text-decoration: underline;
+}

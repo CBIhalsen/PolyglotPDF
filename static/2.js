@@ -115,7 +115,15 @@ function initSettings() {
                     console.log(settings.translation,77)
                 }
                 console.log(settings.count)
-                document.getElementById('count_article').textContent = ` Articles in Total: ${settings.count} `;
+                // 获取当前标签的值
+                let currentText = document.getElementById('count_article').textContent;
+
+                // 将当前值与 settings.count 拼接
+                let newText = `${currentText} ${settings.count}`;
+
+                // 更新标签的值
+                document.getElementById('count_article').textContent = newText;
+
             }
         })
         .catch(error => {

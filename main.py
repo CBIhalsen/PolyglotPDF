@@ -1,10 +1,11 @@
-
+import math
 import All_Translation as at
 from PIL import Image
 import pytesseract
 import time
 import fitz
 import os
+import unicodedata
 import download_model
 import load_config
 import re
@@ -15,6 +16,11 @@ config = load_config.load_config()
 translation_type = config['default_services']['Translation_api']
 translation = config['default_services']['Enable_translation']
 use_mupdf = not config['default_services']['ocr_model']
+
+PPC = config['PPC']
+print('ppc',PPC)
+line_model = config['default_services']['line_model']
+print('line',line_model)
 # print(use_mupdf,'mupdf值')
 # print('当前',config['count'])
 
@@ -120,6 +126,25 @@ def is_math(text, page_num,font_info):
 
     return False
 
+def line_non_text(text):
+    """
+    判断文本是否由纯数字和所有(Unicode)标点符号组成
+    参数：
+        text: 待检查的文本
+    返回：
+        bool: 如果文本由纯数字和标点符号组成返回True，否则返回False
+    """
+    text = text.strip()
+    if not text:
+        return False
+    for ch in text:
+        # 使用 unicodedata.category() 获取字符在 Unicode 标准中的分类
+        # 'Nd' 代表十进制数字 (Number, Decimal digit)
+        # 'P' 代表各种标点 (Punctuation)，如 Po, Ps, Pe, 等
+        cat = unicodedata.category(ch)
+        if not (cat == 'Nd' or cat.startswith('P')):
+            return False
+    return True
 
 
 def is_non_text(text):
@@ -162,6 +187,7 @@ class main_function:
         self.translation = translation
         self.translation_type = translation_type
         self.use_mupdf = use_mupdf
+        self.line_model = line_model
 
         self.t = time.time()
         # 新增一个全局列表，用于存所有页面的 [文本, bbox]，以及翻译后结果
@@ -179,7 +205,7 @@ class main_function:
         load_config.update_count()
         config = load_config.load_config()
         count = config["count"]
-        print("更新后", count)
+
 
         # 2. 生成 PDF 缩略图 (保留原逻辑)
         pdf_thumbnail.create_pdf_thumbnail(self.full_path, width=400)
@@ -219,7 +245,7 @@ class main_function:
                 original_language=self.original_language,
                 target_language=self.target_language,
                 translation_type=self.translation_type,
-                batch_size=20
+                batch_size=PPC
             )
 
         # 6. 将翻译结果统一写入 PDF（覆盖+插入译文）
@@ -249,8 +275,57 @@ class main_function:
 
         page = self.doc.load_page(pag_num)
 
+        if self.line_model and self.use_mupdf:
+            def snap_angle_func(angle):
+                """
+                将任意角度自动映射到 0、90、180、270 四个值之一。
+                """
+                # 将角度映射到 [0, 360) 区间
+                angle = abs(angle) % 360
+                # 选取最接近的标准角度
+                possible_angles = [0, 90, 180, 270]
+                return min(possible_angles, key=lambda x: abs(x - angle))
+
+            blocks = page.get_text("dict")["blocks"]
+            for block in blocks:
+                if block.get("type") == 0:  # 文本块
+                    font_info = None
+                    # 遍历每一行
+                    for line in block["lines"]:
+                        # 1) 拼接文本（减少反复 += 操作）
+                        span_texts = [span["text"] for span in line["spans"] if "text" in span]
+                        line_text = "".join(span_texts).strip()
+
+                        # 2) 如果行文本为空或仅含数字标点，就跳过
+                        if not line_text or line_non_text(line_text):
+                            continue
+
+                        # 3) 此时才计算旋转角度，避免空行浪费
+                        direction = line.get("dir", [1.0, 0.0])
+                        raw_angle = math.degrees(math.atan2(direction[1], direction[0]))
+                        angle = snap_angle_func(raw_angle)
+
+                        # 4) 只在需要时提取字体信息
+                        if not font_info:
+                            for span in line["spans"]:
+                                if "font" in span:
+                                    font_info = span["font"]
+                                    break
+                        if font_info and font_info not in font_collection:
+                            font_collection.append(font_info)
+
+                        line_bbox = line.get("bbox")
+                        # 5) 加入提取结果
+                        self.pages_data[pag_num].append([
+                            line_text,  # 原文
+                            tuple(line_bbox),  # BBox
+                            None,  # 预留翻译文本
+                            angle  # 行角度
+                        ])
+
+
         # 如果用 PyMuPDF 提取文字
-        if self.use_mupdf and image is None:
+        elif self.use_mupdf and image is None:
             blocks = page.get_text("dict")["blocks"]
             for block in blocks:
                 if block.get("type") == 0:  # 文本块
@@ -266,7 +341,7 @@ class main_function:
                                     font_info = span["font"]
                     text = text.strip()
                     if text and not is_math(text, pag_num, font_info) and not is_non_text(text):
-                        self.pages_data[pag_num].append([text, tuple(bbox)])
+                        self.pages_data[pag_num].append([text, tuple(bbox),None])
 
         else:
             # OCR 提取文字
@@ -360,14 +435,15 @@ class main_function:
 
                 self.pages_data[pag_num].append([
                     current_paragraph_text.strip(),
-                    (x0_pdf, y0_pdf, x1_pdf, y1_pdf)
+                    (x0_pdf, y0_pdf, x1_pdf, y1_pdf),
+                    None
                 ])
 
         # 注意：这里不做翻译、不插入 PDF，只负责“收集文本”到 self.pages_data
 
     def batch_translate_pages_data(self, original_language, target_language,
-                                   translation_type, batch_size=10):
-        """
+                                   translation_type, batch_size=PPC ):
+        """PPC (Pages Per Call)
         分批翻译 pages_data，每次处理最多 batch_size 页的文本，避免一次性过多。
         将译文存回 self.pages_data 的第三个元素，如 [原文, bbox, 译文]
         """
@@ -406,7 +482,7 @@ class main_function:
             for i in range(start_idx, end_idx):
                 for block in self.pages_data[i]:
                     # 在第三个位置添加翻译文本
-                    block.append(translation_list[idx_t])
+                    block[2] = translation_list[idx_t]
                     idx_t += 1
 
             start_idx += batch_size
@@ -423,6 +499,12 @@ class main_function:
                 coords = block[1]  # (x0, y0, x1, y1)
                 # 如果第三个元素是译文，则用之，否则用原文
                 translated_text = block[2] if len(block) >= 3 else original_text
+
+                if self.line_model:
+                    angle = block[3] if len(block) > 3 else 0
+
+                else:
+                    angle = 0
 
                 rect = fitz.Rect(*coords)
 
@@ -441,21 +523,22 @@ class main_function:
                         print(f"创建白色画布时发生错误: {e2}")
                     print(f"应用重编辑时发生错误: {e}")
 
-                # 插入文本(译文或原文)
-                # 方法1：创建字体对象时设置
+
 
                 page.insert_htmlbox(
                     rect,
                     translated_text,
                     css="""
-                    * {
-                        font-family: "Microsoft YaHei";
-                        /* 这行可把内容改成粗体, 可写 "bold" 或数字 (100–900) */
-                        font-weight: 100;
-                        /* 这里可以使用标准 CSS 颜色写法, 例如 #FF0000、rgb() 等 */
-                        color:  #333333;
-                    }
-                    """
+                * {
+                    font-family: "Microsoft YaHei";
+                    /* 这行可把内容改成粗体, 可写 "bold" 或数字 (100–900) */
+                    font-weight: 100;
+                    /* 这里可以使用标准 CSS 颜色写法, 例如 #FF0000、rgb() 等 */
+                    color:  #333333;
+                }
+                """,
+                    rotate=angle
+
                 )
 
 
@@ -463,4 +546,4 @@ class main_function:
 
 if __name__ == '__main__':
 
-    main_function(original_language='auto', target_language='ja', pdf_path='demo.pdf').main()
+    main_function(original_language='auto', target_language='zh', pdf_path='New_USM_1_30Jul24_1.pdf').main()

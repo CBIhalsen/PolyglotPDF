@@ -11,39 +11,47 @@
 <body>
     <div class="container">
         <div class="sidebar">
-            <h2>Library</h2>
+            <h2 data-lang-key="1">Library</h2>
             <ul class="sidebar-menu">
-                <li><a href="#" class="active" onclick="showHome()">Homepage</a></li>
-                <li><a href="#" onclick="showAllRecent()">Recent Reading</a></li>
-                <li><a href="#" onclick="showSetup()">Setup steps</a></li>
-                <li><a href="#">Search</a></li>
-                <li><a href="#">Folders</a></li>
+                <li ><a data-lang-key="2" href="#" class="active" onclick="showHome()">Homepage</a></li>
+                <li ><a data-lang-key="3" href="#" onclick="showAllRecent()">Recent Reading</a></li>
+                <li><a data-lang-key="4" href="#" onclick="showSetup()">Setup steps</a></li>
+                <li><a data-lang-key="5" href="#">Search</a></li>
+                <li><a data-lang-key="6" href="#">Folders</a></li>
             </ul>
         </div>
 
         <div class="main-content">
             <div class="header">
-                <h1 id="recentread">Recent Reading</h1>
+                <h1 data-lang-key="7" id="recentread">Recent Reading</h1>
                 <div class="header-buttons">
 <!-- HTML -->
                     <div class="button-group">
+                        <div class="language-switch">
+                        <select id="languageSelect" class="nice-language-select">
+                          <option value="en">English</option>
+                          <option value="zh">中文</option>
+
+                        </select>
+                      </div>
                         <button class="action-button " onclick="showBatchModal()">
                             <i class="fa-solid fa-list-check"></i>
-                            <span>Batch</span>
+                            <span data-lang-key="8">Batch</span>
                         </button>
                         <button class="action-button" onclick="showSettings()">
                             <i class="fa-solid fa-gear"></i>
-                            <span>Settings</span>
+                            <span data-lang-key="9">Settings</span>
                         </button>
                     </div>
 
-                    <button class="add-button" onclick="showUpload()">+ Add Article</button>
+                    <button data-lang-key="10" class="add-button" onclick="showUpload()">+ Add Article</button>
+
                 </div>
             </div>
 
             <div id="viewAllSection" class="recent-header">
-                <h2 id = 'count_article'>共10篇文章</h2>
-                <a href="#" class="view-all" onclick="showAllRecent()">View All ></a>
+                <h2 data-lang-key="12" id = 'count_article'>Articles in Total:</h2>
+                <a data-lang-key="13" href="#" class="view-all" onclick="showAllRecent()">View All ></a>
             </div>
 
             <div class="article-grid" id="articleContainer">
@@ -51,26 +59,26 @@
 
             <div class="t-container" id="t-container">
     <div class="t-header-container">
-        <h1>配置文件编辑器</h1>
-        <button class="t-save-btn" id="saveall" onclick="saveall()">保存所有修改</button>
+        <h1 data-lang-key="14">配置文件编辑器</h1>
+        <button data-lang-key="15" class="t-save-btn" id="saveall" onclick="saveall()">保存所有修改</button>
     </div>
 
-<h3 style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: normal;margin-left: 5px; margin-bottom: 10px;">国内大语言模型API申请：</h3>
+<h3 data-lang-key="16"  style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: normal;margin-left: 5px; margin-bottom: 10px;">国内大语言模型API申请：</h3>
 
 <div style="display: flex; justify-content: space-between; gap: 40px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; padding: 20px;">
     <div style="flex: 1; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
-        <p style="margin: 0 0 15px 0;">通过火山引擎平台申请:</p>
+        <p data-lang-key="17" style="margin: 0 0 15px 0;">通过火山引擎平台申请:</p>
         <ul style="list-style-type: none; padding: 0; margin: 0;">
-            <li style="margin-bottom: 10px;">申请地址: <a href="https://www.volcengine.com/product/doubao/" style="color: #0066cc; text-decoration: none;">火山引擎-豆包</a></li>
-            <li>支持模型: 豆包(Doubao)、Deepseek系列模型</li>
+            <li data-lang-key="18" style="margin-bottom: 10px;">申请地址: <a href="https://www.volcengine.com/product/doubao/" style="color: #0066cc; text-decoration: none;">火山引擎-豆包</a></li>
+            <li data-lang-key="19">支持模型: 豆包(Doubao)、Deepseek系列模型</li>
         </ul>
     </div>
 
     <div style="flex: 1; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
-        <p style="margin: 0 0 15px 0;">通过阿里云平台申请:</p>
+        <p data-lang-key="20" style="margin: 0 0 15px 0;">通过阿里云平台申请:</p>
         <ul style="list-style-type: none; padding: 0; margin: 0;">
-            <li style="margin-bottom: 10px;">申请地址: <a href="https://cn.aliyun.com/product/tongyi?from_alibabacloud=&utm_content=se_1019997984" style="color: #0066cc; text-decoration: none;">阿里云-通义千问</a></li>
-            <li>支持模型: Qwen-Max、Qwen-Plus等系列模型</li>
+            <li data-lang-key="21" style="margin-bottom: 10px;">申请地址: <a href="https://cn.aliyun.com/product/tongyi?from_alibabacloud=&utm_content=se_1019997984" style="color: #0066cc; text-decoration: none;">阿里云-通义千问</a></li>
+            <li data-lang-key="22" >支持模型: Qwen-Max、Qwen-Plus等系列模型</li>
         </ul>
     </div>
 </div>
@@ -78,13 +86,19 @@
 
     <div class="t-section">
         <div class="t-input-group">
-            <label>count:</label>
+            <label data-lang-key="23">count:</label>
             <span class="t-count-display" id="t-count"></span>
         </div>
     </div>
     <div class="t-section">
+        <div class="t-input-group">
+            <label data-lang-key="24">PPC:</label>
+            <input type="text" class="t-ppc" id="t-ppc" />
+        </div>
+    </div>
+    <div class="t-section">
         <div class="t-section-header">
-            <h3>翻译模型API</h3>
+            <h3 data-lang-key="25">翻译模型API</h3>
             <button class="t-toggle-btn">+</button>
         </div>
         <div class="t-content" id="t-translation-services">
@@ -93,22 +107,33 @@
     </div>
     <div class="t-section">
         <div class="t-section-header">
-            <h3>OCR 服务</h3>
+            <h3 data-lang-key="26">OCR 服务</h3>
             <button class="t-toggle-btn">+</button>
         </div>
         <div class="t-content" id="t-ocr-services">
             <!-- OCR服务的内容将通过JavaScript动态生成 -->
         </div>
     </div>
-    <div class="t-section">
+<div class="t-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 7px;">
+    <div class="t-left">
         <div class="t-section-header">
-            <h3>默认配置</h3>
+            <h3 data-lang-key="27">默认配置</h3>
             <button class="t-toggle-btn">+</button>
         </div>
         <div class="t-content" id="t-default-services">
             <!-- 默认配置的内容将通过JavaScript动态生成 -->
         </div>
     </div>
+
+    <div class="t-right">
+        <div class="info-box">
+<p data-lang-key="47" class="info-text">
+
+</p>
+
+        </div>
+    </div>
+</div>
 </div>
 
         </div>
@@ -116,7 +141,7 @@
 <div class="upload-container" id="uploadModal"  >
     <div class="upload-content" id="upload_content-1">
         <div class="upload-header" >
-            <h2>Add Literature to Your Reading List </h2>
+            <h2 data-lang-key="28">Add Literature to Your Reading List </h2>
             <button class="close-btn" style="position: absolute!important;top: 0px!important;right: 0px!important;" onclick="closeUploadModal()">×</button>
         </div>
 
@@ -125,9 +150,9 @@
 <div class="upload-area" id="dropZone">
     <input type="file" id="fileInput" multiple accept=".pdf,.xps,.epub,.fb2,.cbz,.mobi" style="display: none;">
     <i class="fa-solid fa-file-arrow-up"></i>
-    <p class="upload-text">Drag and drop your files here or<span class="upload-link" onclick="triggerFileInput()"> click to upload</span></p>
-    <p class="upload-hint">Up to 12 files at a time, each with a maximum of 200MB</p>
-    <p class="upload-formats">Supported : PDF, XPS, EPUB, FB2, CBZ, MOBI</p>
+    <p class="upload-text" data-lang-key="29">Drag and drop your files here or<span class="upload-link" onclick="triggerFileInput()"> click to upload</span></p>
+    <p class="upload-hint" data-lang-key="30">Up to 12 files at a time, each with a maximum of 200MB</p>
+    <p class="upload-formats" data-lang-key="31">Supported : PDF, XPS, EPUB, FB2, CBZ, MOBI</p>
 </div>
 
 
@@ -204,7 +229,7 @@
              <div class="upload-header" >
                 <div class="success-message" id="successMessage" style="display: flex; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
         <div class="success-icon" style="font-size: 80px; color: #4CAF50; margin-bottom: 20px;">✓</div>
-        <p class="success-text" style="font-size: 18px; color: #333;">Please wait patiently, you can check the translation progress under the recent reading tab.</p>
+        <p class="success-text" style="font-size: 18px; color: #333;" data-lang-key="32">Please wait patiently, you can check the translation progress under the recent reading tab.</p>
     </div>
             <button class="close-btn" style="position: absolute!important;top: 0px!important;right: 0px!important;" onclick="closeUploadModal()">×</button>
         </div>
@@ -220,7 +245,7 @@
   <div class="settings-container" id="settingsModal">
     <div class="settings-content">
         <div class="settings-header">
-            <h2>Translation API Settings</h2>
+            <h2 data-lang-key="33">Translation API Settings</h2>
             <button class="close-btn" onclick="closeSettings()">×</button>
         </div>
                 <!-- 添加OCR开关部分 -->
@@ -229,31 +254,31 @@
         <div class="api-selection">
                         <div class="api-option">
                 <input type="radio" id="openai" name="api" value="openai" onchange="showApiKey('openai')">
-                <label for="openai">Openai API</label>
+                <label for="openai" data-lang-key="34">Openai API</label>
 
             </div>
 
             <div class="api-option">
                 <input type="radio" id="Doubao" name="api" value="Doubao" onchange="showApiKey('Doubao')">
-                <label for="Doubao">Doubao Translate API</label>
+                <label for="Doubao" data-lang-key="35">Doubao Translate API</label>
 
             </div>
 
             <div class="api-option">
                 <input type="radio" id="Qwen" name="api" value="Qwen" onchange="showApiKey('Qwen')">
-                <label for="Qwen">Qwen Translate API</label>
+                <label for="Qwen" data-lang-key="36">Qwen Translate API</label>
 
             </div>
 
             <div class="api-option">
                 <input type="radio" id="deepseek" name="api" value="deepseek" onchange="showApiKey('deepseek')">
-                <label for="deepseek">Deepseek API</label>
+                <label for="deepseek" data-lang-key="37">Deepseek API</label>
 
             </div>
 
             <div class="api-option">
                 <input type="radio" id="deepl" name="api" value="deepl" onchange="showApiKey('deepl')">
-                <label for="deepl">DeepL API</label>
+                <label for="deepl" data-lang-key="38">DeepL API</label>
 
             </div>
 
@@ -261,7 +286,7 @@
 
             <div class="api-option">
                 <input type="radio" id="youdao" name="api" value="youdao" onchange="showApiKey('youdao')">
-                <label for="youdao">Youdao Translation API</label>
+                <label for="youdao" data-lang-key="39">Youdao Translation API</label>
 
             </div>
 
@@ -271,14 +296,14 @@
 
 
 <div class="ocr-toggle">
-    <span>OCR Global Mode Disabled by Default</span>
+    <span data-lang-key="40">OCR Global Mode Disabled by Default</span>
     <label class="switch">
         <input type="checkbox" id="ocrToggle" data-on="false" data-off="true" checked>
         <span class="slider round"></span>
     </label>
 </div>
 <div class="ocr-toggle">
-    <span>Translation Mode Enabled </span>
+    <span data-lang-key="41">Translation Mode Enabled</span>
     <label class="switch">
         <input type="checkbox" id="translationToggle" data-on="true" data-off="false" checked>
         <span class="slider round"></span>
@@ -296,15 +321,15 @@
 <div id="batchModal" class="upload-container">
   <div class="batch-content">
     <div class="batch-header">
-      <h2>Batch Management</h2>
+      <h2 data-lang-key="42">Batch Management</h2>
       <button class="close-btn" onclick="closeBatchModal()">×</button>
     </div>
 
     <div class="batch-controls">
-      <button class="action-button" onclick="toggleSelectAll()">Select All</button>
-      <button class="action-button" onclick="handleBatchDelete()">Delete</button>
-      <button class="action-button" onclick="handleMindMap()">Mind Map</button>
-      <button class="action-button" onclick="handleSummary()">Summary</button>
+      <button data-lang-key="43" class="action-button" onclick="toggleSelectAll()">Select All</button>
+      <button data-lang-key="44" class="action-button" onclick="handleBatchDelete()">Delete</button>
+      <button data-lang-key="45" class="action-button" onclick="handleMindMap()">Mind Map</button>
+      <button data-lang-key="46" class="action-button" onclick="handleSummary()">Summary</button>
     </div>
 
     <!-- 这里放置盛放卡片的容器，支持滚动  -->
@@ -312,6 +337,55 @@
   </div>
 </div>
 <!-- 基础库 -->
+    <script src="./static/i18n.js"></script>
+    <script>
+  // 获取浏览器语言的简易函数
+  function getBrowserLanguage() {
+    const lang = (navigator.language || navigator.userLanguage).toLowerCase();
+    if (lang.includes('zh')) {
+      return 'zh';
+    }
+    return 'en';
+  }
+
+  // 根据传入 lang 对整页进行翻译
+  function applyTranslations(lang) {
+    document.querySelectorAll('[data-lang-key]').forEach(el => {
+      const key = el.getAttribute('data-lang-key');
+      if (i18n[lang] && i18n[lang][key]) {
+        // 仅更新文本，不动外部标签的 class、样式
+        el.innerHTML = i18n[lang][key];
+      }
+    });
+  }
+
+  // 当页面加载时，先读 localStorage，如无才用浏览器语言
+  window.addEventListener('load', () => {
+    const storedLang = localStorage.getItem('userLang');
+    let langToUse;
+
+    if (storedLang) {
+      langToUse = storedLang;
+    } else {
+      langToUse = getBrowserLanguage();
+    }
+
+    // 设置下拉框默认选项
+    document.getElementById('languageSelect').value = langToUse;
+
+    // 应用翻译
+    applyTranslations(langToUse);
+  });
+
+  // 下拉框切换事件
+  document.getElementById('languageSelect').addEventListener('change', function() {
+    const selectedLang = this.value;
+    // 翻译
+    applyTranslations(selectedLang);
+    // 存储到 localStorage
+    localStorage.setItem('userLang', selectedLang);
+  });
+</script>
 <script src="./static/1.js"></script>
 
 <!-- 公共文件 -->

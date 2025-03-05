@@ -143,3 +143,28 @@ select.t-input:focus {
         .t-save-btn.success {
             background-color: #22c55e;
         }
+
+        .t-ppc {
+  /* 基础排版 */
+  width: 120px;
+  padding: 8px;
+  font-size: 14px;
+
+  /* 边框与圆角 */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+
+  /* 其他外观 */
+  color: #333;
+  background-color: #f9f9f9;
+  outline: none;
+
+  /* 过渡，提升交互体验 */
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.t-ppc:focus {
+  /* 获取焦点时边框颜色改变，比如蓝色 */
+  border-color: #4A90E2;
+  box-shadow: 0 0 5px rgba(74,144,226,0.5);
+}

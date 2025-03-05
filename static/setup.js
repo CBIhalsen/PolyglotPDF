@@ -11,6 +11,8 @@
     function initializeUI(data) {
     document.getElementById('t-count').textContent = data.count;
     document.getElementById('t-count').value = data.count;
+        document.getElementById('t-ppc').textContent = data.PPC;
+    document.getElementById('t-ppc').value = data.PPC;
     console.log('count', data.count);
 
     // 初始化翻译服务 (这部分代码保持不变)
@@ -35,6 +37,11 @@
             type: 'select',
             options: ['true', 'false'],
             value: data.default_services.ocr_model
+        },
+        'line_model': {
+            type: 'select',
+            options: ['true', 'false'],
+            value: data.default_services.line_model
         },
         'Enable_translation': {
             type: 'select',
@@ -74,8 +81,13 @@ Object.entries(defaultConfig).forEach(([key, config]) => {
 
         select.appendChild(optionElement);
     });
+      if (key === 'Enable_translation') {
+        inputGroup.innerHTML = `<label style="font-size: 80%; font-weight: bold;">${key}:</label>`;
+      } else {
+        inputGroup.innerHTML = `<label>${key}:</label>`;
+      }
 
-    inputGroup.innerHTML = `<label>${key}:</label>`;
+
     inputGroup.appendChild(select);
     defaultServices.appendChild(inputGroup);
 });
@@ -106,6 +118,7 @@ Object.entries(defaultConfig).forEach(([key, config]) => {
             `;
             content.appendChild(inputGroup);
         });
+
 
         section.appendChild(header);
         section.appendChild(content);
@@ -200,6 +213,7 @@ async function saveall() {
 function collectConfig() {
     const config = {
       count: document.getElementById('t-count').value,
+        PPC: parseInt(document.getElementById('t-ppc').value, 10),
         translation_services: {},
         ocr_services: {},
         default_services: {}
@@ -237,9 +251,10 @@ function collectConfig() {
             let value = group.querySelector('select').value;
 
             // 对特定key进行布尔值转换
-            if(key === 'ocr_model' || key === 'Enable_translation') {
+            if(key === 'ocr_model' || key === 'Enable_translation' || key === 'line_model') {
                 value = value === 'true' ? true : false;
             }
+
 
             config.default_services[key] = value;
         });
