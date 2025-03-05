@@ -1,3 +1,4 @@
+English | [简体中文](/README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JA.md) | [한국어](README_KO.md)
 # PolyglotPDF
 
 [![Python](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/)
