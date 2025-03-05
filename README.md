@@ -188,3 +188,14 @@ This approach directly processes PDF text blocks, maintaining the original layou
   - Low computational resource requirements, suitable for scale deployment
   - High cost-effectiveness for commercial applications
 
+- * Contact author:
+QQ： 1421243966
+email: 1421243966@qq.com
+
+Related questions answered and discussed：
+
+ QQ group:
+ 1031477425
+
+
+
