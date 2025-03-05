@@ -1,3 +1,4 @@
+注： 对于pdf这种棘手的文件处理，对于文字版pdf的最优解：参考开源项目mupdf重构block识别算法只需要达到Adobe Acrobat Dc精度即可，不要舍近求远使用ocr扫描文字版pdf。 使用ai模型去理解pdf布局未来成本绝对会高于使用gpt4o mini这类价格！ 对于pdf种公式识别出要么不处理，要么通过字体文件名称和对应unicode值进行映射。 ocr扫描文字版pdf相当愚蠢
 # PolyglotPDF
 
 [![Python](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/)
