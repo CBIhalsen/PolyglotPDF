@@ -240,8 +240,8 @@ class main_function:
                 self.start(image=image, pag_num=i)  # 只做提取，不做翻译写入
 
         # 5. 若开启翻译，则批量翻译所有提取的文本
-        if self.translation:
-            self.batch_translate_pages_data(
+
+        self.batch_translate_pages_data(
                 original_language=self.original_language,
                 target_language=self.target_language,
                 translation_type=self.translation_type,
@@ -469,13 +469,18 @@ class main_function:
                     translation_type=translation_type,
                     texts_to_process=batch_texts
                 ).translation()
-            else:
+            elif self.translation and not use_mupdf:
                 # 离线翻译
                 translation_list = at.Offline_translation(
                     original_language=original_language,
                     target_language=target_language,
                     texts_to_process=batch_texts
                 ).translation()
+            else:
+
+                translation_list = batch_texts
+        
+
 
             # 回填译文
             idx_t = 0
@@ -546,4 +551,4 @@ class main_function:
 
 if __name__ == '__main__':
 
-    main_function(original_language='auto', target_language='zh', pdf_path='New_USM_1_30Jul24_1.pdf').main()
+    main_function(original_language='auto', target_language='zh', pdf_path='demo.pdf').main()
