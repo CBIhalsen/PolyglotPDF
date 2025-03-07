@@ -87,14 +87,20 @@ def is_math(text, page_num,font_info):
     total_spaces = text.count(' ') + (newline_count * 5)
     space_ratio = total_spaces / text_len if text_len > 0 else 0
 
-    # 检查是否存在完整单词(5个或更多字符)
+    # 定义数学符号集合
+    math_symbols = "=∑θ∫∂√±ΣΠfδλσε∋∈µ→()|−ˆ,.+*/[]{}^_<>~#%&@!?;:'\"\\-"
+
+    # 检查是否存在完整单词(5个或更多非数学符号的连续字符)
     text_no_spaces = text.replace(" ", "")
-    has_complete_word = bool(re.search(r'.{5,}', text_no_spaces))
 
-    # 如果没有完整单词,认为是非文本
+    # 创建一个正则表达式，匹配5个或更多连续的非数学符号字符
+    pattern = r'[^' + re.escape(math_symbols) + r']{5,}'
+    has_complete_word = bool(re.search(pattern, text_no_spaces))
+
+    # 如果没有完整单词，认为是非文本
     if not has_complete_word:
-
         return True
+
 
     # 计算数字占比
     digit_count = sum(c.isdigit() for c in text)
@@ -479,7 +485,7 @@ class main_function:
             else:
 
                 translation_list = batch_texts
-        
+
 
 
             # 回填译文
