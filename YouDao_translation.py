@@ -50,8 +50,7 @@ def translate(texts,original_lang, target_lang):
         # 确保输入文本为列表格式
         if isinstance(texts, str):
             texts = [texts]
-        print('待翻译',texts)
-        print(type(texts))
+
 
         # 准备请求数据
         data = {

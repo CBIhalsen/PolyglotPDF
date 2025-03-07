@@ -73,11 +73,10 @@ Object.entries(defaultConfig).forEach(([key, config]) => {
             // 直接比较字符串值
             optionElement.selected = (option === config.value);
             console.log(`Translation API option: ${option}, config value: ${config.value}, selected: ${optionElement.selected}`);
-        } else if (key === 'ocr_model' || key === 'Enable_translation') {
-            // 布尔值的处理保持不变
-            const optionBool = option.toLowerCase() === 'true';
-            optionElement.selected = (optionBool === config.value);
-        }
+        }  else if (key === 'ocr_model' || key === 'Enable_translation' || key === 'line_model') {
+                const optionBool = option.toLowerCase() === 'true';
+                optionElement.selected = (optionBool === config.value);
+            }
 
         select.appendChild(optionElement);
     });

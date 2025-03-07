@@ -87,14 +87,20 @@ def is_math(text, page_num,font_info):
     total_spaces = text.count(' ') + (newline_count * 5)
     space_ratio = total_spaces / text_len if text_len > 0 else 0
 
-    # 检查是否存在完整单词(5个或更多字符)
+    # 定义数学符号集合
+    math_symbols = "=∑θ∫∂√±ΣΠfδλσε∋∈µ→()|−ˆ,.+*/[]{}^_<>~#%&@!?;:'\"\\-"
+
+    # 检查是否存在完整单词(5个或更多非数学符号的连续字符)
     text_no_spaces = text.replace(" ", "")
-    has_complete_word = bool(re.search(r'.{5,}', text_no_spaces))
 
-    # 如果没有完整单词,认为是非文本
+    # 创建一个正则表达式，匹配5个或更多连续的非数学符号字符
+    pattern = r'[^' + re.escape(math_symbols) + r']{5,}'
+    has_complete_word = bool(re.search(pattern, text_no_spaces))
+
+    # 如果没有完整单词，认为是非文本
     if not has_complete_word:
-
         return True
+
 
     # 计算数字占比
     digit_count = sum(c.isdigit() for c in text)
@@ -240,8 +246,8 @@ class main_function:
                 self.start(image=image, pag_num=i)  # 只做提取，不做翻译写入
 
         # 5. 若开启翻译，则批量翻译所有提取的文本
-        if self.translation:
-            self.batch_translate_pages_data(
+
+        self.batch_translate_pages_data(
                 original_language=self.original_language,
                 target_language=self.target_language,
                 translation_type=self.translation_type,
@@ -469,13 +475,18 @@ class main_function:
                     translation_type=translation_type,
                     texts_to_process=batch_texts
                 ).translation()
-            else:
+            elif self.translation and not use_mupdf:
                 # 离线翻译
                 translation_list = at.Offline_translation(
                     original_language=original_language,
                     target_language=target_language,
                     texts_to_process=batch_texts
                 ).translation()
+            else:
+
+                translation_list = batch_texts
+
+
 
             # 回填译文
             idx_t = 0
@@ -546,4 +557,4 @@ class main_function:
 
 if __name__ == '__main__':
 
-    main_function(original_language='auto', target_language='zh', pdf_path='New_USM_1_30Jul24_1.pdf').main()
+    main_function(original_language='auto', target_language='zh', pdf_path='demo.pdf').main()
