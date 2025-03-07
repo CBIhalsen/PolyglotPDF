@@ -44,6 +44,7 @@ def is_math(text, page_num,font_info):
 
 
     # 判断文本长度
+    # print('文本为:',text)
     text_len = len(text)
     if text_len < 4:
         return True
@@ -64,13 +65,18 @@ def is_math(text, page_num,font_info):
         'Latin Modern Math', 'Neo Euler'
     ]
     # 检查文本长度是否小于50且字体是否在数学字体列表中
+    text_len_non_sp = len(text.replace(" ", ""))
+
     if text_len < 70 and any(math_font in font_info for math_font in math_fonts):
+        # print(text,'小于50且字体')
         return True
 
-    if 15 < text_len <100:
+    if 15 < text_len_non_sp <100:
         # 使用正则表达式找出所有5个或更多任意字符连续组成的单词
         long_words = re.findall(r'\S{5,}', text)
         if len(long_words) < 2:
+            # print(text_len)
+            # print(text, '15 < text_len <100')
             return True
 
 
@@ -99,6 +105,7 @@ def is_math(text, page_num,font_info):
 
     # 如果没有完整单词，认为是非文本
     if not has_complete_word:
+        # print(text, '没有完整单词')
         return True
 
 
@@ -108,6 +115,7 @@ def is_math(text, page_num,font_info):
 
     # 如果数字占比超过30%，返回True
     if digit_ratio > 0.3:
+        # print(text, '数字占比超过30%')
         return True
 
 
@@ -115,19 +123,27 @@ def is_math(text, page_num,font_info):
 
 
     # 检查数学公式
-    math_symbols = set("=∑θ∫∂√±ΣΠfδλσε∋∈µ→()|−ˆ,...")
+    math_symbols = set("=∑θ∫∂√±ΣΠδλσε∋∈µ→()|−ˆ,...")
     # 数学公式判断条件2:包含至少2个数学符号且总文本较短
     if sum(1 for sym in math_symbols if sym in text) >= 2 and len(text_no_spaces) < 25:
+        # found_symbols = [sym for sym in text if sym in math_symbols]
+        # print(f"在文本中找到的数学符号: {found_symbols}")
+        # print(sum(1 for sym in math_symbols if sym in text))
+        # print(text, '条件2')
         return True
 
     # 数学公式判断条件1:包含至少2个数学符号且行短且行数少且最大行长度小
     if sum(1 for sym in math_symbols if sym in text) >= 2 and min_line_len < 10 and len_lines < 5 and max_line_len < 35:
-
+        # print(text, '条件1')
         return True
 
     # 数学公式判断条件3:包含至少2个数学符号且空格比例高
     if sum(1 for sym in math_symbols if sym in text) >= 2 and space_ratio > 0.5:
-
+        # print(text, '条件3')
+        return True
+    # 数学公式判断条件4:包含至少1个数学符号且空格数高
+    if sum(1 for sym in math_symbols if sym in text) >= 1 and total_spaces > 3 and text_len<20:
+        # print(text, '条件4')
         return True
 
     return False
