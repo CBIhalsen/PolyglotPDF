@@ -301,7 +301,7 @@ async function handleNextStep() {
                     // 执行回调函数
                     const value = document.getElementById('record_show_staute').getAttribute('data-value') === 'true';
                     loadArticles(value,false);
-                    initSettings()
+
                 } else {
                     throw new Error('Translation request failed');
                 }

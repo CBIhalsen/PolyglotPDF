@@ -38,10 +38,7 @@
                             <i class="fa-solid fa-list-check"></i>
                             <span data-lang-key="8">Batch</span>
                         </button>
-                        <button class="action-button" onclick="showSettings()">
-                            <i class="fa-solid fa-gear"></i>
-                            <span data-lang-key="9">Settings</span>
-                        </button>
+
                     </div>
 
                     <button data-lang-key="10" class="add-button" onclick="showUpload()">+ Add Article</button>
@@ -242,78 +239,12 @@
 </div>
 
 
-  <div class="settings-container" id="settingsModal">
-    <div class="settings-content">
-        <div class="settings-header">
-            <h2 data-lang-key="33">Translation API Settings</h2>
-            <button class="close-btn" onclick="closeSettings()">×</button>
-        </div>
-                <!-- 添加OCR开关部分 -->
-
-
-        <div class="api-selection">
-                        <div class="api-option">
-                <input type="radio" id="openai" name="api" value="openai" onchange="showApiKey('openai')">
-                <label for="openai" data-lang-key="34">Openai API</label>
-
-            </div>
-
-            <div class="api-option">
-                <input type="radio" id="Doubao" name="api" value="Doubao" onchange="showApiKey('Doubao')">
-                <label for="Doubao" data-lang-key="35">Doubao Translate API</label>
-
-            </div>
-
-            <div class="api-option">
-                <input type="radio" id="Qwen" name="api" value="Qwen" onchange="showApiKey('Qwen')">
-                <label for="Qwen" data-lang-key="36">Qwen Translate API</label>
-
-            </div>
-
-            <div class="api-option">
-                <input type="radio" id="deepseek" name="api" value="deepseek" onchange="showApiKey('deepseek')">
-                <label for="deepseek" data-lang-key="37">Deepseek API</label>
-
-            </div>
-
-            <div class="api-option">
-                <input type="radio" id="deepl" name="api" value="deepl" onchange="showApiKey('deepl')">
-                <label for="deepl" data-lang-key="38">DeepL API</label>
-
-            </div>
 
 
 
-            <div class="api-option">
-                <input type="radio" id="youdao" name="api" value="youdao" onchange="showApiKey('youdao')">
-                <label for="youdao" data-lang-key="39">Youdao Translation API</label>
+    </div>
 
-            </div>
-
-
-
-        </div>
-
-
-<div class="ocr-toggle">
-    <span data-lang-key="40">OCR Global Mode Disabled by Default</span>
-    <label class="switch">
-        <input type="checkbox" id="ocrToggle" data-on="false" data-off="true" checked>
-        <span class="slider round"></span>
-    </label>
-</div>
-<div class="ocr-toggle">
-    <span data-lang-key="41">Translation Mode Enabled</span>
-    <label class="switch">
-        <input type="checkbox" id="translationToggle" data-on="true" data-off="false" checked>
-        <span class="slider round"></span>
-    </label>
-</div>
-
-        <div class="settings-footer">
-            <button class="save-btn" id="saveBtn" onclick="saveSettings()">Save Settings</button>
-        </div>
-    </div> </div>
+    </div>
     <div id="record_show_staute" data-value="true" style="display: none;">
 </div>
 

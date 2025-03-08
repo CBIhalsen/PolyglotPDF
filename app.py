@@ -1,17 +1,44 @@
-
 from flask import Flask, request, send_file, jsonify, send_from_directory
-
 import json
 from pathlib import Path
 import os
+import sys
 
 from main import main_function
 import load_config
 from flask_cors import CORS
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
-from load_config import delete_entry, decrease_count,get_default_services,update_default_services
+from load_config import delete_entry, decrease_count, get_default_services, update_default_services
 from convert2pdf import convert_to_pdf
+
+
+# 仅添加这一个函数，用于确定应用数据目录
+def get_app_data_dir():
+    """获取应用数据目录，确保跨平台兼容性"""
+    if getattr(sys, 'frozen', False):
+        # 打包后的应用
+        if sys.platform == 'darwin':  # macOS
+            # 在macOS上使用用户的Application Support目录
+            app_data = os.path.join(os.path.expanduser('~/Library/Application Support'), 'EbookTranslation')
+        elif sys.platform == 'linux':  # Linux
+            # 在Linux上使用~/.local/share目录
+            app_data = os.path.join(os.path.expanduser('~/.local/share'), 'EbookTranslation')
+        else:  # Windows或其他
+            # 在Windows上使用应用程序所在目录
+            app_data = os.path.dirname(sys.executable)
+    else:
+        # 开发环境
+        app_data = os.path.dirname(os.path.abspath(__file__))
+
+    # 确保目录存在
+    os.makedirs(app_data, exist_ok=True)
+    return app_data
+
+
+# 在app.py开头附近添加这一行
+APP_DATA_DIR = get_app_data_dir()
+
 app = Flask(__name__)
 CORS(app)
 
@@ -19,8 +46,12 @@ CORS(app)
 current_dir = Path(__file__).parent
 
 # 设置上传文件目录
-UPLOAD_DIR = "static/original"
+UPLOAD_DIR = os.path.join(APP_DATA_DIR, "static", "original")
+TARGET_DIR = os.path.join(APP_DATA_DIR, "static", "target")
+
+# 确保目录存在
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(TARGET_DIR, exist_ok=True)
 
 # 静态文件配置
 app.static_folder = 'static'
@@ -32,11 +63,24 @@ executor = ThreadPoolExecutor(max_workers=13)
 file_lock = Lock()
 
 
+# 提供静态文件访问，优先使用APP_DATA_DIR中的文件
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    """提供静态文件访问，优先使用APP_DATA_DIR中的文件"""
+    # 首先检查APP_DATA_DIR中是否有该文件
+    app_data_file = os.path.join(APP_DATA_DIR, 'static', filename)
+    if os.path.exists(app_data_file):
+        directory = os.path.join(APP_DATA_DIR, 'static')
+        return send_from_directory(directory, filename)
+
+    # 如果APP_DATA_DIR中没有，则使用应用自带的静态文件
+    return send_from_directory('static', filename)
 
 
 @app.route('/')
 def read_index():
     return send_file(current_dir / "index.html")
+
 
 @app.route('/pdfviewer.html')
 def read_pdfviewer():
@@ -44,24 +88,11 @@ def read_pdfviewer():
     index = request.args.get('index')
     # print(index,'打开')
 
-
     # 现在你可以使用这些参数了
     load_config.update_file_status(index=int(index), read="1")
     return send_file(current_dir / "pdfviewer.html")
 
-@app.route('/recent.json')
-def get_recent():
-    try:
-        with file_lock:
-            with open(current_dir / "recent.json", "r", encoding="utf-8") as f:
-                data = json.load(f)
-        return jsonify(data)
-    except FileNotFoundError:
-        return jsonify({})
-    except json.JSONDecodeError:
-        return jsonify({"error": "Invalid JSON format"}), 500
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+
 @app.route('/upload/', methods=['POST'])
 def upload_file():
     try:
@@ -82,6 +113,13 @@ def upload_file():
         filename = file.filename
         file_extension = os.path.splitext(filename)[1].lower()
         print(filename, '文件名')
+
+        # 使用APP_DATA_DIR构建上传目录路径
+        UPLOAD_DIR = os.path.join(APP_DATA_DIR, 'static', 'original')
+        # 确保目录存在
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+        # 构建文件完整路径
         file_path = os.path.join(UPLOAD_DIR, filename)
 
         file.save(file_path)
@@ -97,11 +135,10 @@ def upload_file():
                 # 转换成功后删除原始文件
                 os.remove(file_path)
 
-
                 return jsonify({
                     "success": True,
                     "message": "文件已成功转换为PDF并保存",
-                    "filename": filename
+                    "filename": pdf_filename  # 返回PDF文件名
                 })
             else:
                 # 转换失败，删除原始文件
@@ -138,7 +175,7 @@ def translate_files():
         target_lang = data.get('targetLang', 'zh')
         original_lang = data.get('sourceLang', 'en')  # 默认改为 'en'
 
-        print(f"Processing files: {files}, target: 3{target_lang}, source: 3{original_lang}")
+        print(f"Processing files: {files}, target: {target_lang}, source: {original_lang}")
 
         # 修改翻译任务的函数调用方式
         def translate_single_file(filename):
@@ -189,6 +226,8 @@ def translate_files():
             "status": "error",
             "message": f"Failed to process translation request: {str(e)}"
         }), 500
+
+
 @app.route('/delete_article', methods=['POST'])
 def delete_article():
     """
@@ -206,9 +245,9 @@ def delete_article():
             return jsonify({'error': 'Missing article ID'}), 400
 
         # 调用删除函数
-        print('删除',article_id)
+        print('删除', article_id)
         success = delete_entry(int(article_id)) and decrease_count()
-        print('zzz',success)
+        print('zzz', success)
 
         if success:
             return jsonify({'message': 'Article deleted successfully'}), 200
@@ -218,6 +257,8 @@ def delete_article():
     except Exception as e:
         print(f"Error deleting article: {str(e)}")
         return jsonify({'error': 'Server error'}), 500
+
+
 @app.route('/delete_batch', methods=['POST'])
 def delete_batch():
     """
@@ -262,6 +303,7 @@ def delete_batch():
         print(f"Error in batch delete: {str(e)}")
         return jsonify({'error': 'Server error'}), 500
 
+
 @app.route('/api/save-settings', methods=['POST'])
 def save_settings():
     try:
@@ -269,13 +311,13 @@ def save_settings():
         data = request.get_json()
 
         # 解析数据
-        translation_open= data.get('translation')
+        translation_open = data.get('translation')
         api_type = data.get('apiType')
         ocr_value = data.get('OCR')
 
         # 这里添加保存设置的逻辑
         # 例如保存到数据库或配置文件
-        update_default_services(translation_open,api_type, ocr_value)  # 示例函数
+        update_default_services(translation_open, api_type, ocr_value)  # 示例函数
 
         # 返回成功响应
         return jsonify({'message': '设置保存成功'}), 200
@@ -287,8 +329,6 @@ def save_settings():
 
 @app.route('/api/get-default-services', methods=['GET'])
 def get_default_services_route():
-
-
     """
     获取默认服务配置的API路由
 
@@ -315,6 +355,19 @@ def get_default_services_route():
             'message': f'Error: {str(e)}'
         }), 500
 
+
+# 修改 get_recent() 函数
+@app.route('/recent.json')
+def get_recent():
+    try:
+        data = load_config.load_recent()
+        if data is None:
+            return jsonify({})
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# 修改 get_config() 函数
 @app.route('/config_json', methods=['GET'])
 def get_config():
     """
@@ -322,12 +375,11 @@ def get_config():
     返回的内容就是前端需要渲染的 config.json 数据结构。
     """
     config_data = load_config.load_config()
+    if config_data is None:
+        return jsonify({}), 500
     return jsonify(config_data)
 
-
-
-
-
+# 修改 update_config() 函数
 @app.route('/update_config', methods=['POST'])
 def update_config():
     """处理单个配置更新"""
@@ -338,6 +390,8 @@ def update_config():
 
         # 加载当前配置
         current_config = load_config.load_config()
+        if current_config is None:
+            return jsonify({'status': 'error', 'message': '无法加载当前配置'}), 500
 
         # 递归更新配置
         def update_dict(current, new):
@@ -358,7 +412,7 @@ def update_config():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-
+# 修改 save_all() 函数
 @app.route('/save_all', methods=['POST'])
 def save_all():
     """完全覆盖保存所有配置"""
@@ -376,10 +430,14 @@ def save_all():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+# 修改主程序初始化部分
 if __name__ == "__main__":
+    print(f"Application data directory: {APP_DATA_DIR}")
     print(f"Current directory: {current_dir}")
     print("Required files:")
     print(f"- index.html: {'✓' if (current_dir / 'index.html').exists() else '✗'}")
-    print(f"- recent.json: {'✓' if (current_dir / 'recent.json').exists() else '✗'}")
 
-    app.run(host="127.0.0.1", port=8000, debug=True)
+    # 不需要手动检查和创建recent.json，load_config模块会处理这些
+    # load_config.load_recent() 会确保recent.json存在
+
+    app.run(host="127.0.0.1", port=7777, debug=True)

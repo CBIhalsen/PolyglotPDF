@@ -105,7 +105,7 @@ try {
             <img src="./static/thumbnail/${article.name.substring(0, article.name.lastIndexOf('.'))}.png" alt="${article.name}">
 
         `;
-        console.log(article.name,999)
+
 
         // 下半部分div
         const bottomDiv = document.createElement('div');

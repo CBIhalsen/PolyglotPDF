@@ -1,17 +1,47 @@
 import json
 import os
+import sys
 from typing import Any, Dict, List, Optional
 from pathlib import Path
-import tempfile
+
+
 
 class ConfigError(Exception):
     """配置文件操作相关的自定义异常"""
     pass
 
 
+# 添加获取应用数据目录的函数
+def get_app_data_dir():
+    """获取应用数据目录，确保跨平台兼容性"""
+    if getattr(sys, 'frozen', False):
+        # 打包后的应用
+        if sys.platform == 'darwin':  # macOS
+            # 在macOS上使用用户的Application Support目录
+            app_data = os.path.join(os.path.expanduser('~/Library/Application Support'), 'EbookTranslation')
+        elif sys.platform == 'linux':  # Linux
+            # 在Linux上使用~/.local/share目录
+            app_data = os.path.join(os.path.expanduser('~/.local/share'), 'EbookTranslation')
+        else:  # Windows或其他
+            # 在Windows上使用应用程序所在目录
+            app_data = os.path.dirname(sys.executable)
+    else:
+        # 开发环境
+        app_data = os.path.dirname(os.path.abspath(__file__))
+
+    # 确保目录存在
+    os.makedirs(app_data, exist_ok=True)
+    return app_data
+
+
+# 设置应用数据目录
+APP_DATA_DIR = get_app_data_dir()
+print('数据目录',APP_DATA_DIR)
+
+
 def get_file_path(filename: str) -> Path:
     """
-    获取配置文件的完整路径
+    获取配置文件的完整路径，优先使用APP_DATA_DIR中的文件
 
     Args:
         filename: 配置文件名
@@ -19,12 +49,18 @@ def get_file_path(filename: str) -> Path:
     Returns:
         Path: 配置文件的完整路径
     """
+    # 首先检查APP_DATA_DIR中是否有该文件
+    app_data_file = os.path.join(APP_DATA_DIR, filename)
+    if os.path.exists(app_data_file):
+        return Path(app_data_file)
+
+    # 如果APP_DATA_DIR中没有，则使用当前目录的文件
     return Path(__file__).parent / filename
 
 
 def read_json_file(filename: str) -> Any:
     """
-    读取JSON文件
+    读取JSON文件，优先使用APP_DATA_DIR中的文件
 
     Args:
         filename: 要读取的文件名
@@ -45,7 +81,7 @@ def read_json_file(filename: str) -> Any:
 
 def write_json_file(filename: str, data: Any) -> None:
     """
-    写入JSON文件
+    写入JSON文件到APP_DATA_DIR
 
     Args:
         filename: 要写入的文件名
@@ -55,7 +91,8 @@ def write_json_file(filename: str, data: Any) -> None:
         ConfigError: 当文件写入失败时
     """
     try:
-        file_path = get_file_path(filename)
+        # 始终写入到APP_DATA_DIR
+        file_path = os.path.join(APP_DATA_DIR, filename)
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as e:
@@ -64,28 +101,54 @@ def write_json_file(filename: str, data: Any) -> None:
 
 def load_config() -> Optional[Dict]:
     """
-    加载主配置文件
+    加载主配置文件，优先使用APP_DATA_DIR中的文件
 
     Returns:
         Dict: 配置数据，如果加载失败则返回None
     """
     try:
-        return read_json_file('config.json')
-    except ConfigError as e:
+        # 检查APP_DATA_DIR中是否有config.json
+        app_config_path = os.path.join(APP_DATA_DIR, "config.json")
+        if os.path.exists(app_config_path):
+            with open(app_config_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        else:
+            # 如果APP_DATA_DIR中没有，则使用当前目录的config.json
+            config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+            with open(config_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            # 首次访问时，将config.json复制到APP_DATA_DIR
+            with open(app_config_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            return data
+    except Exception as e:
         print(f"Error loading config: {str(e)}")
         return None
 
 
 def load_recent() -> Optional[List]:
     """
-    加载最近记录文件
+    加载最近记录文件，优先使用APP_DATA_DIR中的文件
 
     Returns:
         List: 最近记录数据，如果加载失败则返回None
     """
     try:
-        return read_json_file('recent.json')
-    except ConfigError as e:
+        # 检查APP_DATA_DIR中是否有recent.json
+        app_recent_path = os.path.join(APP_DATA_DIR, "recent.json")
+        if os.path.exists(app_recent_path):
+            with open(app_recent_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        else:
+            # 如果APP_DATA_DIR中没有，则使用当前目录的recent.json
+            recent_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "recent.json")
+            with open(recent_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            # 首次访问时，将recent.json复制到APP_DATA_DIR
+            with open(app_recent_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            return data
+    except Exception as e:
         print(f"Error loading recent data: {str(e)}")
         return None
 
@@ -122,7 +185,7 @@ def update_count() -> bool:
     """
     try:
         config = load_config()
-        print('从cofig.json加载',config['count'])
+        print('从cofig.json加载', config['count'])
         if config is None:
             return False
 
@@ -144,11 +207,13 @@ def update_file_status(index: int, read: Optional[bool] = None,
         read: 是否已读
         statue: 状态值
 
-    Returns:config = load_config.load_config()
+    Returns:
         bool: 操作是否成功
     """
     try:
-        data = read_json_file('recent.json')
+        data = load_recent()
+        if data is None:
+            return False
 
         for item in data:
             if item['index'] == index:
@@ -176,8 +241,9 @@ def delete_entry(index: int) -> bool:
         bool: 操作是否成功
     """
     try:
-        data = read_json_file('recent.json')
-        # print(f"读取到的数据: {data}")
+        data = load_recent()
+        if data is None:
+            return False
 
         # 找到要删除的记录
         target_entry = None
@@ -190,17 +256,17 @@ def delete_entry(index: int) -> bool:
             print(f"找到目标记录: {target_entry}")
 
             # 删除原始文件（保持原始扩展名）
-            original_file = os.path.join('static', 'original', target_entry['name'])
+            original_file = os.path.join(APP_DATA_DIR, 'static', 'original', target_entry['name'])
             print(f"原始文件路径: {original_file}")
-            # if os.path.exists(original_file):
-            #     os.remove(original_file)
-            #     print(f"成功删除原始文件: {original_file}")
-            # else:
-            #     print(f"原始文件不存在: {original_file}")
+            if os.path.exists(original_file):
+                os.remove(original_file)
+                print(f"成功删除原始文件: {original_file}")
+            else:
+                print(f"原始文件不存在: {original_file}")
 
             # 删除翻译后的文件（始终使用.pdf扩展名）
             filename_without_ext = os.path.splitext(target_entry['name'])[0]
-            target_file = os.path.join('static', 'target',
+            target_file = os.path.join(APP_DATA_DIR, 'static', 'target',
                                        f"{filename_without_ext}_{target_entry['target_language']}.pdf")
             print(f"目标文件路径: {target_file}")
             if os.path.exists(target_file):
@@ -216,37 +282,6 @@ def delete_entry(index: int) -> bool:
     except Exception as e:
         print(f"Error deleting entry: {str(e)}")
         return False
-
-
-if __name__ == "__main__":
-    # 确保目录存在
-    os.makedirs('static/original', exist_ok=True)
-    os.makedirs('static/target', exist_ok=True)
-
-    # 创建测试用的 recent.json
-    test_data = [
-        {
-            "index": 1,
-            "name": "g2.epub",  # 注意这里是.epub
-            "target_language": "zh",
-            "status": "completed",
-            "timestamp": "2024-01-20 12:00:00"
-        }
-    ]
-    write_json_file('recent.json', test_data)
-
-    # 在删除之前先检查文件是否存在
-    print("检查初始状态...")
-    print(f"原始文件(.epub)是否存在: {os.path.exists('static/original/g2.epub')}")
-    print(f"目标文件(.pdf)是否存在: {os.path.exists('static/target/g2_zh.pdf')}")
-
-    print("\n开始测试删除功能...")
-    result = delete_entry(1)
-    print(f"删除操作结果: {result}")
-
-    print("\n检查最终状态...")
-    print(f"原始文件(.epub)是否存在: {os.path.exists('static/original/g2.epub')}")
-    print(f"目标文件(.pdf)是否存在: {os.path.exists('static/target/g2_zh.pdf')}")
 
 
 def decrease_count() -> bool:
@@ -267,9 +302,11 @@ def decrease_count() -> bool:
     except ConfigError as e:
         print(f"Error decreasing count: {str(e)}")
         return False
+
+
 def update_default_services(translation: Optional[bool] = None,
-                          translation_service: Optional[str] = None,
-                          ocr_model: Optional[bool] = None) -> bool:
+                            translation_service: Optional[str] = None,
+                            ocr_model: Optional[bool] = None) -> bool:
     """
     更新默认服务配置
 
@@ -329,10 +366,19 @@ def get_default_services() -> Optional[Dict]:
         print(f"Error getting default services: {str(e)}")
         return None
 
+
 def save_config(config):
-    """保存配置文件"""
+    """
+    保存配置文件
+
+    Args:
+        config: 要保存的配置数据
+
+    Returns:
+        bool: 操作是否成功
+    """
     # 创建备份
-    CONFIG_FILE = 'config.json'
+    CONFIG_FILE = os.path.join(APP_DATA_DIR, 'config.json')
     if os.path.exists(CONFIG_FILE):
         backup_file = f"{CONFIG_FILE}.bak"
         try:
@@ -361,30 +407,34 @@ def save_config(config):
                 print(f"恢复备份失败: {restore_error}")
         return False
 
-# if __name__ == "__main__":
-#     # 确保目录存在
-#     os.makedirs('static/original', exist_ok=True)
-#     os.makedirs('static/target', exist_ok=True)
-#
-#     # 创建测试用的 recent.json
-#     test_data = [
-#         {
-#             "index": 1,
-#             "name": "g2.pdf",
-#             "target_language": "zh",
-#             "status": "completed",
-#             "timestamp": "2024-01-20 12:00:00"
-#         }
-#     ]
-#     write_json_file('recent.json', test_data)
-#
-#     # 测试删除功能
-#     print("开始测试删除功能...")
-#     result = delete_entry(1)
-#     print(f"删除操作结果: {result}")
-#
-#     # 验证文件是否还存在
-#     original_exists = os.path.exists('static/original/g2.pdf')
-#     target_exists = os.path.exists('static/target/g2_zh.pdf')
-#     print(f"原始文件是否存在: {original_exists}")
-#     print(f"目标文件是否存在: {target_exists}")
+
+if __name__ == "__main__":
+    # 确保目录存在
+    os.makedirs(os.path.join(APP_DATA_DIR, 'static', 'original'), exist_ok=True)
+    os.makedirs(os.path.join(APP_DATA_DIR, 'static', 'target'), exist_ok=True)
+
+    # 创建测试用的 recent.json
+    test_data = [
+        {
+            "index": 1,
+            "name": "g2.epub",  # 注意这里是.epub
+            "target_language": "zh",
+            "status": "completed",
+            "timestamp": "2024-01-20 12:00:00"
+        }
+    ]
+    write_json_file('recent.json', test_data)
+
+    # 在删除之前先检查文件是否存在
+    print("检查初始状态...")
+    print(f"应用数据目录: {APP_DATA_DIR}")
+    print(f"原始文件(.epub)是否存在: {os.path.exists(os.path.join(APP_DATA_DIR, 'static', 'original', 'g2.epub'))}")
+    print(f"目标文件(.pdf)是否存在: {os.path.exists(os.path.join(APP_DATA_DIR, 'static', 'target', 'g2_zh.pdf'))}")
+
+    print("\n开始测试删除功能...")
+    result = delete_entry(1)
+    print(f"删除操作结果: {result}")
+
+    print("\n检查最终状态...")
+    print(f"原始文件(.epub)是否存在: {os.path.exists(os.path.join(APP_DATA_DIR, 'static', 'original', 'g2.epub'))}")
+    print(f"目标文件(.pdf)是否存在: {os.path.exists(os.path.join(APP_DATA_DIR, 'static', 'target', 'g2_zh.pdf'))}")

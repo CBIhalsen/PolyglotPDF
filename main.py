@@ -11,7 +11,7 @@ import load_config
 import re
 from datetime import datetime
 import pdf_thumbnail
-
+from load_config import APP_DATA_DIR
 config = load_config.load_config()
 translation_type = config['default_services']['Translation_api']
 translation = config['default_services']['Enable_translation']
@@ -200,7 +200,7 @@ class main_function:
 
         self.pdf_path = pdf_path
         self.pdf_path = pdf_path
-        self.full_path ='./static/original/' + pdf_path
+        self.full_path = os.path.join(APP_DATA_DIR, 'static', 'original', pdf_path)
         self.doc = fitz.open(self.full_path)
 
         self.original_language = original_language
@@ -275,11 +275,13 @@ class main_function:
 
         # 7. 保存 PDF、更新状态
         pdf_name, _ = os.path.splitext(self.pdf_path)
+        target_path = os.path.join(APP_DATA_DIR, 'static', 'target', f"{pdf_name}_{self.target_language}.pdf")
         self.doc.ez_save(
-            f"./static/target/{pdf_name}_{self.target_language}.pdf",
+            target_path,
             garbage=4,
             deflate=True
         )
+
         load_config.update_file_status(count, statue="1")  # statue = "1"
 
         # 8. 打印耗时
