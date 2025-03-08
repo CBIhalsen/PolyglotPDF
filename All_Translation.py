@@ -11,27 +11,7 @@ import asyncio
 # #
 # Get the encoder of a specific model, assume gpt3.5, tiktoken is extremely fast,
 # and the error of this statistical token method is small and can be ignored
-enc = tiktoken.encoding_for_model("gpt-3.5")
 
-
-class Offline_translation:
-
-
-    def __init__(self,original_language,target_language,texts_to_process=[]):
-
-        self.model_name = f"opus-mt-{original_language}-{target_language}"
-        self.original_text = texts_to_process
-        self.original_language = original_language
-        self.target_language = target_language
-
-
-    def translation(self):
-        os.environ['TRANSFORMERS_OFFLINE'] = "1"
-        processed_texts= process_texts(self.original_text,enc)
-        split_points = calculate_split_points(processed_texts)
-        translated_texts = batch_translate(processed_texts=processed_texts, split_points=split_points,original_language=self.original_language,target_language=self.target_language)
-
-        return translated_texts
 
 class Online_translation:
     def __init__(self, original_language, target_language, translation_type, texts_to_process=[]):
