@@ -10,18 +10,29 @@ def create_pdf_thumbnail(pdf_path, width=400):
         pdf_path: PDF文件路径
         width: 缩略图的宽度（像素）
     """
-    try:
-        # 创建保存路径
-        thumbnail_dir = os.path.join('static', 'thumbnail')
 
-        # 如果目录不存在，创建目录
-        os.makedirs(thumbnail_dir, exist_ok=True)
+    # print('t',pdf_path)
+    try:
+
 
         # 获取PDF文件名（不含扩展名）
         pdf_filename = os.path.splitext(os.path.basename(pdf_path))[0]
 
         # 构建输出路径
+
+        pdf_absolute_path = os.path.abspath(pdf_path)
+
+        # 创建保存路径
+        thumbnail_dir = os.path.join(os.path.dirname(pdf_absolute_path), 'static', 'thumbnail')
+
+        # 如果目录不存在，创建目录
+        os.makedirs(thumbnail_dir, exist_ok=True)
+
+
+        # 构建输出路径
         output_path = os.path.join(thumbnail_dir, f"{pdf_filename}.png")
+        # print('o', output_path)
+
 
         # 打开PDF文件
         doc = fitz.open(pdf_path)
