@@ -1,9 +1,12 @@
 from flask import Flask, request, send_file, jsonify, send_from_directory
 import json
 from pathlib import Path
+
+from threading import Thread
+import atexit
 import os
 import sys
-
+import webbrowser
 from main import main_function
 import load_config
 from flask_cors import CORS
@@ -11,9 +14,20 @@ from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 from load_config import delete_entry, decrease_count, get_default_services, update_default_services
 from convert2pdf import convert_to_pdf
-
-
+from threading import Timer
+from socketserver import ThreadingMixIn
+from werkzeug.serving import BaseWSGIServer, make_server
 # 仅添加这一个函数，用于确定应用数据目录
+
+class ThreadedWSGIServer(ThreadingMixIn, BaseWSGIServer):
+    """
+    支持多线程处理的 WSGI Server。
+    通过混入 ThreadingMixIn，让每个请求在单独的线程中处理，
+    从而避免单请求长时间阻塞其它请求。
+    """
+    # 不需要额外的方法或属性，继承自 ThreadingMixIn 和 BaseWSGIServer 即可。
+    pass
+
 def get_app_data_dir():
     """获取应用数据目录，确保跨平台兼容性"""
     if getattr(sys, 'frozen', False):
@@ -39,11 +53,12 @@ def get_app_data_dir():
 # 在app.py开头附近添加这一行
 APP_DATA_DIR = get_app_data_dir()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)  # 禁用默认的静态文件处理
+
 CORS(app)
 
 # 获取当前文件目录
-current_dir = Path(__file__).parent
+current_dir = Path(APP_DATA_DIR)
 
 # 设置上传文件目录
 UPLOAD_DIR = os.path.join(APP_DATA_DIR, "static", "original")
@@ -63,18 +78,23 @@ executor = ThreadPoolExecutor(max_workers=13)
 file_lock = Lock()
 
 
-# 提供静态文件访问，优先使用APP_DATA_DIR中的文件
 @app.route('/static/<path:filename>')
 def serve_static(filename):
-    """提供静态文件访问，优先使用APP_DATA_DIR中的文件"""
-    # 首先检查APP_DATA_DIR中是否有该文件
-    app_data_file = os.path.join(APP_DATA_DIR, 'static', filename)
-    if os.path.exists(app_data_file):
-        directory = os.path.join(APP_DATA_DIR, 'static')
-        return send_from_directory(directory, filename)
+    """提供静态文件访问，使用APP_DATA_DIR中的文件"""
+    try:
+        # 直接使用APP_DATA_DIR中的static目录
+        static_dir = os.path.join(APP_DATA_DIR, 'static')
+        print(f"Trying to serve: {os.path.join(static_dir, filename)}")  # 调试输出
 
-    # 如果APP_DATA_DIR中没有，则使用应用自带的静态文件
-    return send_from_directory('static', filename)
+        if os.path.exists(os.path.join(static_dir, filename)):
+            return send_from_directory(static_dir, filename)
+        else:
+            print(f"File not found: {os.path.join(static_dir, filename)}")  # 调试输出
+            return f"File not found: {filename}", 404
+
+    except Exception as e:
+        print(f"Error serving static file: {e}")  # 调试输出
+        return str(e), 500
 
 
 @app.route('/')
@@ -430,14 +450,74 @@ def save_all():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+
+
+server = None
+
+class ServerThread(Thread):
+    """后台运行的 Flask 服务器线程。"""
+    def __init__(self, flask_app, host="127.0.0.1", port=8000):
+        super().__init__()
+        self.host = host
+        self.port = port
+        self.app = flask_app
+        self.srv = None
+
+    def run(self):
+        # 使用自定义的多线程 WSGI Server
+        self.srv = make_server(self.host, self.port, self.app, ThreadedWSGIServer)
+        self.srv.serve_forever()
+
+    def shutdown(self):
+        if self.srv:
+            self.srv.shutdown()
+
+
+def open_browser():
+    webbrowser.open_new("http://127.0.0.1:8000")
 # 修改主程序初始化部分
+
+
+@atexit.register
+def on_exit():
+    """Python 进程退出前，自动停止服务器。"""
+    print("程序退出，准备停止服务器...")
+    global server
+    if server:
+        server.shutdown()
+        server.join()
+        print("服务器已停止。")
 if __name__ == "__main__":
     print(f"Application data directory: {APP_DATA_DIR}")
     print(f"Current directory: {current_dir}")
     print("Required files:")
     print(f"- index.html: {'✓' if (current_dir / 'index.html').exists() else '✗'}")
 
-    # 不需要手动检查和创建recent.json，load_config模块会处理这些
-    # load_config.load_recent() 会确保recent.json存在
+    # 延迟打开浏览器
+    Timer(1, open_browser).start()
 
-    app.run(host="127.0.0.1", port=7777, debug=True)
+    try:
+        # 创建并启动服务器
+        server = ServerThread(app, host="127.0.0.1", port=8000)
+        server.daemon = True  # 设置为守护线程
+        server.start()
+        print("服务器已在 http://127.0.0.1:8000 运行...")
+
+        # 保持主线程运行
+        while True:
+            try:
+                if not server.is_alive():
+                    break
+                server.join(1)  # 每秒检查一次服务器状态
+            except KeyboardInterrupt:
+                print("\n接收到终止信号，正在关闭服务器...")
+                server.shutdown()
+                break
+
+    except Exception as e:
+        print(f"运行时错误: {e}")
+    finally:
+        # 清理资源
+        executor.shutdown(wait=True)
+        if 'server' in locals() and server:
+            server.shutdown()
