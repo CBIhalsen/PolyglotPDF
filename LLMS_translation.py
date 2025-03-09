@@ -4,7 +4,7 @@ import aiohttp
 import load_config
 
 class Openai_translation:
-    def __init__(self, model):
+    def __init__(self):
         config = load_config.load_config()
         self.api_key = config['translation_services']['openai']['auth_key']
         self.url = "https://api.openai.com/v1/chat/completions"
