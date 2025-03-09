@@ -197,30 +197,23 @@ def update_count() -> bool:
         return False
 
 
-def update_file_status(index: int, read: Optional[bool] = None,
-                       statue: Optional[str] = None) -> bool:
-    """
-    更新文件状态
+def update_file_status(index: int, read: Optional[bool] = None, statue: Optional[str] = None) -> bool:
+    # print(f"函数开始执行，参数值：index={index}, read={read}, statue={statue}")
 
-    Args:
-        index: 要更新的记录索引
-        read: 是否已读
-        statue: 状态值
-
-    Returns:
-        bool: 操作是否成功
-    """
     try:
         data = load_recent()
-        if data is None:
-            return False
+        # print("加载的数据：", data)
 
         for item in data:
             if item['index'] == index:
+                # print(f"找到匹配项：{item}")
                 if read is not None:
+                    # print(f"更新read从{item['read']}到{read}")
                     item['read'] = read
                 if statue is not None:
+                    # print(f"更新statue从{item['statue']}到{statue}")
                     item['statue'] = statue
+                # print(f"更新后的项：{item}")
                 break
 
         write_json_file('recent.json', data)

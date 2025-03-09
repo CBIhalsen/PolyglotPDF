@@ -17,7 +17,7 @@ from convert2pdf import convert_to_pdf
 from threading import Timer
 from socketserver import ThreadingMixIn
 from werkzeug.serving import BaseWSGIServer, make_server
-# 仅添加这一个函数，用于确定应用数据目录
+
 
 class ThreadedWSGIServer(ThreadingMixIn, BaseWSGIServer):
     """

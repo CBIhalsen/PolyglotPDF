@@ -192,7 +192,7 @@ font_collection = []
 
 class main_function:
     def __init__(self, pdf_path,
-                 original_language, target_language,
+                 original_language, target_language,bn = None,en = None,
                  DPI=72,):
         """
         这里的参数与原来保持一致或自定义。主要多加一个 self.pages_data 用于存储所有页面的提取结果。
@@ -210,6 +210,8 @@ class main_function:
         self.translation_type = translation_type
         self.use_mupdf = use_mupdf
         self.line_model = line_model
+        self.bn = bn
+        self.en = en
 
         self.t = time.time()
         # 新增一个全局列表，用于存所有页面的 [文本, bbox]，以及翻译后结果
@@ -246,15 +248,30 @@ class main_function:
         load_config.add_new_entry(new_entry)
 
         # 4. 保留原先判断是否 use_mupdf 的代码，以便先提取文本
+        page_count =self.doc.page_count
+        if self.bn == None:
+            self.bn = 0
+        if self.en == None:
+            self.en = page_count
+
         if self.use_mupdf:
-            # 使用 PyMuPDF 直接获取文本块 (不要改动这段判断逻辑)
-            for i in range(self.doc.page_count):
-                self.start(image=None, pag_num=i)   # 只做提取，不做翻译写入
+            start_page = self.bn
+            end_page = min(self.en, page_count)
+
+            # 使用 PyMuPDF 直接获取文本块
+            for i in range(start_page, end_page):
+                self.start(image=None, pag_num=i)  # 只做提取，不做翻译写入
         else:
             # OCR 模式
             zoom = self.DPI / 72
             mat = fitz.Matrix(zoom, zoom)
-            for i, page in enumerate(self.doc):
+            # 处理从 self.bn 到 self.en 的页面范围，并确保 self.en 不超过文档页数
+            start_page = self.bn
+            end_page = min(self.en, page_count)
+
+            # 迭代指定范围的页面
+            for i in range(start_page, end_page):
+                page = self.doc[i]  # 获取指定页面
                 pix = page.get_pixmap(matrix=mat)
                 image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
                 # 如果需要保存图像到文件，可自行保留或注释
@@ -575,4 +592,4 @@ class main_function:
 
 if __name__ == '__main__':
 
-    main_function(original_language='auto', target_language='zh', pdf_path='demo.pdf').main()
+    main_function(original_language='auto', target_language='zh', pdf_path='g2.pdf').main()
