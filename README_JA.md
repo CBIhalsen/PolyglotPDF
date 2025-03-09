@@ -10,6 +10,10 @@
 ## デモ
 <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/demo.gif?raw=true" width="80%" height="40%">
 
+## 速度比較
+
+<img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Figure_1.png?raw=true" width="80%" height="40%">
+
 ### [🎬 フルビデオを見る](https://github.com/CBIhalsen/PolyglotPDF/blob/main/demo.mp4)
 翻訳APIの選択肢としてLLMsが追加されました。推奨モデル：Doubao、Qwen、deepseek v3、gpt4-o-miniです。カラースペースエラーはPDFファイルの白色領域を埋めることで解決できます。古いtext to text翻訳APIは削除されました。
 
@@ -53,6 +57,112 @@ PolyglotPDFは、特殊技術を用いてPDF文書内のテキスト、表、数
 
 ## インストールとセットアップ
 
+### 使用方法の一つとして、ライブラリをインストールします：
+
+```bash
+pip install EbookTranslator
+```
+
+基本的な使い方：
+
+```bash
+EbookTranslator your_file.pdf
+```
+
+パラメータ付きの使用例：
+
+```bash
+EbookTranslator your_file.pdf -o en -t zh -b 1 -e 10 -c /path/to/config.json -d 300
+```
+
+#### Pythonコードでの使用
+
+```python
+from EbookTranslator import main_function
+
+translator = main_function(
+    pdf_path="your_file.pdf",
+    original_language="en",
+    target_language="zh",
+    bn=1,
+    en=10,
+    config_path="/path/to/config.json",
+    DPI=300
+)
+translator.main()
+```
+
+## パラメータの説明
+
+| パラメータ | コマンドラインオプション | 説明 | デフォルト値 |
+|-----------|---------------------|-------------|---------------|
+| `pdf_path` | 位置引数 | PDFファイルのパス | 必須 |
+| `original_language` | `-o, --original` | 元の言語 | `auto` |
+| `target_language` | `-t, --target` | 翻訳先の言語 | `zh` |
+| `bn` | `-b, --begin` | 開始ページ番号 | `1` |
+| `en` | `-e, --end` | 終了ページ番号 | ドキュメントの最終ページ |
+| `config_path` | `-c, --config` | 設定ファイルのパス | 現在の作業ディレクトリの `config.json` |
+| `DPI` | `-d, --dpi` | OCRモードのDPI | `72` |
+
+#### 設定ファイル
+
+設定ファイルはJSON形式で、デフォルトでは現在の作業ディレクトリの`config.json`に保存されます。存在しない場合、プログラムは内蔵のデフォルト設定を使用します。
+
+#### 設定ファイル例
+
+```json
+{
+  "count": 4,
+  "PPC": 20,
+  "translation_services": {
+    "Doubao": {
+      "auth_key": "",
+      "model_name": ""
+    },
+    "Qwen": {
+      "auth_key": "",
+      "model_name": "qwen-plus"
+    },
+    "deepl": {
+      "auth_key": ""
+    },
+    "deepseek": {
+      "auth_key": "",
+      "model_name": "ep-20250218224909-gps4n"
+    },
+    "openai": {
+      "auth_key": "",
+      "model_name": "gpt-4o-mini"
+    },
+    "youdao": {
+      "app_key": "",
+      "app_secret": ""
+    }
+  },
+  "ocr_services": {
+    "tesseract": {
+      "path": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+    }
+  },
+  "default_services": {
+    "ocr_model": false,
+    "line_model": false,
+    "Enable_translation": true,
+    "Translation_api": "openai"
+  }
+}
+```
+
+#### 出力
+
+翻訳されたPDFファイルは、`output_dir`で指定されたディレクトリに保存されます (デフォルトは現在の作業ディレクトリ内の`target`フォルダ)。
+
+## ライセンス
+
+MIT
+
+## フレンドリーなUIインターフェースの使用方法
+
 1. リポジトリのクローン：
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
@@ -84,7 +194,6 @@ python app.py
 - PyMuPDF==1.24.0
 - pytesseract==0.3.10
 - requests==2.31.0
-- tiktoken==0.6.0
 - Werkzeug==2.0.1
 
 ## 謝辞

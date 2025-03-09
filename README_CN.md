@@ -1,4 +1,3 @@
-注： 对于pdf这种棘手的文件处理，对于文字版pdf的最优解：参考开源项目mupdf重构block识别算法只需要达到Adobe Acrobat Dc精度即可，不要舍近求远使用ocr扫描文字版pdf。 使用ai模型去理解pdf布局未来成本绝对会高于使用gpt4o mini这类价格！ 对于pdf种公式识别出要么不处理，要么通过字体文件名称和对应unicode值进行映射。 ocr扫描文字版pdf相当愚蠢
 # PolyglotPDF
 
 [![Python](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/)
@@ -8,8 +7,13 @@
 [![Math](https://img.shields.io/badge/math-formulas-red.svg)](https://example.com)
 [![PyMuPDF](https://img.shields.io/badge/PyMuPDF-1.24.0-blue.svg)](https://pymupdf.readthedocs.io/)
 
-## Demo
+## Demo 
 <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/demo.gif?raw=true" width="80%" height="40%">
+
+## 速度对比
+
+<img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Figure_1.png?raw=true" width="80%" height="40%">
+
 
 ### [🎬 Watch Full Video](https://github.com/CBIhalsen/PolyglotPDF/blob/main/demo.mp4)
 已经加入llms作为翻译api的选择，建议选择：Doubao ,Qwen ,deepseek v3 ,gpt4-o-mini。色彩空间错误可以通过填充PDF文件中的白色区域来解决。 古老text to text翻译api已删除
@@ -54,6 +58,113 @@ PolyglotPDF 是一款先进的 PDF 处理工具，采用特殊技术实现对 PD
 - **支持离线翻译**：使用较小翻译模型
 
 ## 安装和设置
+
+### 使用方法之一是安装该库：
+
+```bash
+pip install EbookTranslator
+```
+
+基本用法：
+
+```bash
+EbookTranslator your_file.pdf
+```
+
+带参数使用：
+
+```bash
+EbookTranslator your_file.pdf -o en -t zh -b 1 -e 10 -c /path/to/config.json -d 300
+```
+
+#### 在 Python 中使用
+
+```python
+from EbookTranslator import main_function
+
+translator = main_function(
+    pdf_path="your_file.pdf",
+    original_language="en",
+    target_language="zh",
+    bn=1,
+    en=10,
+    config_path="/path/to/config.json",
+    DPI=300
+)
+translator.main()
+```
+
+## 参数说明
+
+| 参数 | 命令行选项 | 描述 | 默认值 |
+|-----------|---------------------|-------------|---------------|
+| `pdf_path` | 位置参数 | PDF 文件路径 | 必填 |
+| `original_language` | `-o, --original` | 源语言 | `auto` |
+| `target_language` | `-t, --target` | 目标语言 | `zh` |
+| `bn` | `-b, --begin` | 起始页码 | `1` |
+| `en` | `-e, --end` | 结束页码 | 文档的最后一页 |
+| `config_path` | `-c, --config` | 配置文件路径 | 当前工作目录下的 `config.json` |
+| `DPI` | `-d, --dpi` | OCR 模式的 DPI | `72` |
+
+#### 配置文件
+
+配置文件是一个 JSON 文件，默认位于当前工作目录下的 `config.json`。如果不存在，程序将使用内置的默认设置。
+
+#### 配置文件示例
+
+```json
+{
+  "count": 4,
+  "PPC": 20,
+  "translation_services": {
+    "Doubao": {
+      "auth_key": "",
+      "model_name": ""
+    },
+    "Qwen": {
+      "auth_key": "",
+      "model_name": "qwen-plus"
+    },
+    "deepl": {
+      "auth_key": ""
+    },
+    "deepseek": {
+      "auth_key": "",
+      "model_name": "ep-20250218224909-gps4n"
+    },
+    "openai": {
+      "auth_key": "",
+      "model_name": "gpt-4o-mini"
+    },
+    "youdao": {
+      "app_key": "",
+      "app_secret": ""
+    }
+  },
+  "ocr_services": {
+    "tesseract": {
+      "path": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+    }
+  },
+  "default_services": {
+    "ocr_model": false,
+    "line_model": false,
+    "Enable_translation": true,
+    "Translation_api": "openai"
+  }
+}
+```
+
+
+#### 输出
+
+翻译后的 PDF 文件将保存在 `output_dir` 指定的目录中（默认是当前工作目录下的 `target` 文件夹）。
+
+## 许可
+
+MIT
+
+## 使用友好 UI 界面的方法
 
 1. 克隆仓库：
 ```bash
@@ -189,3 +300,11 @@ for block in blocks:
   - 低计算资源消耗，适合规模化部署
   - 成本效益高，适合商业应用
 
+- * Contact author:
+QQ： 1421243966
+email: 1421243966@qq.com
+
+Related questions answered and discussed：
+
+ QQ group:
+ 1031477425

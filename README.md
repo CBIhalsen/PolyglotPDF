@@ -1,4 +1,4 @@
-English | [简体中文](/README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JA.md) | [한국어](README_KO.md)
+English | [简体中文](https://github.com/CBIhalsen/PolyglotPDF/blob/main//README_CN.md) | [繁體中文](https://github.com/CBIhalsen/PolyglotPDF/blob/main/README_TW.md) | [日本語](https://github.com/CBIhalsen/PolyglotPDF/blob/main/README_JA.md) | [한국어](https://github.com/CBIhalsen/PolyglotPDF/blob/main/README_KO.md)
 # PolyglotPDF
 
 [![Python](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/)
@@ -45,7 +45,7 @@ Apply through Alibaba Cloud platform:
 
 
 ## Overview
-PolyglotPDF is an advanced PDF processing tool that employs specialized techniques for ultra-fast text, table, and formula recognition in PDF documents, typically completing processing within 1 second. It features OCR capabilities and layout-preserving translation, with full document translations usually completed within 10 seconds (speed may vary depending on the translation API provider).
+PolyglotPDF(EbookTranslation) is an advanced PDF processing tool that employs specialized techniques for ultra-fast text, table, and formula recognition in PDF documents, typically completing processing within 1 second. It features OCR capabilities and layout-preserving translation, with full document translations usually completed within 10 seconds (speed may vary depending on the translation API provider).
 
 ## Features
 - **Ultra-Fast Recognition**: Processes text, tables, and formulas in PDFs within ~1 second
@@ -59,6 +59,120 @@ PolyglotPDF is an advanced PDF processing tool that employs specialized techniqu
 - **Support for offline translation**: Use smaller translation model
 
 ## Installation and Setup
+
+
+
+### There are several ways to use it. One is to install the library,
+
+```bash
+pip install EbookTranslator
+```
+
+
+
+Basic usage:
+
+```bash
+EbookTranslator your_file.pdf
+```
+
+Usage with parameters:
+
+```bash
+EbookTranslator your_file.pdf -o en -t zh -b 1 -e 10 -c /path/to/config.json -d 300
+```
+
+####  Using in Python Code
+
+```python
+from EbookTranslator import main_function
+
+translator = main_function(
+    pdf_path="your_file.pdf",
+    original_language="en",
+    target_language="zh",
+    bn=1,
+    en=10,
+    config_path="/path/to/config.json",
+    DPI=300
+)
+translator.main()
+```
+
+## Parameter Description
+
+| Parameter | Command Line Option | Description | Default Value |
+|-----------|---------------------|-------------|---------------|
+| `pdf_path` | Positional argument | PDF file path | Required |
+| `original_language` | `-o, --original` | Source language | `auto` |
+| `target_language` | `-t, --target` | Target language | `zh` |
+| `bn` | `-b, --begin` | Starting page number | `1` |
+| `en` | `-e, --end` | Ending page number | Last page of the document |
+| `config_path` | `-c, --config` | Configuration file path | `config.json` in the current working directory |
+| `DPI` | `-d, --dpi` | DPI for OCR mode | `72` |
+
+#### Configuration File
+
+The configuration file is a JSON file, by default located at `config.json` in the current working directory. If it doesn't exist, the program will use built-in default settings.
+
+#### Configuration File Example
+
+```json
+{
+  "count": 4,
+  "PPC": 20,
+  "translation_services": {
+    "Doubao": {
+      "auth_key": "",
+      "model_name": ""
+    },
+    "Qwen": {
+      "auth_key": "",
+      "model_name": "qwen-plus"
+    },
+    "deepl": {
+      "auth_key": ""
+    },
+    "deepseek": {
+      "auth_key": "",
+      "model_name": "ep-20250218224909-gps4n"
+    },
+    "openai": {
+      "auth_key": "",
+      "model_name": "gpt-4o-mini"
+    },
+    "youdao": {
+      "app_key": "",
+      "app_secret": ""
+    }
+  },
+  "ocr_services": {
+    "tesseract": {
+      "path": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+    }
+  },
+  "default_services": {
+    "ocr_model": false,
+    "line_model": false,
+    "Enable_translation": true,
+    "Translation_api": "openai"
+  }
+}
+```
+
+
+#### Output
+
+Translated PDF files will be saved in the directory specified by `output_dir` (default is the `target` folder in the current working directory).
+
+
+
+
+## License
+
+MIT
+
+## Use method for friendly UI interface
 
 1. Clone the repository:
 ```bash

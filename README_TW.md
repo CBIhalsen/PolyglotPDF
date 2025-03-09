@@ -10,6 +10,10 @@
 ## 演示
 <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/demo.gif?raw=true" width="80%" height="40%">
 
+## 速度對比
+
+<img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Figure_1.png?raw=true" width="80%" height="40%">
+
 ### [🎬 觀看完整影片](https://github.com/CBIhalsen/PolyglotPDF/blob/main/demo.mp4)
 翻譯API選項已新增LLMs。推薦模型：Doubao、Qwen、deepseek v3、gpt4-o-mini。色彩空間錯誤可透過填充PDF檔案的白色區域來解決。舊有的text to text翻譯API已被移除。
 
@@ -53,6 +57,123 @@ PolyglotPDF是一款使用特殊技術，能夠超高速識別PDF文件中文字
 
 ## 安裝與設定
 
+### 使用方法之一是安裝該庫：
+
+```bash
+pip install EbookTranslator
+```
+
+基本用法：
+
+```bash
+EbookTranslator your_file.pdf
+```
+
+帶參數使用：
+
+```bash
+EbookTranslator your_file.pdf -o en -t zh -b 1 -e 10 -c /path/to/config.json -d 300
+```
+
+#### 在 Python 中使用
+
+```python
+from EbookTranslator import main_function
+
+translator = main_function(
+    pdf_path="your_file.pdf",
+    original_language="en",
+    target_language="zh",
+    bn=1,
+    en=10,
+    config_path="/path/to/config.json",
+    DPI=300
+)
+translator.main()
+```
+
+## 參數說明
+
+| 參數 | 命令行選項 | 描述 | 默認值 |
+|-----------|---------------------|-------------|---------------|
+| `pdf_path` | 位置參數 | PDF 文件路徑 | 必填 |
+| `original_language` | `-o, --original` | 源語言 | `auto` |
+| `target_language` | `-t, --target` | 目標語言 | `zh` |
+| `bn` | `-b, --begin` | 起始頁碼 | `1` |
+| `en` | `-e, --end` | 結束頁碼 | 文檔的最後一頁 |
+| `config_path` | `-c, --config` | 配置文件路徑 | 當前工作目錄下的 `config.json` |
+| `DPI` | `-d, --dpi` | OCR 模式的 DPI | `72` |
+
+#### 配置文件
+
+配置文件是一個 JSON 文件，默認位於當前工作目錄下的 `config.json`。如果不存在，程序將使用內置的默認設置。
+
+#### 配置文件示例
+
+```json
+{
+  "count": 4,
+  "PPC": 20,
+  "translation_services": {
+    "Doubao": {
+      "auth_key": "",
+      "model_name": ""
+    },
+    "Qwen": {
+      "auth_key": "",
+      "model_name": "qwen-plus"
+    },
+    "deepl": {
+      "auth_key": ""
+    },
+    "deepseek": {
+      "auth_key": "",
+      "model_name": "ep-20250218224909-gps4n"
+    },
+    "openai": {
+      "auth_key": "",
+      "model_name": "gpt-4o-mini"
+    },
+    "youdao": {
+      "app_key": "",
+      "app_secret": ""
+    }
+  },
+  "ocr_services": {
+    "tesseract": {
+      "path": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+    }
+  },
+  "default_services": {
+    "ocr_model": false,
+    "line_model": false,
+    "Enable_translation": true,
+    "Translation_api": "openai"
+  }
+}
+```
+
+#### 配置選項
+
+- `translation_service`: 翻譯服務提供商（例如 "google", "deepl", "baidu"）
+- `api_key`: 翻譯 API 密鑰（如果需要）
+- `translation_mode`: 翻譯模式，"online" 或 "offline"
+- `ocr_enabled`: 是否啟用 OCR 識別
+- `tesseract_path`: Tesseract OCR 引擎路徑（如果未添加到系統 PATH）
+- `output_dir`: 輸出目錄
+- `language_codes`: 語言代碼映射
+- `font_mapping`: 不同語言對應的字體
+
+#### 輸出
+
+翻譯後的 PDF 文件將保存在 `output_dir` 指定的目錄中（默認是當前工作目錄下的 `target` 文件夾）。
+
+## 許可
+
+MIT
+
+## 使用友好 UI 介面的方法
+
 1. 複製儲存庫：
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
@@ -84,7 +205,6 @@ python app.py
 - PyMuPDF==1.24.0
 - pytesseract==0.3.10
 - requests==2.31.0
-- tiktoken==0.6.0
 - Werkzeug==2.0.1
 
 ## 致謝
