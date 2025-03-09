@@ -1,5 +1,5 @@
 
-import tiktoken
+
 import time
 import os
 import Deepl_Translation as dt
@@ -7,7 +7,8 @@ import YouDao_translation as yt
 import LLMS_translation as lt
 import asyncio
 
-
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 # #
 # Get the encoder of a specific model, assume gpt3.5, tiktoken is extremely fast,
 # and the error of this statistical token method is small and can be ignored
@@ -22,15 +23,11 @@ class Online_translation:
         self.translation_type = translation_type
 
     def run_async(self, coro):
-        """运行异步函数的同步包装器"""
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            return loop.run_until_complete(coro)
-        finally:
-            loop.close()
+        # 往往只要 run_until_complete()，不手动 close() 即可
+        return loop.run_until_complete(coro)
 
     def translation(self):
+        print('翻译api',self.translation_type)
         if self.translation_type == 'deepl':
             translated_list = self.deepl_translation()
         elif self.translation_type == 'youdao':
@@ -69,7 +66,7 @@ class Online_translation:
 
 
     async def openai_translation(self):
-        translator = lt.Openai_translation("gpt-3.5-turbo")
+        translator = lt.Openai_translation()
         translated_texts = await translator.translate(
             texts=self.original_text,
             original_lang=self.original_lang,
