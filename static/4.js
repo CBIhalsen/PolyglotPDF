@@ -134,6 +134,7 @@ async function handleBatchDelete() {
     // 删除成功后刷新弹窗数据
     selectedBatchIds.clear();
     loadBatchData();
+    getecount();
   } catch (error) {
     console.error('删除失败:', error);
     alert('Delete failed, please try again!');

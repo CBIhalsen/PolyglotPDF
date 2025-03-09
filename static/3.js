@@ -283,6 +283,7 @@ async function handleNextStep() {
                 }, 1000);
             });
 
+
             // 异步发起翻译请求
             fetch('/translation', {
                 method: 'POST',
@@ -301,6 +302,8 @@ async function handleNextStep() {
                     // 执行回调函数
                     const value = document.getElementById('record_show_staute').getAttribute('data-value') === 'true';
                     loadArticles(value,false);
+                     getecount();
+
 
                 } else {
                     throw new Error('Translation request failed');
@@ -322,6 +325,13 @@ async function handleNextStep() {
 
 }
 
+ function updatecount() {
+    fetch('/config_json')
+        .then(response => response.json())
+        .then(data => {
+           document.getElementById('count_article').textContent += data.count;
+        });
+    }
 
 function deleteArticle(articleId) {
     // 创建弹窗遮罩层

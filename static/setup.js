@@ -13,7 +13,9 @@
     document.getElementById('t-count').value = data.count;
         document.getElementById('t-ppc').textContent = data.PPC;
     document.getElementById('t-ppc').value = data.PPC;
-        document.getElementById('count_article').textContent += data.count;
+document.getElementById('count_article').textContent += data.count;
+
+
     console.log('count', data.count);
 
     // 初始化翻译服务 (这部分代码保持不变)
