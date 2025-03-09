@@ -6,6 +6,6 @@ Pillow==10.2.0
 PyMuPDF==1.24.0
 pytesseract==0.3.10
 requests==2.31.0
-tiktoken==0.6.0
+
 Werkzeug==2.0.1
 aiohttp
