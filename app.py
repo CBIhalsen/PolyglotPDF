@@ -456,7 +456,7 @@ server = None
 
 class ServerThread(Thread):
     """后台运行的 Flask 服务器线程。"""
-    def __init__(self, flask_app, host="127.0.0.1", port=8000):
+    def __init__(self, flask_app, host="127.0.0.1", port=12226):
         super().__init__()
         self.host = host
         self.port = port
@@ -474,7 +474,7 @@ class ServerThread(Thread):
 
 
 def open_browser():
-    webbrowser.open_new("http://127.0.0.1:8000")
+    webbrowser.open_new("http://127.0.0.1:12226")
 # 修改主程序初始化部分
 
 
@@ -498,10 +498,10 @@ if __name__ == "__main__":
 
     try:
         # 创建并启动服务器
-        server = ServerThread(app, host="127.0.0.1", port=8000)
+        server = ServerThread(app, host="127.0.0.1", port=12226)
         server.daemon = True  # 设置为守护线程
         server.start()
-        print("服务器已在 http://127.0.0.1:8000 运行...")
+        print("服务器已在 http://127.0.0.1:12226 运行...")
 
         # 保持主线程运行
         while True:
