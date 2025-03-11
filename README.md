@@ -166,12 +166,6 @@ The configuration file is a JSON file, by default located at `config.json` in th
 Translated PDF files will be saved in the directory specified by `output_dir` (default is the `target` folder in the current working directory).
 
 
-
-
-## License
-
-MIT
-
 ## Use method for friendly UI interface
 
 1. Clone the repository:
