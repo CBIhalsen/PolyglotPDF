@@ -1,10 +1,8 @@
 deepl==1.17.0
 Flask==2.0.1
 flask-cors
-langdetect==1.0.9
-Pillow==10.2.0
+Pillow
 PyMuPDF==1.24.0
-pytesseract==0.3.10
-requests==2.31.0
-Werkzeug==2.0.1
+requests
+Werkzeug
 aiohttp
