@@ -20,10 +20,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 设置环境变量
 ENV PYTHONUNBUFFERED=1
-ENV PORT=8000
+ENV PORT=12226
 
 # 暴露端口
-EXPOSE 8000
+EXPOSE 12226
 
 # 启动命令
 CMD ["python", "app.py"]
