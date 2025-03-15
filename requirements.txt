@@ -1,5 +1,5 @@
 deepl==1.17.0
-Flask==2.0.1
+Flask
 flask-cors
 Pillow
 PyMuPDF==1.24.0
