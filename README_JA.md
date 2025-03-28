@@ -166,7 +166,7 @@ MIT
 1. リポジトリのクローン：
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
-cd polyglotpdf
+cd Polyglotpdf
 ```
 
 2. 依存パッケージのインストール：
