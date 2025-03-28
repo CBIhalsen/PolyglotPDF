@@ -177,7 +177,7 @@ MIT
 1. 複製儲存庫：
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
-cd polyglotpdf
+cd Polyglotpdf
 ```
 
 2. 安裝相依套件：
