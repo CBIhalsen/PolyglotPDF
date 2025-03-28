@@ -171,7 +171,7 @@ Translated PDF files will be saved in the directory specified by `output_dir` (d
 1. Clone the repository:
 ```bash
 git clone https://github.com/CBIhalsen/PolyglotPDF.git
-cd polyglotpdf
+cd Polyglotpdf
 ```
 
 2. Install required packages:
