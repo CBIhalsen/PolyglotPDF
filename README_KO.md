@@ -167,7 +167,7 @@ MIT
 1. 저장소 클론:
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
-cd polyglotpdf
+cd Polyglotpdf
 ```
 
 2. 의존성 패키지 설치:

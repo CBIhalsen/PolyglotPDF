@@ -169,7 +169,7 @@ MIT
 1. 克隆仓库：
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
-cd polyglotpdf
+cd Polyglotpdf
 ```
 
 2. 安装依赖包：
