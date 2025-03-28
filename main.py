@@ -532,6 +532,7 @@ class main_function:
                     idx_t += 1
 
             start_idx += batch_size
+            print('当前进度', end_idx, "/", total_pages)
 
     def apply_translations_to_pdf(self):
         """
