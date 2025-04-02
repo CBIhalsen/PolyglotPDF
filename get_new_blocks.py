@@ -696,6 +696,9 @@ def get_new_blocks(page):
 
                 line_is_bold = any(bold_flags)
                 stripped_text = full_text.strip()
+                if not stripped_text:
+                    continue
+
 
                 # 3) 若行首有“•”，则去掉并向右偏移
                 if stripped_text.startswith("•"):
