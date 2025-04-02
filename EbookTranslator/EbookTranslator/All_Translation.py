@@ -1,4 +1,3 @@
-
 import time
 import os
 from .import Deepl_Translation as dt
@@ -43,9 +42,9 @@ class Online_translation:
         elif self.translation_type == 'Qwen':
             # 使用同步包装器运行异步函数
             translated_list = self.run_async(self.Qwen_translation())
-
-        return translated_list
-
+        elif self.translation_type == 'Grok':
+            # 使用同步包装器运行异步函数
+            translated_list = self.run_async(self.Grok_translation())
 
         return translated_list
 
@@ -91,6 +90,14 @@ class Online_translation:
         return translated_texts
     async def Qwen_translation(self):
         translator = lt.Qwen_translation()
+        translated_texts = await translator.translate(
+            texts=self.original_text,
+            original_lang=self.original_lang,
+            target_lang=self.target_language
+        )
+        return translated_texts
+    async def Grok_translation(self):
+        translator = lt.Grok_translation()
         translated_texts = await translator.translate(
             texts=self.original_text,
             original_lang=self.original_lang,
