@@ -155,9 +155,9 @@ class main_function:
                 is_bold = item[6]  # text_bold值
 
                 if is_bold:
-                    bold_text += translate_text + " "  # 在每个文本之间添加空格
+                    bold_text += translate_text   # 在每个文本之间添加空格
                 else:
-                    normal_text += translate_text + " "
+                    normal_text += translate_text
 
         # 去除末尾多余的空格
         bold_text = bold_text.strip()
@@ -216,18 +216,8 @@ class main_function:
             blocks = new_blocks.get_new_blocks(page)
             # 如果获取到的 blocks 为空，则进行相应处理
             if not blocks:
-                # 例如，这里追加一个空条目并返回，也可根据自身需求改为其它处理方式
-                self.pages_data[pag_num].append([
-                    "",  # 空文本（或可填写提示性文本）
-                    (0, 0, 0, 0),  # 简单传入空 bbox
-                    None,  # 译文占位
-                    0,  # angle
-                    "000000",  # 颜色占位
-                    0,  # text_indent
-                    False,  # text_bold
-                    0  # text_size
-                ])
-                return
+                return True
+
 
 
             for block in blocks:
@@ -391,6 +381,8 @@ class main_function:
             start_idx += batch_size
             print('当前进度',end_idx,"/",total_pages)
 
+
+
     def apply_translations_to_pdf(self):
         """
         统一对 PDF 做“打码/打白 + 插入译文”操作
@@ -463,4 +455,4 @@ class main_function:
 
 if __name__ == '__main__':
 
-    main_function(original_language='auto', target_language='zh', pdf_path='zh1.pdf',en=420,bn=430).main()
+    main_function(original_language='auto', target_language='zh', pdf_path='zh1.pdf').main()
