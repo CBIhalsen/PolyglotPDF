@@ -166,7 +166,7 @@ MIT
 1. リポジトリのクローン：
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
-cd polyglotpdf
+cd Polyglotpdf
 ```
 
 2. 依存パッケージのインストール：
@@ -182,7 +182,7 @@ python app.py
 ```
 
 5. Webインターフェースへのアクセス：
-ブラウザで `http://127.0.0.1:8000` を開く
+ブラウザで `http://127.0.0.1:12226` を開く
 
 ## 環境要件
 - Python 3.8+

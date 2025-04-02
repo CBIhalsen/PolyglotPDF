@@ -177,7 +177,7 @@ MIT
 1. 複製儲存庫：
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
-cd polyglotpdf
+cd Polyglotpdf
 ```
 
 2. 安裝相依套件：
@@ -193,7 +193,7 @@ python app.py
 ```
 
 5. 存取網頁介面：
-在瀏覽器中開啟 `http://127.0.0.1:8000`
+在瀏覽器中開啟 `http://127.0.0.1:12226`
 
 ## 環境需求
 - Python 3.8+

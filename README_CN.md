@@ -169,7 +169,7 @@ MIT
 1. 克隆仓库：
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
-cd polyglotpdf
+cd Polyglotpdf
 ```
 
 2. 安装依赖包：
@@ -184,7 +184,7 @@ python app.py
 ```
 
 5. 访问网页界面：
-在浏览器中打开 `http://127.0.0.1:8000`
+在浏览器中打开 `http://127.0.0.1:12226`
 
 ## 环境要求
 - Python 3.8+

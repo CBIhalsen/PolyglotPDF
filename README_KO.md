@@ -167,7 +167,7 @@ MIT
 1. 저장소 클론:
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
-cd polyglotpdf
+cd Polyglotpdf
 ```
 
 2. 의존성 패키지 설치:
@@ -183,7 +183,7 @@ python app.py
 ```
 
 5. 웹 인터페이스 접속:
-브라우저에서 `http://127.0.0.1:8000` 열기
+브라우저에서 `http://127.0.0.1:12226` 열기
 
 ## 환경 요구사항
 - Python 3.8+
