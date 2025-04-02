@@ -53,6 +53,9 @@ PolyglotPDF是一款使用特殊技術，能夠超高速識別PDF文件中文字
 
 ## 安裝與設定
 
+<details>
+  <summary>標準安裝</summary>
+
 1. 複製儲存庫：
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
@@ -73,6 +76,63 @@ python app.py
 
 5. 存取網頁介面：
 在瀏覽器中開啟 `http://127.0.0.1:8000`
+</details>
+
+<details>
+  <summary>Docker 使用說明</summary>
+
+## 快速啟動
+
+使用以下命令拉取並運行 PolyglotPDF Docker 映像：
+
+```bash
+# 拉取映像
+docker pull 2207397265/polyglotpdf:latest
+
+# 運行容器
+docker run -d -p 12226:12226 --name polyglotpdf 2207397265/polyglotpdf:latest
+```
+
+## 訪問應用
+
+容器啟動後，在瀏覽器中打開：
+```
+http://localhost:12226
+```
+
+## 使用 Docker Compose
+
+創建 `docker-compose.yml` 文件：
+
+```yaml
+version: '3'
+services:
+  polyglotpdf:
+    image: 2207397265/polyglotpdf:latest
+    ports:
+      - "12226:12226"
+    restart: unless-stopped
+```
+
+然後運行：
+
+```bash
+docker-compose up -d
+```
+
+## 常用 Docker 命令
+
+```bash
+# 停止容器
+docker stop polyglotpdf
+
+# 重啟容器
+docker restart polyglotpdf
+
+# 查看日誌
+docker logs polyglotpdf
+```
+</details>
 
 ## 環境需求
 - Python 3.8+
