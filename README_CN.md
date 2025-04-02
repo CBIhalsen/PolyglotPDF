@@ -55,6 +55,9 @@ PolyglotPDF 是一款先进的 PDF 处理工具，采用特殊技术实现对 PD
 
 ## 安装和设置
 
+<details>
+  <summary>标准安装</summary>
+
 1. 克隆仓库：
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
@@ -74,9 +77,10 @@ python app.py
 
 5. 访问网页界面：
 在浏览器中打开 `http://127.0.0.1:8000`
+</details>
 
-
-# Docker 使用说明
+<details>
+  <summary>Docker 安装</summary>
 
 ## 快速启动
 
@@ -116,6 +120,20 @@ services:
 ```bash
 docker-compose up -d
 ```
+## 常用 Docker 命令
+
+```bash
+# 停止容器
+docker stop polyglotpdf
+
+# 重启容器
+docker restart polyglotpdf
+
+# 查看日志
+docker logs polyglotpdf
+```
+</details>
+
 
 
 ## 环境要求

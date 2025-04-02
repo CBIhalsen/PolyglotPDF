@@ -53,6 +53,9 @@ PolyglotPDF는 특수 기술을 사용하여 PDF 문서 내의 텍스트, 표, �
 
 ## 설치 및 설정
 
+<details>
+  <summary>표준 설치</summary>
+
 1. 저장소 클론:
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
@@ -73,6 +76,63 @@ python app.py
 
 5. 웹 인터페이스 접속:
 브라우저에서 `http://127.0.0.1:8000` 열기
+</details>
+
+<details>
+  <summary>Docker 사용 방법</summary>
+
+## 빠른 시작
+
+다음 명령을 사용하여 PolyglotPDF Docker 이미지를 가져와 실행:
+
+```bash
+# 이미지 가져오기
+docker pull 2207397265/polyglotpdf:latest
+
+# 컨테이너 실행
+docker run -d -p 12226:12226 --name polyglotpdf 2207397265/polyglotpdf:latest
+```
+
+## 애플리케이션 접속
+
+컨테이너가 시작된 후, 브라우저에서 열기:
+```
+http://localhost:12226
+```
+
+## Docker Compose 사용
+
+`docker-compose.yml` 파일 생성:
+
+```yaml
+version: '3'
+services:
+  polyglotpdf:
+    image: 2207397265/polyglotpdf:latest
+    ports:
+      - "12226:12226"
+    restart: unless-stopped
+```
+
+그리고 실행:
+
+```bash
+docker-compose up -d
+```
+
+## 자주 사용하는 Docker 명령어
+
+```bash
+# 컨테이너 중지
+docker stop polyglotpdf
+
+# 컨테이너 재시작
+docker restart polyglotpdf
+
+# 로그 확인
+docker logs polyglotpdf
+```
+</details>
 
 ## 환경 요구사항
 - Python 3.8+
