@@ -151,10 +151,16 @@ def horizontal_merge(
 
 def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_font_color=True):
     """
-    垂直方向合并示例，包含多段合并逻辑(1, 2, 3) + "中间合并豁免"逻辑。
+    垂直方向合并示例，包含多段合并逻辑(1,2,3) + "中间合并豁免"逻辑。
     新增：颜色差值判断，可选启用；以及合并后统计 total_bold_chars / total_nonbold_chars 判断整行粗体。
+    新增：condition_4：若上一行 bbox 可以包裹当前行 bbox（含2像素容差），则合并。
+• condition_1 (中间豁免合并)：若当前行在上一行的 bbox 范围内（x0≥px0+margin_in_middle，x1≤px1-margin_in_middle 等），且字体大小、颜色等基本一致，则认为是同段落被拆分的行。
+• condition_2 (新逻辑合并)：对上一行右边界和当前行 x1 等进行限制，强调“上一行右边界明显包住当前行的宽度”，可理解为同一行拆成多段。
+• condition_3 (老逻辑合并)：只要块号相同、Y 轴距离足够小、字体等一致就合并；里面还包含了对行宽差别 (width_diff) 的一些自定义判断、缩进处理等。
+• condition_4 (包裹合并)：如果上一行能在四个方向上包裹当前行（含 2 像素容差），则直接把当前行合并进上一行。
     【改动】：在合并时，合并子行的 font_names 字段，避免只保留一个。
     """
+
     merged = []
     # 横向距离阈值(非中间豁免时要满足此判断)
     max_x_distance = 80
@@ -179,13 +185,14 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
         same_block = (line["block_index"] == prev_line["block_index"])
         same_font_size_flag = (line["font_size"] == prev_line["font_size"])
         same_font_name_flag = (line["font_name"] == prev_line["font_name"])
+
         # 颜色差
         color_diff_val = 0
         if line["font_color"] is not None and prev_line["font_color"] is not None:
             color_diff_val = abs(line["font_color"] - prev_line["font_color"])
         same_font_color_flag = (color_diff_val <= 500000)
 
-        # 根据开关决定是否要求它们一致
+        # 根据 check_xxx 决定是否严格要求它们一致
         if not check_font_size:
             same_font_size_flag = True
         if not check_font_name:
@@ -199,7 +206,7 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
         # 1) 将 max_horizontal_gap 改为相邻行字体大小的均值
         max_horizontal_gap = (curr_font_size + prev_font_size) / 2.0
         # 2) 将 max_y_diff 改为该均值的一半
-        margin_in_middle = max_horizontal_gap / 2.0
+        margin_in_middle = max_horizontal_gap / 1.5
         max_x_distance = max_horizontal_gap * 8
 
         # Y 轴距离判断
@@ -212,23 +219,44 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
 
         # condition_1: “中间合并豁免”
         condition_1 = (
-            same_block and same_font_size_flag and same_font_name_flag and same_font_color_flag and
-            y_distance_small and (x0 >= px0 + margin_in_middle) and (x1 <= px1 - margin_in_middle)
-        )
-        # condition_2：新逻辑合并
-        condition_2 = (
-            same_block and y_distance_small and x_distance_small and
-            (px1 >= x1) and (abs(px0 - x0) < margin_in_middle/2.5)
-        )
-        # condition_3：老逻辑合并
-        condition_3 = (
-            same_block and y_distance_small and
-            same_font_size_flag and  # 原逻辑里可选
-            same_font_name_flag and
-            same_font_color_flag and
-            x_distance_small
+            same_block
+            and same_font_size_flag
+            and same_font_name_flag
+            and same_font_color_flag
+            and y_distance_small
+            and (x0 >= px0 + margin_in_middle)
+            and (x1 <= px1 - margin_in_middle)
         )
 
+        # condition_2：新逻辑合并
+        condition_2 = (
+            same_block
+            and y_distance_small
+            and x_distance_small
+            and (px1 >= x1)
+            and (abs(px0 - x0) < margin_in_middle / 2.5)
+        )
+
+        # condition_3：老逻辑合并
+        condition_3 = (
+            same_block
+            and y_distance_small
+            and same_font_size_flag  # 可选
+            and same_font_name_flag
+            and same_font_color_flag
+            and x_distance_small
+        )
+
+        # 【新增】 condition_4: “包裹合并”逻辑
+        # 若上一行的 bbox 可以包裹当前行的 bbox（在容差2像素内）
+        tolerance = 4.0
+        condition_4 = (
+                same_block
+                and (x0 >= px0 - tolerance)
+                and (y0 >= py0 - tolerance)
+                and (x1 <= px1 + tolerance)
+                and (y1 <= py1 + tolerance)
+        )
         # print(f"[merge_lines_debug] ----------")
         # print(f" 当前行 idx_line = {idx_line}")
         # print(f" 上一行 bbox = ({px0:.2f}, {py0:.2f}, {px1:.2f}, {py1:.2f}), prev_width = {prev_width:.2f}")
@@ -240,6 +268,7 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
         # print(f" condition_1 = {condition_1}")
         # print(f" condition_2 = {condition_2}")
         # print(f" condition_3 = {condition_3}")
+        # print(f" condition_4 (包裹合并) = {condition_4}")
 
         # (1) condition_1 -> 中间豁免合并
         if condition_1:
@@ -261,8 +290,10 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
             # 合并所有字体名称
             merged[-1]["font_names"].extend(line["font_names"])
             merged[-1]["font_names"] = list(set(merged[-1]["font_names"]))
+
             if line["font_size"] is not None and line["font_size"] > margin_in_middle * 2:
                 merged[-1]["type"] = "title"
+
             continue
 
         # (2) condition_2 -> 新逻辑合并
@@ -298,6 +329,7 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
 
             width_diff = abs(current_width - prev_width)
             # print(f"[merge_lines_debug] -> width_diff = {width_diff:.2f}")
+
             if width_diff <= margin_in_middle / 2.5:
                 # 直接合并
                 # print("[merge_lines_debug] -> width_diff 较小，进行合并")
@@ -346,7 +378,7 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
                     prev_line["font_names"].extend(line["font_names"])
                     prev_line["font_names"] = list(set(prev_line["font_names"]))
                     continue
-                # (2) 若当前行更窄 + 当前行x0>上一行x0+2，则不合并
+                # (2) 若当前行更窄 + 当前行x0>=上一行x0+2，则不合并
                 elif (current_width < prev_width) and (x0 >= px0 + 2):
                     # print("[merge_lines_debug] -> (宽度差>2) + (当前行更窄)，不合并")
                     merged.append(line)
@@ -358,7 +390,6 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
                         indent_val = abs(px0 - x0)
                         # print(f"[merge_lines_debug] -> 老逻辑记录缩进 indent = {indent_val:.2f}")
                         merged[-1]["indent"] = indent_val
-
                     merged_text = prev_line["text"].rstrip() + " " + line["text"].lstrip()
                     prev_line["text"] = merged_text
                     new_x0 = min(px0, x0)
@@ -378,6 +409,29 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
                     prev_line["font_names"].extend(line["font_names"])
                     prev_line["font_names"] = list(set(prev_line["font_names"]))
                     continue
+
+        # (4) condition_4 -> 被上一行包裹的合并（新逻辑）
+        elif condition_4:
+            # print("[merge_lines_debug] -> 命中 condition_4 (行被上一行包裹)，进行合并")
+            merged[-1]["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
+            new_x0 = min(px0, x0)
+            new_y0 = min(py0, y0)
+            new_x1 = max(px1, x1)
+            new_y1 = max(py1, y1)
+            merged[-1]["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
+            # 合并粗体/非粗体字符数
+            merged[-1]["total_bold_chars"] += line["total_bold_chars"]
+            merged[-1]["total_nonbold_chars"] += line["total_nonbold_chars"]
+            # 判断最终粗体
+            if merged[-1]["total_bold_chars"] > merged[-1]["total_nonbold_chars"]:
+                merged[-1]["font_bold"] = True
+            else:
+                merged[-1]["font_bold"] = False
+            # 合并所有字体名称
+            merged[-1]["font_names"].extend(line["font_names"])
+            merged[-1]["font_names"] = list(set(merged[-1]["font_names"]))
+            continue
+
         else:
             # print("[merge_lines_debug] -> 不符合任何合并条件，直接append")
             merged.append(line)
