@@ -1,3 +1,6 @@
+
+
+
 English | [简体中文](/README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JA.md) | [한국어](README_KO.md)
 # PolyglotPDF
 
@@ -17,7 +20,7 @@ English | [简体中文](/README_CN.md) | [繁體中文](README_TW.md) | [日本
 
 In addition, consider adding arxiv search function and rendering arxiv papers after latex translation.
 
-### Pasges show
+### Pages show
 <div style="display: flex; margin-bottom: 20px;">
     <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page1.png?raw=true" width="40%" height="20%" style="margin-right: 20px;">
     <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page2.jpeg?raw=true" width="40%" height="20%">
@@ -44,6 +47,7 @@ Apply through Alibaba Cloud platform:
 ## Overview
 PolyglotPDF is an advanced PDF processing tool that employs specialized techniques for ultra-fast text, table, and formula recognition in PDF documents, typically completing processing within 1 second. It features OCR capabilities and layout-preserving translation, with full document translations usually completed within 10 seconds (speed may vary depending on the translation API provider).
 
+
 ## Features
 - **Ultra-Fast Recognition**: Processes text, tables, and formulas in PDFs within ~1 second
 - **Layout-Preserving Translation**: Maintains original document formatting while translating content
@@ -55,7 +59,10 @@ PolyglotPDF is an advanced PDF processing tool that employs specialized techniqu
 - **Enhanced OCR Capabilities**: Improved accuracy in text recognition and processing
 - **Support for offline translation**: Use smaller translation model
 
-## Installation and Setup
+## Installation and Usage
+
+<details>
+  <summary>Standard Installation</summary>
 
 1. Clone the repository:
 ```bash
@@ -76,6 +83,63 @@ python app.py
 
 5. Access the web interface:
 Open your browser and navigate to `http://127.0.0.1:8000`
+</details>
+
+<details>
+  <summary>Docker Installation</summary>
+
+### Quick Start
+
+Use the following commands to pull and run the PolyglotPDF Docker image:
+
+```bash
+# Pull image
+docker pull 2207397265/polyglotpdf:latest
+
+# Run container
+docker run -d -p 12226:12226 --name polyglotpdf 2207397265/polyglotpdf:latest
+```
+
+### Access the Application
+
+After the container starts, open in your browser:
+```
+http://localhost:12226
+```
+
+### Using Docker Compose
+
+Create a `docker-compose.yml` file:
+
+```yaml
+version: '3'
+services:
+  polyglotpdf:
+    image: 2207397265/polyglotpdf:latest
+    ports:
+      - "12226:12226"
+    restart: unless-stopped
+```
+
+Then run:
+
+```bash
+docker-compose up -d
+```
+
+### Common Docker Commands
+
+```bash
+# Stop container
+docker stop polyglotpdf
+
+# Restart container
+docker restart polyglotpdf
+
+# View logs
+docker logs polyglotpdf
+```
+</details>
 
 ## Requirements
 - Python 3.8+
@@ -196,6 +260,4 @@ Related questions answered and discussed：
 
  QQ group:
  1031477425
-
-
 
