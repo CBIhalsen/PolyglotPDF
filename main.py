@@ -58,7 +58,6 @@ class main_function:
         """
 
         self.pdf_path = pdf_path
-        self.pdf_path = pdf_path
         self.full_path = os.path.join(APP_DATA_DIR, 'static', 'original', pdf_path)
         self.doc = fitz.open(self.full_path)
 
@@ -200,7 +199,7 @@ class main_function:
         print('翻译共耗时',end_time - self.t)
         merged_output_path = os.path.join(APP_DATA_DIR, 'static', 'merged_pdf', f"{pdf_name}_{self.original_language}_{self.target_language}.pdf")
 
-        merge_pdf.merge_pdfs_horizontally(pdf1_path=self.pdf_path,pdf2_path=target_path,output_path=merged_output_path)
+        merge_pdf.merge_pdfs_horizontally(pdf1_path=self.full_path,pdf2_path=target_path,output_path=merged_output_path)
 
     def start(self, image, pag_num):
         """
@@ -464,4 +463,4 @@ class main_function:
 
 if __name__ == '__main__':
 
-    main_function(original_language='auto', target_language='zh', pdf_path='zh1.pdf').main()
+    main_function(original_language='auto', target_language='zh', pdf_path='zh1.pdf',en=420,bn=430).main()
