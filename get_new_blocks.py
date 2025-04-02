@@ -449,7 +449,7 @@ def is_math(font_info_list, text_len, text, font_size):
     text_length_nospaces = len(text.replace(" ", ""))
 
     # 若行整体文本长度很短，且字体集合与“数学字体”有交集，则直接视为 math
-    if text_length_nospaces < font_size * 3:
+    if text_length_nospaces < font_size * 3.3:
         font_set = set(font_info_list)
         if font_set & MATH_FONTS_SET:
             # print('math,', text)
