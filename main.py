@@ -68,7 +68,6 @@ class main_function:
         self.translation = translation
         self.translation_type = translation_type
         self.use_mupdf = use_mupdf
-        self.line_model = line_model
         self.bn = bn
         self.en = en
 
@@ -216,6 +215,22 @@ class main_function:
 
         if self.use_mupdf and image is None:
             blocks = new_blocks.get_new_blocks(page)
+            # 如果获取到的 blocks 为空，则进行相应处理
+            if not blocks:
+                # 例如，这里追加一个空条目并返回，也可根据自身需求改为其它处理方式
+                self.pages_data[pag_num].append([
+                    "",  # 空文本（或可填写提示性文本）
+                    (0, 0, 0, 0),  # 简单传入空 bbox
+                    None,  # 译文占位
+                    0,  # angle
+                    "000000",  # 颜色占位
+                    0,  # text_indent
+                    False,  # text_bold
+                    0  # text_size
+                ])
+                return
+
+
             for block in blocks:
                 text_type = block[2]  # 类型
                 if text_type == 'math':
@@ -449,4 +464,4 @@ class main_function:
 
 if __name__ == '__main__':
 
-    main_function(original_language='auto', target_language='zh', pdf_path='g2.pdf').main()
+    main_function(original_language='auto', target_language='zh', pdf_path='zh1.pdf').main()
