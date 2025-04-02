@@ -430,7 +430,7 @@ class main_function:
 
                 # 使用绝对路径，确保路径分隔符正确
                 font_path = font_path.replace('\\', '/')
-                print(rect,translated_text,angle)
+                # print(rect,translated_text,angle)
 
                 page.insert_htmlbox(
                     rect,
