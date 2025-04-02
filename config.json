@@ -14,11 +14,11 @@
       "auth_key": ""
     },
     "deepseek": {
-      "auth_key": "c28b0b2d-1b2b-4801-9192-320e96734ba4",
+      "auth_key": "",
       "model_name": "ep-20250218224909-gps4n"
     },
     "openai": {
-      "auth_key": "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",
+      "auth_key": "",
       "model_name": "gpt-4o-mini"
     },
     "youdao": {
