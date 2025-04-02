@@ -172,7 +172,7 @@ try {
         menuButton.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            showMenu(e, article.index, e.currentTarget);
+            showMenu(e, article, e.currentTarget);
         });
     });
 } catch (error) {
@@ -206,13 +206,18 @@ function showToast(message) {
 
 
 // 显示菜单函数
-function showMenu(event, articleId) {
+function showMenu(event, article) {
     const menu = document.createElement('div');
+    articleId = article.index
+    article_name= article.name
+    article_tl = article.target_language
+    article_ol = article.original_language
     console.log(2,articleId)
     menu.className = 'article-menu';
     menu.innerHTML = `
         <div class="menu-item" onclick="editArticle(${articleId})">Edit</div>
         <div class="menu-item" onclick="deleteArticle(${articleId})">Delete</div>
+       <div class="menu-item" onclick="open_bilingual(${articleId}, '${article_name}', '${article_tl}', '${article_ol}')">Bilingual PDF</div>
     `;
 
     // 定位菜单
@@ -231,6 +236,11 @@ function showMenu(event, articleId) {
     });
 }
 
+
+function open_bilingual(articleId,article_name,article_tl,article_ol) {
+    const url = `/pdfviewer2.html?name=${encodeURIComponent(article_name)}&target_language=${encodeURIComponent(article_tl)}&index=${encodeURIComponent(articleId)}&original_language=${encodeURIComponent(article_ol)}`;
+    window.open(url, '_blank');
+}
 
 
 // Toast提示函数

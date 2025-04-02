@@ -58,11 +58,6 @@ en: {
         '        </li>\n' +
         '        <li>The translation feature is enabled by default</li>\n' +
         '        <li>After changing the translation model, please enter the corresponding model name and key in the translation model API options</li>\n' +
-        '        <li>\n' +
-        '            Line_demo: <a href="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo.pdf" target="_blank">Line-model-demo.pdf</a>\n' +
-        '            <br>\n' +
-        '            Line_zh: <a href="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo_zh.pdf" target="_blank">Line-model-demo_zh.pdf</a>\n' +
-        '        </li>\n' +
         '    </ul>'
 
 },
@@ -114,7 +109,8 @@ en: {
     "44": "删除",
     "45": "思维导图",
     "46": "摘要",
-    "47": "注意:\n\n<ul>\n<li>OCR 和 Line 模式默认禁用\n  <ul> PPC（每次调用的页面数）\n    <li>OCR 用于扫描基于图像的 PDF</li>\n    <li>Line 模式用于翻译内容稀疏的 PDF</li>\n  </ul>\n</li>\n<li>翻译功能默认启用</li>\n<li>更换翻译模型后，请在翻译模型 API 选项中输入对应的模型名称和密钥</li>\n<li>\n  Line_demo: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo.pdf\" target=\"_blank\">Line-model-demo.pdf</a>\n  <br>\n  Line_zh: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo_zh.pdf\" target=\"_blank\">Line-model-demo_zh.pdf</a>\n</li>\n</ul>"
+    "47": "注意:\n\n<ul>\n<li>OCR 和 Line 模式默认禁用\n  <ul> PPC（每次调用的页面数）\n    <li>OCR 用于扫描基于图像的 PDF</li>\n   " +
+        "\n</ul>"
 
   },
   "es": {

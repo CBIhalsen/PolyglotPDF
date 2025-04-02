@@ -1,18 +1,51 @@
-
-
 import time
 import os
 import Deepl_Translation as dt
 import YouDao_translation as yt
 import LLMS_translation as lt
 import asyncio
+from functools import wraps
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
-# #
-# Get the encoder of a specific model, assume gpt3.5, tiktoken is extremely fast,
-# and the error of this statistical token method is small and can be ignored
 
+def retry_on_error(max_retries=2, delay=1):
+    def decorator(func):
+        @wraps(func)
+        def wrapper_sync(*args, **kwargs):
+            retries = 0
+            while retries <= max_retries:
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    retries += 1
+                    if retries <= max_retries:
+                        print(f"Error occurred: {str(e)}")
+                        print(f"Retrying... (Attempt {retries} of {max_retries})")
+                        time.sleep(delay)
+                    else:
+                        print(f"Max retries reached. Skipping... Final error: {str(e)}")
+                        return None
+            return None
+
+        async def wrapper_async(*args, **kwargs):
+            retries = 0
+            while retries <= max_retries:
+                try:
+                    return await func(*args, **kwargs)
+                except Exception as e:
+                    retries += 1
+                    if retries <= max_retries:
+                        print(f"Error occurred: {str(e)}")
+                        print(f"Retrying... (Attempt {retries} of {max_retries})")
+                        await asyncio.sleep(delay)
+                    else:
+                        print(f"Max retries reached. Skipping... Final error: {str(e)}")
+                        return None
+            return None
+
+        return wrapper_async if asyncio.iscoroutinefunction(func) else wrapper_sync
+    return decorator
 
 class Online_translation:
     def __init__(self, original_language, target_language, translation_type, texts_to_process=[]):
@@ -23,48 +56,44 @@ class Online_translation:
         self.translation_type = translation_type
 
     def run_async(self, coro):
-        # 往往只要 run_until_complete()，不手动 close() 即可
         return loop.run_until_complete(coro)
 
     def translation(self):
-        print('翻译api',self.translation_type)
+        print('翻译api', self.translation_type)
         if self.translation_type == 'deepl':
             translated_list = self.deepl_translation()
         elif self.translation_type == 'youdao':
             translated_list = self.youdao_translation()
         elif self.translation_type == 'openai':
-            # 使用同步包装器运行异步函数
             translated_list = self.run_async(self.openai_translation())
         elif self.translation_type == 'deepseek':
-            # 使用同步包装器运行异步函数
             translated_list = self.run_async(self.deepseek_translation())
         elif self.translation_type == 'Doubao':
-            # 使用同步包装器运行异步函数
             translated_list = self.run_async(self.Doubao_translation())
         elif self.translation_type == 'Qwen':
-            # 使用同步包装器运行异步函数
             translated_list = self.run_async(self.Qwen_translation())
 
         return translated_list
 
-
-        return translated_list
-
+    @retry_on_error()
     def deepl_translation(self):
-
-        translated_texts = dt.translate(texts=self.original_text,original_lang=self.original_lang,target_lang=self.target_language)
-
+        translated_texts = dt.translate(
+            texts=self.original_text,
+            original_lang=self.original_lang,
+            target_lang=self.target_language
+        )
         return translated_texts
 
-
+    @retry_on_error()
     def youdao_translation(self):
-
-        translated_texts = yt.translate(texts=self.original_text,original_lang=self.original_lang,target_lang=self.target_language)
-
+        translated_texts = yt.translate(
+            texts=self.original_text,
+            original_lang=self.original_lang,
+            target_lang=self.target_language
+        )
         return translated_texts
 
-
-
+    @retry_on_error()
     async def openai_translation(self):
         translator = lt.Openai_translation()
         translated_texts = await translator.translate(
@@ -74,6 +103,7 @@ class Online_translation:
         )
         return translated_texts
 
+    @retry_on_error()
     async def deepseek_translation(self):
         translator = lt.Deepseek_translation()
         translated_texts = await translator.translate(
@@ -82,6 +112,8 @@ class Online_translation:
             target_lang=self.target_language
         )
         return translated_texts
+
+    @retry_on_error()
     async def Doubao_translation(self):
         translator = lt.Doubao_translation()
         translated_texts = await translator.translate(
@@ -90,6 +122,8 @@ class Online_translation:
             target_lang=self.target_language
         )
         return translated_texts
+
+    @retry_on_error()
     async def Qwen_translation(self):
         translator = lt.Qwen_translation()
         translated_texts = await translator.translate(

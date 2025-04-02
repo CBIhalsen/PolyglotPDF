@@ -1,17 +1,19 @@
-import math
+
 import All_Translation as at
 from PIL import Image
 import pytesseract
 import time
 import fitz
 import os
-import unicodedata
-import download_model
+
 import load_config
-import re
+
 from datetime import datetime
 import pdf_thumbnail
 from load_config import APP_DATA_DIR
+import get_new_blocks as new_blocks
+import Subset_Font
+import merge_pdf
 config = load_config.load_config()
 translation_type = config['default_services']['Translation_api']
 translation = config['default_services']['Enable_translation']
@@ -19,176 +21,33 @@ use_mupdf = not config['default_services']['ocr_model']
 
 PPC = config['PPC']
 print('ppc',PPC)
-line_model = config['default_services']['line_model']
-print('line',line_model)
+
 # print(use_mupdf,'mupdf值')
 # print('当前',config['count'])
 
 
+def decimal_to_hex_color(decimal_color):
+    if decimal_color == 0:
+        return '#000000'  # 黑色
 
-def get_font_by_language(target_language):
-    font_mapping = {
-        'zh': "'Microsoft YaHei', 'SimSun'",  # 中文
-        'en': "'Times New Roman', Arial",      # 英文
-        'ja': "'MS Mincho', 'Yu Mincho'",     # 日文
-        'ko': "'Malgun Gothic'",              # 韩文
-    }
-    # 如果找不到对应语言，返回默认字体
-    return font_mapping.get(target_language, "'Times New Roman', Arial")
+    # 将十进制数转换为十六进制，并移除'0x'前缀
+    hex_color = hex(decimal_color)[2:]
 
+    # 确保是6位十六进制数
+    hex_color = hex_color.zfill(6)
+
+    # 添加'#'前缀
+    return f'#{hex_color}'
 
 def is_math(text, page_num,font_info):
-    """
-    判断文本是否为非文本（如数学公式或者长度小于4的文本）
-    """
-
-
-    # 判断文本长度
-    # print('文本为:',text)
-    text_len = len(text)
-    if text_len < 4:
-        return True
-    math_fonts = [
-        # Computer Modern Math
-        'CMMI', 'CMSY', 'CMEX',
-        'CMMI5', 'CMMI6', 'CMMI7', 'CMMI8', 'CMMI9', 'CMMI10',
-        'CMSY5', 'CMSY6', 'CMSY7', 'CMSY8', 'CMSY9', 'CMSY10',
-
-        # AMS Math
-        'MSAM', 'MSBM', 'EUFM', 'EUSM',
-
-        # Times/Palatino Math
-        'TXMI', 'TXSY', 'PXMI', 'PXSY',
-
-        # Modern Math
-        'CambriaMath', 'AsanaMath', 'STIXMath', 'XitsMath',
-        'Latin Modern Math', 'Neo Euler'
-    ]
-    # 检查文本长度是否小于50且字体是否在数学字体列表中
-    text_len_non_sp = len(text.replace(" ", ""))
-
-    if text_len < 70 and any(math_font in font_info for math_font in math_fonts):
-        # print(text,'小于50且字体')
-        return True
-
-    if 15 < text_len_non_sp <100:
-        # 使用正则表达式找出所有5个或更多任意字符连续组成的单词
-        long_words = re.findall(r'\S{5,}', text)
-        if len(long_words) < 2:
-            # print(text_len)
-            # print(text, '15 < text_len <100')
-            return True
-
-
-    # 分行处理
-    lines = text.split('\n')
-    len_lines = len([line for line in lines if line.strip()])
-
-    # 找到长度最小和最大的行
-    min_line_len = min((len(line) for line in lines if line.strip()), default=text_len)
-    max_line_len = max((len(line) for line in lines), default=text_len)
-
-    # 计算空格比例
-    newline_count = text.count('\n')
-    total_spaces = text.count(' ') + (newline_count * 5)
-    space_ratio = total_spaces / text_len if text_len > 0 else 0
-
-    # 定义数学符号集合
-    math_symbols = "=∑θ∫∂√±ΣΠfδλσε∋∈µ→()|−ˆ,.+*/[]{}^_<>~#%&@!?;:'\"\\-"
-
-    # 检查是否存在完整单词(5个或更多非数学符号的连续字符)
-    text_no_spaces = text.replace(" ", "")
-
-    # 创建一个正则表达式，匹配5个或更多连续的非数学符号字符
-    pattern = r'[^' + re.escape(math_symbols) + r']{5,}'
-    has_complete_word = bool(re.search(pattern, text_no_spaces))
-
-    # 如果没有完整单词，认为是非文本
-    if not has_complete_word:
-        # print(text, '没有完整单词')
-        return True
-
-
-    # 计算数字占比
-    digit_count = sum(c.isdigit() for c in text)
-    digit_ratio = digit_count / text_len if text_len > 0 else 0
-
-    # 如果数字占比超过30%，返回True
-    if digit_ratio > 0.3:
-        # print(text, '数字占比超过30%')
-        return True
-
-
-
-
-
-    # 检查数学公式
-    math_symbols = set("=∑θ∫∂√±ΣΠδλσε∋∈µ→()|−ˆ,...")
-    # 数学公式判断条件2:包含至少2个数学符号且总文本较短
-    if sum(1 for sym in math_symbols if sym in text) >= 2 and len(text_no_spaces) < 25:
-        # found_symbols = [sym for sym in text if sym in math_symbols]
-        # print(f"在文本中找到的数学符号: {found_symbols}")
-        # print(sum(1 for sym in math_symbols if sym in text))
-        # print(text, '条件2')
-        return True
-
-    # 数学公式判断条件1:包含至少2个数学符号且行短且行数少且最大行长度小
-    if sum(1 for sym in math_symbols if sym in text) >= 2 and min_line_len < 10 and len_lines < 5 and max_line_len < 35:
-        # print(text, '条件1')
-        return True
-
-    # 数学公式判断条件3:包含至少2个数学符号且空格比例高
-    if sum(1 for sym in math_symbols if sym in text) >= 2 and space_ratio > 0.5:
-        # print(text, '条件3')
-        return True
-    # 数学公式判断条件4:包含至少1个数学符号且空格数高
-    if sum(1 for sym in math_symbols if sym in text) >= 1 and total_spaces > 3 and text_len<20:
-        # print(text, '条件4')
-        return True
-
     return False
 
 def line_non_text(text):
-    """
-    判断文本是否由纯数字和所有(Unicode)标点符号组成
-    参数：
-        text: 待检查的文本
-    返回：
-        bool: 如果文本由纯数字和标点符号组成返回True，否则返回False
-    """
-    text = text.strip()
-    if not text:
-        return False
-    for ch in text:
-        # 使用 unicodedata.category() 获取字符在 Unicode 标准中的分类
-        # 'Nd' 代表十进制数字 (Number, Decimal digit)
-        # 'P' 代表各种标点 (Punctuation)，如 Po, Ps, Pe, 等
-        cat = unicodedata.category(ch)
-        if not (cat == 'Nd' or cat.startswith('P')):
-            return False
     return True
 
 
 def is_non_text(text):
-    """
-    判断是否为参考文献格式
-    参数：
-    text: 待检查的文本
-    返回：
-    bool: 如果是参考文献格式返回True，否则返回False
-    """
-    # 去除开头的空白字符
-    text = text.lstrip()
-
-    # 检查是否以[数字]开头
-    pattern = r'^\[\d+\]'
-
-    if re.match(pattern, text):
-        return True
-
     return False
-font_collection = []
-
 
 class main_function:
     def __init__(self, pdf_path,
@@ -286,11 +145,47 @@ class main_function:
                 translation_type=self.translation_type,
                 batch_size=PPC
             )
+        # 6. 子集化字体
+        bold_text = ""
+        normal_text = ""
 
-        # 6. 将翻译结果统一写入 PDF（覆盖+插入译文）
+        # 遍历所有页码
+        for page in self.pages_data:
+            for item in page:
+                text = item[0]  # 原始文本
+                translate_text = item[2]  # 翻译文本
+                is_bold = item[6]  # text_bold值
+
+                if is_bold:
+                    bold_text += translate_text + " "  # 在每个文本之间添加空格
+                else:
+                    normal_text += translate_text + " "
+
+        # 去除末尾多余的空格
+        bold_text = bold_text.strip()
+        normal_text = normal_text.strip()
+
+        # 打印结果
+        if bold_text:  # 如果粗体文本不为空
+            in_font_path = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}_bold.ttf")
+            out_font_path = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}_bold_subset.ttf")
+            self.subset_font(in_font_path=in_font_path, out_font_path=out_font_path, text=bold_text)
+
+            in_font_path2 = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}.ttf")
+            out_font_path2 = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}_subset.ttf")
+            self.subset_font(in_font_path=in_font_path2, out_font_path=out_font_path2, text=normal_text)
+
+        else:
+            in_font_path = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}.ttf")
+            out_font_path = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}_subset.ttf")
+            self.subset_font(in_font_path=in_font_path, out_font_path=out_font_path, text=normal_text)
+
+
+
+        # 7. 将翻译结果统一写入 PDF（覆盖+插入译文）
         self.apply_translations_to_pdf()
 
-        # 7. 保存 PDF、更新状态
+        # 8. 保存 PDF、更新状态
         pdf_name, _ = os.path.splitext(self.pdf_path)
         target_path = os.path.join(APP_DATA_DIR, 'static', 'target', f"{pdf_name}_{self.target_language}.pdf")
         self.doc.ez_save(
@@ -303,7 +198,10 @@ class main_function:
 
         # 8. 打印耗时
         end_time = time.time()
-        print(end_time - self.t)
+        print('翻译共耗时',end_time - self.t)
+        merged_output_path = os.path.join(APP_DATA_DIR, 'static', 'merged_pdf', f"{pdf_name}_{self.original_language}_{self.target_language}.pdf")
+
+        merge_pdf.merge_pdfs_horizontally(pdf1_path=self.pdf_path,pdf2_path=target_path,output_path=merged_output_path)
 
     def start(self, image, pag_num):
         """
@@ -316,73 +214,25 @@ class main_function:
 
         page = self.doc.load_page(pag_num)
 
-        if self.line_model and self.use_mupdf:
-            def snap_angle_func(angle):
-                """
-                将任意角度自动映射到 0、90、180、270 四个值之一。
-                """
-                # 将角度映射到 [0, 360) 区间
-                angle = abs(angle) % 360
-                # 选取最接近的标准角度
-                possible_angles = [0, 90, 180, 270]
-                return min(possible_angles, key=lambda x: abs(x - angle))
-
-            blocks = page.get_text("dict")["blocks"]
+        if self.use_mupdf and image is None:
+            blocks = new_blocks.get_new_blocks(page)
             for block in blocks:
-                if block.get("type") == 0:  # 文本块
-                    font_info = None
-                    # 遍历每一行
-                    for line in block["lines"]:
-                        # 1) 拼接文本（减少反复 += 操作）
-                        span_texts = [span["text"] for span in line["spans"] if "text" in span]
-                        line_text = "".join(span_texts).strip()
+                text_type = block[2]  # 类型
+                if text_type == 'math':
+                    continue
+                else:
+                    text = block[0]  # 文本内容
+                    text_bbox = block[1]  # 边界框坐标
+                    text_angle = block[3]
+                    text_color = block[4]
+                    text_indent = block[5]
+                    text_bold = block[6]
+                    text_size = block[7]
+                    # 转换颜色值
+                    html_color = decimal_to_hex_color(text_color)
+                    self.pages_data[pag_num].append(
+                        [text, tuple(text_bbox), None, text_angle,html_color,text_indent,text_bold,text_size])
 
-                        # 2) 如果行文本为空或仅含数字标点，就跳过
-                        if not line_text or line_non_text(line_text):
-                            continue
-
-                        # 3) 此时才计算旋转角度，避免空行浪费
-                        direction = line.get("dir", [1.0, 0.0])
-                        raw_angle = math.degrees(math.atan2(direction[1], direction[0]))
-                        angle = snap_angle_func(raw_angle)
-
-                        # 4) 只在需要时提取字体信息
-                        if not font_info:
-                            for span in line["spans"]:
-                                if "font" in span:
-                                    font_info = span["font"]
-                                    break
-                        if font_info and font_info not in font_collection:
-                            font_collection.append(font_info)
-
-                        line_bbox = line.get("bbox")
-                        # 5) 加入提取结果
-                        self.pages_data[pag_num].append([
-                            line_text,  # 原文
-                            tuple(line_bbox),  # BBox
-                            None,  # 预留翻译文本
-                            angle  # 行角度
-                        ])
-
-
-        # 如果用 PyMuPDF 提取文字
-        elif self.use_mupdf and image is None:
-            blocks = page.get_text("dict")["blocks"]
-            for block in blocks:
-                if block.get("type") == 0:  # 文本块
-                    bbox = block["bbox"]
-                    text = ""
-                    font_info = None
-                    for line in block["lines"]:
-                        for span in line["spans"]:
-                            span_text = span["text"].strip()
-                            if span_text:
-                                text += span_text + " "
-                                if not font_info and "font" in span:
-                                    font_info = span["font"]
-                    text = text.strip()
-                    if text and not is_math(text, pag_num, font_info) and not is_non_text(text):
-                        self.pages_data[pag_num].append([text, tuple(bbox),None])
 
         else:
             # OCR 提取文字
@@ -510,15 +360,8 @@ class main_function:
                     translation_type=translation_type,
                     texts_to_process=batch_texts
                 ).translation()
-            elif self.translation and not use_mupdf:
-                # 离线翻译
-                translation_list = at.Offline_translation(
-                    original_language=original_language,
-                    target_language=target_language,
-                    texts_to_process=batch_texts
-                ).translation()
-            else:
 
+            else:
                 translation_list = batch_texts
 
 
@@ -532,7 +375,7 @@ class main_function:
                     idx_t += 1
 
             start_idx += batch_size
-            print('当前进度', end_idx, "/", total_pages)
+            print('当前进度',end_idx,"/",total_pages)
 
     def apply_translations_to_pdf(self):
         """
@@ -542,16 +385,14 @@ class main_function:
             page = self.doc.load_page(page_index)
 
             for block in blocks:
-                original_text = block[0]
                 coords = block[1]  # (x0, y0, x1, y1)
                 # 如果第三个元素是译文，则用之，否则用原文
-                translated_text = block[2] if len(block) >= 3 else original_text
-
-                if self.line_model:
-                    angle = block[3] if len(block) > 3 else 0
-
-                else:
-                    angle = 0
+                translated_text = block[2]
+                html_color = block[4]
+                text_indent = block[5]
+                text_bold = block[6]
+                angle = block[3]
+                text_size = float(block[7]) + 3
 
                 rect = fitz.Rect(*coords)
 
@@ -569,27 +410,42 @@ class main_function:
                     except Exception as e2:
                         print(f"创建白色画布时发生错误: {e2}")
                     print(f"应用重编辑时发生错误: {e}")
+                if text_bold:
+                    # 字体族名称应该简单且不包含路径
+                    font_family = f"{self.target_language}_bold_font"
+                    font_path = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}_bold_subset.ttf")
+                else:
+                    font_family = f"{self.target_language}_font"
+                    font_path = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}_subset.ttf")
 
+                # 确保字体文件存在
+                if not os.path.exists(font_path):
+                    print(f"警告：字体文件不存在: {font_path}")
 
+                # 使用绝对路径，确保路径分隔符正确
+                font_path = font_path.replace('\\', '/')
 
                 page.insert_htmlbox(
                     rect,
                     translated_text,
-                    css="""
-                * {
-                    font-family: "Microsoft YaHei";
-                    /* 这行可把内容改成粗体, 可写 "bold" 或数字 (100–900) */
-                    font-weight: 100;
-                    /* 这里可以使用标准 CSS 颜色写法, 例如 #FF0000、rgb() 等 */
-                    color:  #333333;
-                }
-                """,
+                    css=f"""
+                    @font-face {{
+                        font-family: "{font_family}";
+                        src: url("{font_path}");
+                    }}
+                    * {{
+                        font-family: "{font_family}";
+                        color: {html_color};
+                        text-indent: {text_indent}pt;  
+                        font-size: {text_size}pt; 
+                    }}
+                    """,
                     rotate=angle
-
                 )
 
 
-        # 完成后不会立即保存，需要在 main(...) 里 self.doc.ez_save(...)
+    def subset_font(self, in_font_path, out_font_path,text):
+        Subset_Font.subset_font(in_font_path=in_font_path,out_font_path=out_font_path,text=text,language=self.target_language)
 
 if __name__ == '__main__':
 

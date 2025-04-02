@@ -41,11 +41,6 @@ document.getElementById('count_article').textContent += data.count;
             options: ['true', 'false'],
             value: data.default_services.ocr_model
         },
-        'line_model': {
-            type: 'select',
-            options: ['true', 'false'],
-            value: data.default_services.line_model
-        },
         'Enable_translation': {
             type: 'select',
             options: ['true', 'false'],
@@ -76,7 +71,7 @@ Object.entries(defaultConfig).forEach(([key, config]) => {
             // 直接比较字符串值
             optionElement.selected = (option === config.value);
             console.log(`Translation API option: ${option}, config value: ${config.value}, selected: ${optionElement.selected}`);
-        }  else if (key === 'ocr_model' || key === 'Enable_translation' || key === 'line_model') {
+        }  else if (key === 'ocr_model' || key === 'Enable_translation' ) {
                 const optionBool = option.toLowerCase() === 'true';
                 optionElement.selected = (optionBool === config.value);
             }
@@ -253,7 +248,7 @@ function collectConfig() {
             let value = group.querySelector('select').value;
 
             // 对特定key进行布尔值转换
-            if(key === 'ocr_model' || key === 'Enable_translation' || key === 'line_model') {
+            if(key === 'ocr_model' || key === 'Enable_translation' ) {
                 value = value === 'true' ? true : false;
             }
 

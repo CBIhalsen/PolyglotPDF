@@ -1,19 +1,42 @@
+# 忽略 Git 相关文件
 .git
 .gitignore
-__pycache__
+
+# 忽略 Python 缓存和编译文件
+__pycache__/
+**/__pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# 忽略虚拟环境相关文件夹
 .Python
-env
+env/
+venv/
+
+# 忽略 pip 日志
 pip-log.txt
 pip-delete-this-directory.txt
-.tox
+
+# 忽略测试和覆盖率相关文件
+.tox/
 .coverage
 .coverage.*
-.cache
+.cache/
 nosetests.xml
 coverage.xml
 *.cover
+
+# 忽略日志文件
 *.log
-.pytest_cache
+logs/*.log
+
+# 忽略 pytest 缓存
+.pytest_cache/
+
+# 忽略项目根目录下的 lib 文件夹
+lib/
+
+# 忽略 IDE 配置文件
+.idea/
+.vscode/

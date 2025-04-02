@@ -1,3 +1,5 @@
+
+
 version: '3'
 services:
   polyglotpdf:
@@ -8,3 +10,4 @@ services:
       - ./config.json:/app/config.json
     environment:
       - PORT=12226
+

@@ -1,0 +1,68 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Single PDF Viewer</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #f0f0f0;
+    }
+    /* 外层容器全屏 */
+    .pdf-container {
+      width: 100%;
+      height: 100%;
+    }
+    /* PDF viewer 全屏 */
+    .pdf-viewer {
+      width: 100%;
+      height: 100%;
+      /* 如果不需要边框，就直接去掉这两行 */
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #fff;
+    }
+    /* embed 元素占满父级容器 */
+    embed {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="pdf-container">
+    <div class="pdf-viewer">
+      <!-- 此处 PDF 的 src 将通过脚本根据 URL 参数设置 -->
+      <embed id="pdf_file" src="" type="application/pdf" />
+    </div>
+  </div>
+  <script>
+    // 解析 URL 参数
+    const urlParams = new URLSearchParams(window.location.search);
+    let name = urlParams.get('name');
+    if (name && name.endsWith('.pdf')) {
+      // 去除文件名末尾的 .pdf
+      name = name.slice(0, -4);
+    }
+    const original_language = urlParams.get('original_language');
+    const target_language = urlParams.get('target_language');
+
+    // 测试用：在控制台打印文件名
+    console.log('要加载的 PDF 文件名：', name);
+
+    // 获取 embed 元素并设置 PDF 文件路径
+    const embedEl = document.getElementById('pdf_file');
+    if (name) {
+      // 根据实际文件路径修改
+      embedEl.src = `./static/merged_pdf/${name}_${original_language}_${target_language}.pdf`;
+    }
+  </script>
+</body>
+</html>
+

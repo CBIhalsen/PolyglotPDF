@@ -101,7 +101,6 @@ def serve_static(filename):
 def read_index():
     return send_file(current_dir / "index.html")
 
-
 @app.route('/pdfviewer.html')
 def read_pdfviewer():
     # 获取 URL 参数
@@ -111,6 +110,16 @@ def read_pdfviewer():
     # 现在你可以使用这些参数了
     load_config.update_file_status(index=int(index), read="1")
     return send_file(current_dir / "pdfviewer.html")
+
+@app.route('/pdfviewer2.html')
+def read_pdfviewer2():
+    # 获取 URL 参数
+    index = request.args.get('index')
+    # print(index,'打开')
+
+    # 现在你可以使用这些参数了
+    load_config.update_file_status(index=int(index), read="1")
+    return send_file(current_dir / "pdfviewer2.html")
 
 
 @app.route('/upload/', methods=['POST'])

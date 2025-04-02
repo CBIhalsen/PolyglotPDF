@@ -10,10 +10,6 @@
 ## 데모
 <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/demo.gif?raw=true" width="80%" height="40%">
 
-## 속도 비교
-
-<img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Figure_1.png?raw=true" width="80%" height="40%">
-
 ### [🎬 전체 영상 보기](https://github.com/CBIhalsen/PolyglotPDF/blob/main/demo.mp4)
 번역 API 선택지로 LLMs가 추가되었습니다. 권장 모델: Doubao, Qwen, deepseek v3, gpt4-o-mini입니다. 색상 공간 오류는 PDF 파일의 흰색 영역을 채우는 것으로 해결할 수 있습니다. 기존 text to text 번역 API는 삭제되었습니다.
 
@@ -57,117 +53,10 @@ PolyglotPDF는 특수 기술을 사용하여 PDF 문서 내의 텍스트, 표, �
 
 ## 설치 및 설정
 
-### 사용 방법 중 하나는 라이브러리를 설치하는 것입니다:
-
-```bash
-pip install EbookTranslator
-```
-
-기본 사용법:
-
-```bash
-EbookTranslator your_file.pdf
-```
-
-매개변수를 사용한 예제:
-
-```bash
-EbookTranslator your_file.pdf -o en -t zh -b 1 -e 10 -c /path/to/config.json -d 300
-```
-
-#### Python 코드에서 사용
-
-```python
-from EbookTranslator import main_function
-
-translator = main_function(
-    pdf_path="your_file.pdf",
-    original_language="en",
-    target_language="zh",
-    bn=1,
-    en=10,
-    config_path="/path/to/config.json",
-    DPI=300
-)
-translator.main()
-```
-
-## 매개변수 설명
-
-| 매개변수 | 명령줄 옵션 | 설명 | 기본값 |
-|-----------|---------------------|-------------|---------------|
-| `pdf_path` | 위치 인수 | PDF 파일 경로 | 필수 |
-| `original_language` | `-o, --original` | 원본 언어 | `auto` |
-| `target_language` | `-t, --target` | 대상 언어 | `zh` |
-| `bn` | `-b, --begin` | 시작 페이지 번호 | `1` |
-| `en` | `-e, --end` | 종료 페이지 번호 | 문서의 마지막 페이지 |
-| `config_path` | `-c, --config` | 구성 파일 경로 | 현재 작업 디렉토리의 `config.json` |
-| `DPI` | `-d, --dpi` | OCR 모드의 DPI | `72` |
-
-#### 구성 파일
-
-구성 파일은 JSON 형식으로, 기본적으로 현재 작업 디렉토리의 `config.json`에 저장됩니다. 파일이 없으면 프로그램은 내장된 기본 설정을 사용합니다.
-
-#### 구성 파일 예제
-
-```json
-{
-  "count": 4,
-  "PPC": 20,
-  "translation_services": {
-    "Doubao": {
-      "auth_key": "",
-      "model_name": ""
-    },
-    "Qwen": {
-      "auth_key": "",
-      "model_name": "qwen-plus"
-    },
-    "deepl": {
-      "auth_key": ""
-    },
-    "deepseek": {
-      "auth_key": "",
-      "model_name": "ep-20250218224909-gps4n"
-    },
-    "openai": {
-      "auth_key": "",
-      "model_name": "gpt-4o-mini"
-    },
-    "youdao": {
-      "app_key": "",
-      "app_secret": ""
-    }
-  },
-  "ocr_services": {
-    "tesseract": {
-      "path": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
-    }
-  },
-  "default_services": {
-    "ocr_model": false,
-    "line_model": false,
-    "Enable_translation": true,
-    "Translation_api": "openai"
-  }
-}
-```
-
-
-#### 출력
-
-번역된 PDF 파일은 `output_dir`에 지정된 디렉토리에 저장됩니다 (기본값은 현재 작업 디렉토리의 `target` 폴더).
-
-## 라이선스
-
-MIT
-
-## 친화적인 UI 인터페이스 사용 방법
-
 1. 저장소 클론:
 ```bash
 git clone https://github.com/CBIhalsen/Polyglotpdf.git
-cd Polyglotpdf
+cd polyglotpdf
 ```
 
 2. 의존성 패키지 설치:
@@ -183,7 +72,7 @@ python app.py
 ```
 
 5. 웹 인터페이스 접속:
-브라우저에서 `http://127.0.0.1:12226` 열기
+브라우저에서 `http://127.0.0.1:8000` 열기
 
 ## 환경 요구사항
 - Python 3.8+
