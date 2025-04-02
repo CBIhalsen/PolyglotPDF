@@ -439,35 +439,47 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
     return merged
 
 
-def is_math(font_info_list, text_len, text,font_size):
+def is_math(font_info_list, text_len, text, font_size):
     """
     判断文本是否为数学公式(或长度太短)，如果是，则排除(标记为 math)。
+    如果长度很短且几乎全为数字/标点/符号，则返回 True。
     """
 
-    # 若行整体长度 < 50，检查字体集合与数学字体集合是否有交集
+    # 用于去除空格计算长度
     text_length_nospaces = len(text.replace(" ", ""))
+
+    # 若行整体文本长度很短，且字体集合与“数学字体”有交集，则直接视为 math
     if text_length_nospaces < font_size * 3:
         font_set = set(font_info_list)
         if font_set & MATH_FONTS_SET:
-            # print('math,',text)
+            # print('math,', text)
             return True
 
-    # if text_len <2:
-    #     return True
-    # 如果长度很短，且全是数字/标点，这里原逻辑是将其视为数字类信息
-    # 但如果完全想区分“纯数字” vs “公式”，可自行调整。
-    if text_len < font_size:
-        text = text.strip()
-        for ch in text:
-            cat = unicodedata.category(ch)  # 'Nd' -> 数字； 'P' -> 标点
-            if not (cat == 'Nd' or cat.startswith('P')):
+    # 如果文字过短，就检查每个字符是否都是数字/标点/符号/空白
+    if text_len < 1.5 * font_size:
+        stripped_text = text.strip()
+        for ch in stripped_text:
+            cat = unicodedata.category(ch)
+            # 允许通过的情况：
+            # 1. 数字 (cat == 'Nd')
+            # 2. 标点 (cat.startswith('P'))
+            # 3. 符号 (cat.startswith('S'))，包括 Sm (数学符号)、So (其他符号)
+            # 4. 空格或其他空白符 (cat.startswith('Z'))
+            #    - 或者你可以直接用 ch.isspace() 来判断空格
+            if not (
+                cat == 'Nd'
+                or cat.startswith('P')
+                or cat.startswith('S')
+                or cat.startswith('Z')
+            ):
+                # 如果发现不属于上述几类，则判定为非“纯数字/标点/符号”
                 return False
-        # 如果走到这里，说明短文本几乎全是数字或标点，原逻辑中打印“纯数字”并返回 True
-        # print(text, '纯数字')
+
+        # 如果走到这里，说明所有字符都在我们的“允许”范围内
+        # print(stripped_text, '纯数字/标点/符号')
         return True
 
-
-
+    # 其它情况默认不视为 math
     return False
 
 
