@@ -75,6 +75,49 @@ python app.py
 5. 访问网页界面：
 在浏览器中打开 `http://127.0.0.1:8000`
 
+
+# Docker 使用说明
+
+## 快速启动
+
+使用以下命令拉取并运行 PolyglotPDF Docker 镜像：
+
+```bash
+# 拉取镜像
+docker pull 2207397265/polyglotpdf:latest
+
+# 运行容器
+docker run -d -p 12226:12226 --name polyglotpdf 2207397265/polyglotpdf:latest
+```
+
+## 访问应用
+
+容器启动后，在浏览器中打开：
+```
+http://localhost:12226
+```
+
+## 使用 Docker Compose
+
+创建 `docker-compose.yml` 文件：
+
+```yaml
+version: '3'
+services:
+  polyglotpdf:
+    image: 2207397265/polyglotpdf:latest
+    ports:
+      - "12226:12226"
+    restart: unless-stopped
+```
+
+然后运行：
+
+```bash
+docker-compose up -d
+```
+
+
 ## 环境要求
 - Python 3.8+
 - deepl==1.17.0

@@ -25,4 +25,4 @@ COPY . /app
 EXPOSE 12226
 
 # 8. 容器启动时，默认执行 Python 脚本
-CMD ["python", "All_Translation.py"]
+CMD ["python", "app.py"]
