@@ -1,10 +1,10 @@
 {
-  "count": 2,
+  "count": 3,
   "PPC": 20,
   "translation_services": {
     "Doubao": {
       "auth_key": "",
-      "model_name": "ep-20250218225515-k55kc"
+      "model_name": ""
     },
     "Qwen": {
       "auth_key": "",
@@ -18,12 +18,16 @@
       "model_name": "ep-20250218224909-gps4n"
     },
     "openai": {
-      "auth_key": "xx2",
+      "auth_key": "",
       "model_name": "gpt-4o-mini"
     },
     "youdao": {
       "app_key": "",
       "app_secret": ""
+    },
+    "Grok": {
+      "auth_key": "",
+      "model_name": "grok-2-latest"
     }
   },
   "ocr_services": {
@@ -33,7 +37,8 @@
   },
   "default_services": {
     "ocr_model": false,
+    
     "Enable_translation": true,
-    "Translation_api": "openai"
+    "Translation_api": "Grok"
   }
 }
