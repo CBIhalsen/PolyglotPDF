@@ -120,6 +120,18 @@ services:
 ```bash
 docker-compose up -d
 ```
+## 常用 Docker 命令
+
+```bash
+# 停止容器
+docker stop polyglotpdf
+
+# 重启容器
+docker restart polyglotpdf
+
+# 查看日志
+docker logs polyglotpdf
+```
 </details>
 
 
