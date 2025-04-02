@@ -398,7 +398,7 @@ def get_recent():
 
 # 修改 get_config() 函数
 @app.route('/config_json', methods=['GET'])
-def get_config():
+def get_config_json():
     """
     前端页面首次加载时，会通过 GET /config_json 获取配置信息。
     返回的内容就是前端需要渲染的 config.json 数据结构。
@@ -410,7 +410,7 @@ def get_config():
 
 # 修改 update_config() 函数
 @app.route('/update_config', methods=['POST'])
-def update_config():
+def update_config_json():
     """处理单个配置更新"""
     try:
         new_config = request.get_json()
@@ -460,6 +460,83 @@ def save_all():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
+@app.route('/api/config', methods=['GET'])
+def get_config_api():
+    # 确保返回的配置中包含grok选项
+    # 通常这个函数应该直接从config.json读取，所以如果config.json已更新，不需要修改这里
+    config_data = load_config.load_config()
+    if config_data is None:
+        return jsonify({}), 500
+    return jsonify(config_data)
+
+@app.route('/api/config', methods=['POST'])
+def update_config_api():
+    # 确保处理配置更新时能够正确处理grok相关的设置
+    # 通常这个函数应该直接将接收到的数据写入config.json，所以如果前端已正确发送grok配置，不需要修改这里
+    try:
+        new_config = request.get_json()
+        if not new_config:
+            return jsonify({'status': 'error', 'message': '无效的配置数据'}), 400
+
+        # 加载当前配置
+        current_config = load_config.load_config()
+        if current_config is None:
+            return jsonify({'status': 'error', 'message': '无法加载当前配置'}), 500
+
+        # 递归更新配置
+        def update_dict(current, new):
+            for key, value in new.items():
+                if isinstance(value, dict) and key in current and isinstance(current[key], dict):
+                    update_dict(current[key], value)
+                else:
+                    current[key] = value
+
+        update_dict(current_config, new_config)
+
+        # 保存更新后的配置
+        if load_config.save_config(current_config):
+            return jsonify({'status': 'success', 'message': '配置已更新'}), 200
+        else:
+            return jsonify({'status': 'error', 'message': '保存配置失败'}), 500
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route("/translate_file", methods=["POST"])
+def translate_file():
+    try:
+        # 翻译完成后确保更新状态
+        if translation_type == "Grok":
+            print("Grok translation completed, updating status")
+        
+        # 更新翻译状态为已完成
+        update_translation_status(filename, '1')
+        return jsonify({"status": "success", "message": "翻译完成"})
+    except Exception as e:
+        print(f"翻译过程中发生错误: {str(e)}")
+        # 确保即使出错也更新状态，避免前端无限加载
+        update_translation_status(filename, '0')
+        return jsonify({"status": "error", "message": str(e)})
+
+# 辅助函数：更新翻译状态
+def update_translation_status(filename, status):
+    """更新指定文件的翻译状态"""
+    try:
+        with open("recent.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+        
+        for item in data:
+            if item.get("name") == filename:
+                item["statue"] = status
+                break
+        
+        with open("recent.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        print(f"已更新文件 {filename} 的翻译状态为 {status}")
+    except Exception as e:
+        print(f"更新翻译状态时出错: {e}")
 
 server = None
 

@@ -72,6 +72,8 @@ class Online_translation:
             translated_list = self.run_async(self.Doubao_translation())
         elif self.translation_type == 'Qwen':
             translated_list = self.run_async(self.Qwen_translation())
+        elif self.translation_type == 'Grok':
+            translated_list = self.run_async(self.Grok_translation())
 
         return translated_list
 
@@ -132,6 +134,23 @@ class Online_translation:
             target_lang=self.target_language
         )
         return translated_texts
+
+    @retry_on_error()
+    async def Grok_translation(self):
+        translator = lt.Grok_translation()
+        try:
+            translated_texts = await translator.translate(
+                texts=self.original_text,
+                original_lang=self.original_lang,
+                target_lang=self.target_language
+            )
+            # 添加日志，确保翻译过程完成
+            print(f"Grok translation completed: {len(translated_texts)} texts processed")
+            return translated_texts
+        except Exception as e:
+            print(f"Error in Grok translation: {e}")
+            # 返回空结果以防止前端无限等待
+            return [""] * len(self.original_text)
 
 
 

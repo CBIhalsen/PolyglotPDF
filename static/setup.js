@@ -1,5 +1,4 @@
-
-    // 页面加载时获取配置
+// 页面加载时获取配置
     fetch('/config_json')
         .then(response => response.json())
         .then(data => {
@@ -48,7 +47,7 @@ document.getElementById('count_article').textContent += data.count;
         },
         'Translation_api': {
             type: 'select',
-            options: ['Doubao', 'Qwen', 'deepseek', 'openai', 'deepL', 'youdao'],
+            options: ['Doubao', 'Qwen', 'deepseek', 'openai', 'deepL', 'youdao','Grok'],
             value: data.default_services.Translation_api
         }
     };
@@ -258,5 +257,32 @@ function collectConfig() {
 
 
     return config;
+}
+
+// 在加载翻译服务配置时，确保处理Grok选项
+function loadTranslationServices(config) {
+    const container = document.getElementById('t-translation-services');
+    // ...existing code...
+
+    // 确保在创建服务配置UI时包含Grok
+    // 使用正确的键名'Grok'而不是'grok'
+    if (config.translation_services && config.translation_services.Grok) {
+        const grokDiv = document.createElement('div');
+        grokDiv.className = 't-service';
+        grokDiv.innerHTML = `
+            <h4 data-lang-key="48">Grok Translate API</h4>
+            <div class="t-input-group">
+                <label>Auth Key:</label>
+                <input type="password" name="grok_auth_key" value="${config.translation_services.Grok.auth_key || ''}">
+            </div>
+            <div class="t-input-group">
+                <label>Model Name:</label>
+                <input type="text" name="grok_model_name" value="${config.translation_services.Grok.model_name || 'grok-2-latest'}">
+            </div>
+        `;
+        container.appendChild(grokDiv);
+    }
+    
+    // ...existing code...
 }
 

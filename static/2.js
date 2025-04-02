@@ -1,14 +1,12 @@
-
 // 全局变量存储API密钥
 let translationKeys = {
     deepl: '',
     google: '',
     youdao: '',
     aliyun: '',
-    tencent: ''
+    tencent: '',
+    Grok: ''  // 修改为大写的Grok
 };
-
-
 
 // 关闭设置弹窗
 function closeSettings() {
