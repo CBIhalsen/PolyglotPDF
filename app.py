@@ -509,6 +509,8 @@ def translate_file():
         # 翻译完成后确保更新状态
         if translation_type == "Grok":
             print("Grok translation completed, updating status")
+        elif translation_type == "ThirdParty":
+            print("ThirdParty translation completed, updating status")
         
         # 更新翻译状态为已完成
         update_translation_status(filename, '1')
