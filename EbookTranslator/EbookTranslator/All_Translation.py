@@ -45,6 +45,11 @@ class Online_translation:
         elif self.translation_type == 'Grok':
             # 使用同步包装器运行异步函数
             translated_list = self.run_async(self.Grok_translation())
+        elif self.translation_type == 'ThirdParty':
+            # 使用同步包装器运行异步函数
+            translated_list = self.run_async(self.ThirdParty_translation())
+        else:
+            translated_list = self.deepl_translation()
 
         return translated_list
 
@@ -98,12 +103,31 @@ class Online_translation:
         return translated_texts
     async def Grok_translation(self):
         translator = lt.Grok_translation()
-        translated_texts = await translator.translate(
-            texts=self.original_text,
-            original_lang=self.original_lang,
-            target_lang=self.target_language
-        )
-        return translated_texts
+        try:
+            translated_texts = await translator.translate(
+                texts=self.original_text,
+                original_lang=self.original_lang,
+                target_lang=self.target_language
+            )
+            print(f"Grok translation completed: {len(translated_texts)} texts processed")
+            return translated_texts
+        except Exception as e:
+            print(f"Error in Grok translation: {e}")
+            return [""] * len(self.original_text)
+
+    async def ThirdParty_translation(self):
+        translator = lt.ThirdParty_translation()
+        try:
+            translated_texts = await translator.translate(
+                texts=self.original_text,
+                original_lang=self.original_lang,
+                target_lang=self.target_language
+            )
+            print(f"ThirdParty translation completed: {len(translated_texts)} texts processed")
+            return translated_texts
+        except Exception as e:
+            print(f"Error in ThirdParty translation: {e}")
+            return [""] * len(self.original_text)
 
 
 
