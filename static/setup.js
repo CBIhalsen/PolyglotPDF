@@ -47,7 +47,7 @@ document.getElementById('count_article').textContent += data.count;
         },
         'Translation_api': {
             type: 'select',
-            options: ['Doubao', 'Qwen', 'deepseek', 'openai', 'deepL', 'youdao','Grok'],
+            options: ['Doubao', 'Qwen', 'deepseek', 'openai', 'deepL', 'youdao','Grok', 'ThirdParty'],
             value: data.default_services.Translation_api
         }
     };
@@ -283,6 +283,56 @@ function loadTranslationServices(config) {
         container.appendChild(grokDiv);
     }
     
-    // ...existing code...
+    // 添加ThirdParty服务配置
+    if (config.translation_services && config.translation_services.ThirdParty) {
+        const thirdPartyDiv = document.createElement('div');
+        thirdPartyDiv.className = 't-sub-section';
+        thirdPartyDiv.innerHTML = `
+            <div class="t-section-header">
+                <h4 data-lang-key="49">ThirdParty</h4>
+                <button class="t-toggle-btn">+</button>
+            </div>
+            <div class="t-content">
+                <div class="t-input-group">
+                    <label>api_url:</label>
+                    <input type="text" class="t-input" value="${config.translation_services.ThirdParty.api_url || 'https://api.example.com/v1/chat/completions'}">
+                </div>
+                <div class="t-input-group">
+                    <label>auth_key:</label>
+                    <input type="password" class="t-input" value="${config.translation_services.ThirdParty.auth_key || ''}">
+                </div>
+                <div class="t-input-group">
+                    <label>model_name:</label>
+                    <input type="text" class="t-input" value="${config.translation_services.ThirdParty.model_name || 'custom-model'}">
+                </div>
+            </div>
+        `;
+        container.appendChild(thirdPartyDiv);
+    } else {
+        // 如果ThirdParty配置不存在，则创建一个默认的
+        const thirdPartyDiv = document.createElement('div');
+        thirdPartyDiv.className = 't-sub-section';
+        thirdPartyDiv.innerHTML = `
+            <div class="t-section-header">
+                <h4>ThirdParty</h4>
+                <button class="t-toggle-btn">+</button>
+            </div>
+            <div class="t-content">
+                <div class="t-input-group">
+                    <label>api_url:</label>
+                    <input type="text" class="t-input" value="https://api.example.com/v1/chat/completions">
+                </div>
+                <div class="t-input-group">
+                    <label>auth_key:</label>
+                    <input type="password" class="t-input" value="">
+                </div>
+                <div class="t-input-group">
+                    <label>model_name:</label>
+                    <input type="text" class="t-input" value="custom-model">
+                </div>
+            </div>
+        `;
+        container.appendChild(thirdPartyDiv);
+    }
 }
 

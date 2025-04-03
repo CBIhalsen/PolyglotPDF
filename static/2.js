@@ -5,7 +5,8 @@ let translationKeys = {
     youdao: '',
     aliyun: '',
     tencent: '',
-    Grok: ''  // 修改为大写的Grok
+    Grok: '',  // 修改为大写的Grok
+    ThirdParty: ''  // 添加ThirdParty
 };
 
 // 关闭设置弹窗
