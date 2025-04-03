@@ -1,44 +1,48 @@
 {
-  "count": 3,
-  "PPC": 20,
-  "translation_services": {
-    "Doubao": {
-      "auth_key": "",
-      "model_name": ""
+    "count": 3,
+    "PPC": 20,
+    "translation_services": {
+        "Doubao": {
+            "auth_key": "",
+            "model_name": ""
+        },
+        "Grok": {
+            "auth_key": "",
+            "model_name": "grok-2-latest"
+        },
+        "Qwen": {
+            "auth_key": "",
+            "model_name": "qwen-plus"
+        },
+        "ThirdParty": {
+            "api_url": "https://api.chatanywhere.tech/v1/chat/completions",
+            "auth_key": "",
+            "model_name": "gpt-4o-mini"
+        },
+        "deepl": {
+            "auth_key": ""
+        },
+        "deepseek": {
+            "auth_key": "",
+            "model_name": "deepseek-chat"
+        },
+        "openai": {
+            "auth_key": "",
+            "model_name": "gpt-4o-mini"
+        },
+        "youdao": {
+            "app_key": "",
+            "app_secret": ""
+        }
     },
-    "Qwen": {
-      "auth_key": "",
-      "model_name": "qwen-plus"
+    "ocr_services": {
+        "tesseract": {
+            "path": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+        }
     },
-    "deepl": {
-      "auth_key": ""
-    },
-    "deepseek": {
-      "auth_key": "",
-      "model_name": "ep-20250218224909-gps4n"
-    },
-    "openai": {
-      "auth_key": "",
-      "model_name": "gpt-4o-mini"
-    },
-    "youdao": {
-      "app_key": "",
-      "app_secret": ""
-    },
-    "Grok": {
-      "auth_key": "",
-      "model_name": "grok-2-latest"
+    "default_services": {
+        "ocr_model": false,
+        "Enable_translation": true,
+        "Translation_api": "ThirdParty"
     }
-  },
-  "ocr_services": {
-    "tesseract": {
-      "path": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
-    }
-  },
-  "default_services": {
-    "ocr_model": false,
-    
-    "Enable_translation": true,
-    "Translation_api": "Grok"
-  }
 }
