@@ -1,5 +1,24 @@
 python包在2.2版本之前预计不会更新，2.2版本预估采取解析最底层span获取更信息的布局逻辑解决，预估解决：行内公式错误判断为公式块，错误将粗体文本进行分段bug,以及insert_html方法重复嵌入字体文件导致处理页数较大pdf时浪费计算资源极其卡顿。 目前效果，对于基于文本的pdf,polyglotpdf的解析方式依旧是最优解。 ocr和布局分析并不总是完美。（考虑处理文本上下标问题，大部分pdf文件中上标下标文本通过指定坐标和字体大小实现伪上下标，考虑替换为真正的上下标文字对应的Unicode编码，但并不完美），对于报告型表格文档，polyglotpdf效果相当完美，当然表格中的复杂矢量数学公式依旧无法正确处理）。
+寻求意见的改进方法，对于复杂的颜色布局文本或者粗体参杂常规字体文本，提出以下方法，对于流内容我们可以解析为html格式如下：
 
+    <p style="color: red; display: inline;">ABSTRACT: </p>
+    <p style="display: inline;">
+        The swine industry annually suffers significant economic losses caused by porcine reproductive and respiratory syndrome virus (PRRSV). Because the available commercial vaccines have limited protective efficacy against epidemic PRRSV, there is an urgent need for innovative solutions. Nanoparticle vaccines induce robust immune responses and have become a promising direction in vaccine development. In this study, we designed and produced a self-assembling nanoparticle vaccine derived from thermophilic archaeal ferritin to combat epidemic PRRSV. First, multiple T cell epitopes targeting viral structural proteins were identified by IFN-γ screening after PRRSV infection. Three different self-assembled nanoparticles with epitopes targeting viral GP3, GP4, and GP5.
+    </p>
+
+  这种解析内容只能由llms翻译，翻译结果如下：
+  ```html
+<p style="color: red; display: inline;">摘要：</p>
+<p style="display: inline;">
+    猪产业每年因猪繁殖与呼吸综合征病毒（PRRSV）造成显著的经济损失。由于现有的商业疫苗对流行性PRRSV的保护效果有限，迫切需要创新的解决方案。纳米粒子疫苗能够引发强烈的免疫反应，已成为疫苗开发的一个有前景的方向。在本研究中，我们设计并生产了一种源自嗜热古细菌铁蛋白的自组装纳米粒子疫苗，以对抗流行性PRRSV。首先，通过PRRSV感染后的IFN-γ筛选，识别出针对病毒结构蛋白的多个T细胞表位。三种不同的自组装纳米粒子携带针对病毒GP3、GP4和GP5的表位。
+</p>
+```
+甚至包括粗体：
+<p style="color: blue; font-weight: bold; display: inline;">摘要：</p>
+<p style="display: inline;">
+    猪产业每年因猪繁殖与呼吸综合征病毒（PRRSV）造成显著的经济损失。由于现有的商业疫苗对流行性PRRSV的保护效果有限，迫切需要创新的解决方案。纳米粒子疫苗能够引发强烈的免疫反应，已成为疫苗开发的一个有前景的方向。在本研究中，我们设计并生产了一种源自嗜热古细菌铁蛋白的自组装纳米粒子疫苗，以对抗流行性PRRSV。首先，通过PRRSV感染后的IFN-γ筛选，识别出针对病毒结构蛋白的多个T细胞表位。三种不同的自组装纳米粒子携带针对病毒GP3、GP4和GP5的表位。
+</p>
+这种方法会无线接近于完美的处理，目前考虑将此方法作为强化功能选用
 
 English | [简体中文](/README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JA.md) | [한국어](README_KO.md)
 # PolyglotPDF
