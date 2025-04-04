@@ -1,4 +1,4 @@
-
+python包在2.2版本之前预计不会更新，2.2版本预估采取解析最底层span获取更信息的布局逻辑解决，预估解决：行内公式错误判断为公式块，错误将粗体文本进行分段bug,以及insert_html方法重复嵌入字体文件导致处理页数较大pdf时浪费计算资源极其卡顿。 目前效果，对于基于文本的pdf,polyglotpdf的解析方式依旧是最优解。 ocr和布局分析并不总是完美。
 
 
 English | [简体中文](/README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JA.md) | [한국어](README_KO.md)
