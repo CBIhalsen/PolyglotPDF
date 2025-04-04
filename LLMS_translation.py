@@ -241,7 +241,7 @@ class Grok_translation:
                     result = await response.json()
                     translated_text = result['choices'][0]['message']['content'].strip()
                     # 添加调试日志
-                    print(f"Grok translated: '{text[:30]}...' -> '{translated_text[:30]}...'")
+                    #print(f"Grok translated: '{text[:30]}...' -> '{translated_text[:30]}...'")
                     return translated_text
                 else:
                     error_text = await response.text()
@@ -298,7 +298,7 @@ class ThirdParty_translation:
                     result = await response.json()
                     translated_text = result['choices'][0]['message']['content'].strip()
                     # 添加调试日志
-                    print(f"ThirdParty translated: '{text[:30]}...' -> '{translated_text[:30]}...'")
+                    #print(f"ThirdParty translated: '{text[:30]}...' -> '{translated_text[:30]}...'")
                     return translated_text
                 else:
                     error_text = await response.text()
