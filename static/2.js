@@ -6,7 +6,8 @@ let translationKeys = {
     aliyun: '',
     tencent: '',
     Grok: '',  // 修改为大写的Grok
-    ThirdParty: ''  // 添加ThirdParty
+    ThirdParty: '',  // 添加ThirdParty
+    GLM: ''  // 添加GLM
 };
 
 // 关闭设置弹窗

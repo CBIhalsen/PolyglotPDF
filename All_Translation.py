@@ -76,6 +76,8 @@ class Online_translation:
             translated_list = self.run_async(self.Grok_translation())
         elif self.translation_type == 'ThirdParty':
             translated_list = self.run_async(self.ThirdParty_translation())
+        elif self.translation_type == 'GLM':
+            translated_list = self.run_async(self.GLM_translation())
         else:
             translated_list = self.deepl_translation()
 
@@ -167,6 +169,21 @@ class Online_translation:
             return translated_texts
         except Exception as e:
             print(f"Error in ThirdParty translation: {e}")
+            return [""] * len(self.original_text)
+
+    @retry_on_error()
+    async def GLM_translation(self):
+        translator = lt.GLM_translation()
+        try:
+            translated_texts = await translator.translate(
+                texts=self.original_text,
+                original_lang=self.original_lang,
+                target_lang=self.target_language
+            )
+            print(f"GLM translation completed: {len(translated_texts)} texts processed")
+            return translated_texts
+        except Exception as e:
+            print(f"Error in GLM translation: {e}")
             return [""] * len(self.original_text)
 
 t = time.time()

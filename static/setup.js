@@ -47,7 +47,7 @@ document.getElementById('count_article').textContent += data.count;
         },
         'Translation_api': {
             type: 'select',
-            options: ['Doubao', 'Qwen', 'deepseek', 'openai', 'deepL', 'youdao','Grok', 'ThirdParty'],
+            options: ['Doubao', 'Qwen', 'deepseek', 'openai', 'deepL', 'youdao','Grok', 'ThirdParty', 'GLM'],
             value: data.default_services.Translation_api
         }
     };
@@ -281,6 +281,24 @@ function loadTranslationServices(config) {
             </div>
         `;
         container.appendChild(grokDiv);
+    }
+    
+    // 确保在创建服务配置UI时包含GLM
+    if (config.translation_services && config.translation_services.GLM) {
+        const glmDiv = document.createElement('div');
+        glmDiv.className = 't-service';
+        glmDiv.innerHTML = `
+            <h4 data-lang-key="50">GLM Translate API</h4>
+            <div class="t-input-group">
+                <label>Auth Key:</label>
+                <input type="password" name="glm_auth_key" value="${config.translation_services.GLM.auth_key || ''}">
+            </div>
+            <div class="t-input-group">
+                <label>Model Name:</label>
+                <input type="text" name="glm_model_name" value="${config.translation_services.GLM.model_name || 'glm-4-plus'}">
+            </div>
+        `;
+        container.appendChild(glmDiv);
     }
     
     // 添加ThirdParty服务配置

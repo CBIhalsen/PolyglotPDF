@@ -313,6 +313,61 @@ class ThirdParty_translation:
             print(f"ThirdParty translation completed, {len(results)} texts translated")
             return results
 
+class GLM_translation:
+    def __init__(self):
+        config = load_config.load_config()
+        self.api_key = config['translation_services']['GLM']['auth_key']
+        self.url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+        self.headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        self.model = config['translation_services']['GLM']['model_name']
+
+    async def translate_single(self, session, text, original_lang, target_lang):
+        """单个文本的异步翻译"""
+        payload = {
+            "model": self.model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": f"You are a professional translator. Translate from {original_lang} to {target_lang}. Return ONLY the translation without explanations or notes."
+                },
+                {
+                    "role": "user",
+                    "content": text
+                }
+            ],
+            "temperature": 0.3,
+            "top_p": 0.7,
+            "do_sample": False
+        }
+
+        try:
+            async with session.post(self.url, headers=self.headers, json=payload) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    return result['choices'][0]['message']['content'].strip()
+                else:
+                    error_text = await response.text()
+                    print(f"Error: {response.status}, Details: {error_text}")
+                    return ""
+        except Exception as e:
+            print(f"Error in GLM translation: {e}")
+            return ""
+
+    async def translate(self, texts, original_lang, target_lang):
+        """异步批量翻译"""
+        print(f"Starting GLM translation of {len(texts)} texts")
+        async with aiohttp.ClientSession() as session:
+            tasks = [
+                self.translate_single(session, text, original_lang, target_lang)
+                for text in texts
+            ]
+            results = await asyncio.gather(*tasks)
+            print(f"GLM translation completed, {len(results)} texts translated")
+            return results
+
 # 测试代码
 async def main():
     texts = [
@@ -379,6 +434,20 @@ async def main():
             print(f"{src} -> {tgt}")
     except Exception as e:
         print(f"Error testing ThirdParty translation: {e}")
+
+    # 添加 GLM 翻译测试
+    try:
+        glm_translator = GLM_translation()
+        translated_glm = await glm_translator.translate(
+            texts=texts,
+            original_lang="en",
+            target_lang="zh"
+        )
+        print("\nGLM translations:")
+        for src, tgt in zip(texts, translated_glm):
+            print(f"{src} -> {tgt}")
+    except Exception as e:
+        print(f"Error testing GLM translation: {e}")
 
 if __name__ == "__main__":
     asyncio.run(main())

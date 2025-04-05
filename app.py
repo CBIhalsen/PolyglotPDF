@@ -511,6 +511,8 @@ def translate_file():
             print("Grok translation completed, updating status")
         elif translation_type == "ThirdParty":
             print("ThirdParty translation completed, updating status")
+        elif translation_type == "GLM":
+            print("GLM translation completed, updating status")
         
         # 更新翻译状态为已完成
         update_translation_status(filename, '1')
