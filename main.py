@@ -1,4 +1,3 @@
-
 import All_Translation as at
 from PIL import Image
 import pytesseract
@@ -21,10 +20,8 @@ use_mupdf = not config['default_services']['ocr_model']
 
 PPC = config['PPC']
 print('ppc',PPC)
-
 # print(use_mupdf,'mupdf值')
 # print('当前',config['count'])
-
 
 def decimal_to_hex_color(decimal_color):
     if decimal_color == 0:
@@ -69,6 +66,11 @@ class main_function:
         self.use_mupdf = use_mupdf
         self.bn = bn
         self.en = en
+
+        # 初始化字体计数器
+        self.font_usage_counter = {"normal": 0, "bold": 0}
+        self.font_embed_counter = {"normal": 0, "bold": 0}
+        self.font_css_cache = {}
 
         self.t = time.time()
         # 新增一个全局列表，用于存所有页面的 [文本, bbox]，以及翻译后结果
@@ -186,20 +188,27 @@ class main_function:
         # 8. 保存 PDF、更新状态
         pdf_name, _ = os.path.splitext(self.pdf_path)
         target_path = os.path.join(APP_DATA_DIR, 'static', 'target', f"{pdf_name}_{self.target_language}.pdf")
-        self.doc.ez_save(
-            target_path,
-            garbage=4,
-            deflate=True
-        )
+        
+        print("正在保存PDF文件,耐心等待...")
+        # 创建新文档并从当前文档复制内容以避免字体重复问题
+        new_doc = fitz.open()
+        new_doc.insert_pdf(self.doc)
+        new_doc.save(target_path, garbage=4, deflate=True)
+        new_doc.close()
 
         load_config.update_file_status(count, statue="1")  # statue = "1"
 
-        # 8. 打印耗时
+        # 打印总耗时
         end_time = time.time()
-        print('翻译共耗时',end_time - self.t)
+        total_duration = end_time - self.t
+        
+        print(f"翻译共耗时: {total_duration:.2f}秒")
+        
         merged_output_path = os.path.join(APP_DATA_DIR, 'static', 'merged_pdf', f"{pdf_name}_{self.original_language}_{self.target_language}.pdf")
 
+        print("正在创建双语对照PDF...")
         merge_pdf.merge_pdfs_horizontally(pdf1_path=self.full_path,pdf2_path=target_path,output_path=merged_output_path)
+        print(f"处理完成！输出文件: {target_path}")
 
     def start(self, image, pag_num):
         """
@@ -385,21 +394,20 @@ class main_function:
 
     def apply_translations_to_pdf(self):
         """
-        统一对 PDF 做“打码/打白 + 插入译文”操作
+        统一对 PDF 做"打码/打白 + 插入译文"操作
         """
+        start_time = time.time()
+        
         for page_index, blocks in enumerate(self.pages_data):
             page = self.doc.load_page(page_index)
-
+            
+            # 按字体类型分组该页面的文本块，避免重复定义字体
+            normal_blocks = []
+            bold_blocks = []
+            
+            # 先覆盖所有区域
             for block in blocks:
                 coords = block[1]  # (x0, y0, x1, y1)
-                # 如果第三个元素是译文，则用之，否则用原文
-                translated_text = block[2]
-                html_color = block[4]
-                text_indent = block[5]
-                text_bold = block[6]
-                angle = block[3]
-                text_size = float(block[7]) + 3
-
                 rect = fitz.Rect(*coords)
 
                 # 先尝试使用 Redact 遮盖
@@ -416,44 +424,133 @@ class main_function:
                     except Exception as e2:
                         print(f"创建白色画布时发生错误: {e2}")
                     print(f"应用重编辑时发生错误: {e}")
-                if text_bold:
-                    # 字体族名称应该简单且不包含路径
-                    font_family = f"{self.target_language}_bold_font"
-                    font_path = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}_bold_subset.ttf")
+                
+                # 分类文本块
+                if len(block) > 6 and block[6]:  # text_bold
+                    bold_blocks.append(block)
                 else:
-                    font_family = f"{self.target_language}_font"
-                    font_path = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}_subset.ttf")
-
+                    normal_blocks.append(block)
+            
+            # 处理普通字体文本块
+            if normal_blocks:
+                font_family = f"{self.target_language}_font"
+                font_path = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}_subset.ttf")
+                font_path = font_path.replace('\\', '/')
+                
                 # 确保字体文件存在
                 if not os.path.exists(font_path):
                     print(f"警告：字体文件不存在: {font_path}")
-
-                # 使用绝对路径，确保路径分隔符正确
-                font_path = font_path.replace('\\', '/')
-                # print(rect,translated_text,angle)
-
-                page.insert_htmlbox(
-                    rect,
-                    translated_text,
-                    css=f"""
+                
+                # 更新字体使用计数
+                self.font_usage_counter["normal"] += len(normal_blocks)
+                
+                # 只有第一次使用该字体时添加@font-face定义
+                if font_family not in self.font_css_cache:
+                    css_prefix = f"""
                     @font-face {{
                         font-family: "{font_family}";
                         src: url("{font_path}");
                     }}
+                    """
+                    self.font_css_cache[font_family] = css_prefix
+                    self.font_embed_counter["normal"] += 1
+                else:
+                    css_prefix = self.font_css_cache[font_family]
+                
+                # 处理每个普通字体文本块
+                for block in normal_blocks:
+                    coords = block[1]
+                    # 如果第三个元素是译文，则用之，否则用原文
+                    translated_text = block[2] if block[2] is not None else block[0]
+                    angle = block[3] if len(block) > 3 else 0
+                    html_color = block[4] if len(block) > 4 else '#000000'
+                    text_indent = block[5] if len(block) > 5 else 0
+                    text_size = float(block[7]) + 3 if len(block) > 7 else 12
+                    rect = fitz.Rect(*coords)
+                    
+                    # 组合CSS
+                    css = css_prefix + f"""
                     * {{
                         font-family: "{font_family}";
                         color: {html_color};
                         text-indent: {text_indent}pt;  
                         font-size: {text_size}pt; 
                     }}
-                    """,
-                    rotate=angle
-                )
-
+                    """
+                    
+                    # 插入文本
+                    page.insert_htmlbox(
+                        rect,
+                        translated_text,
+                        css=css,
+                        rotate=angle
+                    )
+            
+            # 处理粗体字体文本块
+            if bold_blocks:
+                font_family = f"{self.target_language}_bold_font"
+                font_path = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}_bold_subset.ttf")
+                font_path = font_path.replace('\\', '/')
+                
+                # 确保字体文件存在
+                if not os.path.exists(font_path):
+                    print(f"警告：字体文件不存在: {font_path}")
+                
+                # 更新字体使用计数
+                self.font_usage_counter["bold"] += len(bold_blocks)
+                
+                # 只有第一次使用该字体时添加@font-face定义
+                if font_family not in self.font_css_cache:
+                    css_prefix = f"""
+                    @font-face {{
+                        font-family: "{font_family}";
+                        src: url("{font_path}");
+                    }}
+                    """
+                    self.font_css_cache[font_family] = css_prefix
+                    self.font_embed_counter["bold"] += 1
+                else:
+                    css_prefix = self.font_css_cache[font_family]
+                
+                # 处理每个粗体字体文本块
+                for block in bold_blocks:
+                    coords = block[1]
+                    # 如果第三个元素是译文，则用之，否则用原文
+                    translated_text = block[2] if block[2] is not None else block[0]
+                    angle = block[3] if len(block) > 3 else 0
+                    html_color = block[4] if len(block) > 4 else '#000000'
+                    text_indent = block[5] if len(block) > 5 else 0
+                    text_size = float(block[7]) + 3 if len(block) > 7 else 12
+                    rect = fitz.Rect(*coords)
+                    
+                    # 组合CSS
+                    css = css_prefix + f"""
+                    * {{
+                        font-family: "{font_family}";
+                        color: {html_color};
+                        text-indent: {text_indent}pt;  
+                        font-size: {text_size}pt; 
+                    }}
+                    """
+                    
+                    # 插入文本
+                    page.insert_htmlbox(
+                        rect,
+                        translated_text,
+                        css=css,
+                        rotate=angle
+                    )
+            
+            # 每20页打印一次简单进度
+            if page_index % 20 == 0:
+                print(f"正在处理: {page_index}/{len(self.pages_data)} 页")
+        
+        # 处理完全部页面后显示结束信息
+        total_time = time.time() - start_time
+        print(f"文本插入完成，用时 {total_time:.2f} 秒")
 
     def subset_font(self, in_font_path, out_font_path,text):
         Subset_Font.subset_font(in_font_path=in_font_path,out_font_path=out_font_path,text=text,language=self.target_language)
 
 if __name__ == '__main__':
-
     main_function(original_language='auto', target_language='zh', pdf_path='g6.pdf').main()
