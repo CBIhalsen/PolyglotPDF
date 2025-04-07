@@ -189,7 +189,7 @@ class main_function:
         pdf_name, _ = os.path.splitext(self.pdf_path)
         target_path = os.path.join(APP_DATA_DIR, 'static', 'target', f"{pdf_name}_{self.target_language}.pdf")
         
-        print("正在保存PDF文件...")
+        print("正在保存PDF文件,耐心等待...")
         # 创建新文档并从当前文档复制内容以避免字体重复问题
         new_doc = fitz.open()
         new_doc.insert_pdf(self.doc)
@@ -426,7 +426,7 @@ class main_function:
                     print(f"应用重编辑时发生错误: {e}")
                 
                 # 分类文本块
-                if block[6]:  # text_bold
+                if len(block) > 6 and block[6]:  # text_bold
                     bold_blocks.append(block)
                 else:
                     normal_blocks.append(block)
@@ -436,6 +436,10 @@ class main_function:
                 font_family = f"{self.target_language}_font"
                 font_path = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}_subset.ttf")
                 font_path = font_path.replace('\\', '/')
+                
+                # 确保字体文件存在
+                if not os.path.exists(font_path):
+                    print(f"警告：字体文件不存在: {font_path}")
                 
                 # 更新字体使用计数
                 self.font_usage_counter["normal"] += len(normal_blocks)
@@ -456,11 +460,12 @@ class main_function:
                 # 处理每个普通字体文本块
                 for block in normal_blocks:
                     coords = block[1]
-                    translated_text = block[2]
-                    html_color = block[4]
-                    text_indent = block[5]
-                    angle = block[3]
-                    text_size = float(block[7]) + 3
+                    # 如果第三个元素是译文，则用之，否则用原文
+                    translated_text = block[2] if block[2] is not None else block[0]
+                    angle = block[3] if len(block) > 3 else 0
+                    html_color = block[4] if len(block) > 4 else '#000000'
+                    text_indent = block[5] if len(block) > 5 else 0
+                    text_size = float(block[7]) + 3 if len(block) > 7 else 12
                     rect = fitz.Rect(*coords)
                     
                     # 组合CSS
@@ -487,6 +492,10 @@ class main_function:
                 font_path = os.path.join(APP_DATA_DIR, 'temp', 'fonts', f"{self.target_language}_bold_subset.ttf")
                 font_path = font_path.replace('\\', '/')
                 
+                # 确保字体文件存在
+                if not os.path.exists(font_path):
+                    print(f"警告：字体文件不存在: {font_path}")
+                
                 # 更新字体使用计数
                 self.font_usage_counter["bold"] += len(bold_blocks)
                 
@@ -506,11 +515,12 @@ class main_function:
                 # 处理每个粗体字体文本块
                 for block in bold_blocks:
                     coords = block[1]
-                    translated_text = block[2]
-                    html_color = block[4]
-                    text_indent = block[5]
-                    angle = block[3]
-                    text_size = float(block[7]) + 3
+                    # 如果第三个元素是译文，则用之，否则用原文
+                    translated_text = block[2] if block[2] is not None else block[0]
+                    angle = block[3] if len(block) > 3 else 0
+                    html_color = block[4] if len(block) > 4 else '#000000'
+                    text_indent = block[5] if len(block) > 5 else 0
+                    text_size = float(block[7]) + 3 if len(block) > 7 else 12
                     rect = fitz.Rect(*coords)
                     
                     # 组合CSS
@@ -531,8 +541,8 @@ class main_function:
                         rotate=angle
                     )
             
-            # 每10页打印一次简单进度
-            if page_index % 10 == 0:
+            # 每20页打印一次简单进度
+            if page_index % 20 == 0:
                 print(f"正在处理: {page_index}/{len(self.pages_data)} 页")
         
         # 处理完全部页面后显示结束信息
