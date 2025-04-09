@@ -13,15 +13,10 @@ from load_config import APP_DATA_DIR
 import get_new_blocks as new_blocks
 import Subset_Font
 import merge_pdf
-config = load_config.load_config()
-translation_type = config['default_services']['Translation_api']
-translation = config['default_services']['Enable_translation']
-use_mupdf = not config['default_services']['ocr_model']
 
-PPC = config['PPC']
-print('ppc',PPC)
-# print(use_mupdf,'mupdf值')
-# print('当前',config['count'])
+def get_current_config():
+    """获取当前最新配置"""
+    return load_config.load_config(force_reload=True)
 
 def decimal_to_hex_color(decimal_color):
     if decimal_color == 0:
@@ -61,9 +56,14 @@ class main_function:
         self.original_language = original_language
         self.target_language = target_language
         self.DPI = DPI
-        self.translation = translation
-        self.translation_type = translation_type
-        self.use_mupdf = use_mupdf
+        
+        # 动态获取配置，不再在初始化时缓存
+        config = get_current_config()
+        self.translation = config['default_services']['Enable_translation']
+        self.translation_type = config['default_services']['Translation_api']
+        self.use_mupdf = not config['default_services']['ocr_model']
+        self.PPC = config['PPC']  # 将PPC作为实例变量
+        
         self.bn = bn
         self.en = en
 
@@ -86,7 +86,7 @@ class main_function:
         """
         # 1. 计数和配置信息
         load_config.update_count()
-        config = load_config.load_config()
+        config = get_current_config()  # 获取最新配置
         count = config["count"]
 
 
@@ -138,12 +138,12 @@ class main_function:
                 self.start(image=image, pag_num=i)  # 只做提取，不做翻译写入
 
         # 5. 若开启翻译，则批量翻译所有提取的文本
-
+        # 使用实例变量 self.PPC 而不是全局变量
         self.batch_translate_pages_data(
                 original_language=self.original_language,
                 target_language=self.target_language,
                 translation_type=self.translation_type,
-                batch_size=PPC
+                batch_size=self.PPC
             )
         # 6. 子集化字体
         bold_text = ""
@@ -346,11 +346,15 @@ class main_function:
         # 注意：这里不做翻译、不插入 PDF，只负责“收集文本”到 self.pages_data
 
     def batch_translate_pages_data(self, original_language, target_language,
-                                   translation_type, batch_size=PPC ):
+                                   translation_type, batch_size):
         """PPC (Pages Per Call)
         分批翻译 pages_data，每次处理最多 batch_size 页的文本，避免一次性过多。
         将译文存回 self.pages_data 的第三个元素，如 [原文, bbox, 译文]
         """
+        # 重新获取最新配置确保翻译设置是最新的
+        config = get_current_config()
+        use_mupdf = not config['default_services']['ocr_model']
+        
         total_pages = len(self.pages_data)
         start_idx = 0
 
@@ -553,4 +557,5 @@ class main_function:
         Subset_Font.subset_font(in_font_path=in_font_path,out_font_path=out_font_path,text=text,language=self.target_language)
 
 if __name__ == '__main__':
+    config = get_current_config()
     main_function(original_language='auto', target_language='zh', pdf_path='g6.pdf').main()
