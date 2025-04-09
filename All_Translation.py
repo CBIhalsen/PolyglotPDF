@@ -2,6 +2,7 @@ import time
 import os
 import Deepl_Translation as dt
 import YouDao_translation as yt
+import Bing_translation as bt
 import LLMS_translation as lt
 import asyncio
 from functools import wraps
@@ -64,6 +65,8 @@ class Online_translation:
             translated_list = self.deepl_translation()
         elif self.translation_type == 'youdao':
             translated_list = self.youdao_translation()
+        elif self.translation_type == 'bing':
+            translated_list = self.Bing_translation()
         elif self.translation_type == 'openai':
             translated_list = self.run_async(self.openai_translation())
         elif self.translation_type == 'deepseek':
@@ -100,6 +103,8 @@ class Online_translation:
             target_lang=self.target_language
         )
         return translated_texts
+
+  
 
     @retry_on_error()
     async def openai_translation(self):
@@ -184,6 +189,21 @@ class Online_translation:
             return translated_texts
         except Exception as e:
             print(f"Error in GLM translation: {e}")
+            return [""] * len(self.original_text)
+
+    @retry_on_error()
+    async def Bing_translation(self):
+        translator = lt.Bing_translation()
+        try:
+            translated_texts = await translator.translate(
+                texts=self.original_text,
+                original_lang=self.original_lang,
+                target_lang=self.target_language
+            )
+            print(f"Bing translation completed: {len(translated_texts)} texts processed")
+            return translated_texts
+        except Exception as e:
+            print(f"Error in Bing translation: {e}")
             return [""] * len(self.original_text)
 
 t = time.time()

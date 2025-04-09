@@ -1,5 +1,7 @@
 import asyncio
 import aiohttp
+import re
+import requests
 
 import load_config
 
@@ -55,6 +57,85 @@ class Openai_translation:
                 for text in texts
             ]
             return await asyncio.gather(*tasks)
+
+# 添加Bing翻译类
+class Bing_translation:
+    def __init__(self):
+        self.session = requests.Session()
+        self.endpoint = "https://www.bing.com/translator"
+        self.headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+        }
+        self.lang_map = {"zh": "zh-Hans"}
+
+    async def find_sid(self):
+        """获取必要的会话参数"""
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(None, lambda: self.session.get(self.endpoint, headers=self.headers))
+        response.raise_for_status()
+        url = response.url[:-10]
+        ig = re.findall(r"\"ig\":\"(.*?)\"", response.text)[0]
+        iid = re.findall(r"data-iid=\"(.*?)\"", response.text)[-1]
+        key, token = re.findall(
+            r"params_AbusePreventionHelper\s=\s\[(.*?),\"(.*?)\",", response.text
+        )[0]
+        return url, ig, iid, key, token
+
+    async def translate_single(self, session, text, original_lang, target_lang):
+        """单个文本的异步翻译"""
+        if not text or not text.strip():
+            return ""
+            
+        # 处理语言代码映射
+        lang_in = self.lang_map.get(original_lang, original_lang)
+        lang_out = self.lang_map.get(target_lang, target_lang)
+        
+        # 自动语言检测处理
+        if lang_in == "auto":
+            lang_in = "auto-detect"
+        
+        # Bing翻译最大长度限制
+        text = text[:1000]
+        
+        try:
+            url, ig, iid, key, token = await self.find_sid()
+            
+            # 通过异步HTTP请求执行翻译
+            async with session.post(
+                f"{url}ttranslatev3?IG={ig}&IID={iid}",
+                data={
+                    "fromLang": lang_in,
+                    "to": lang_out,
+                    "text": text,
+                    "token": token,
+                    "key": key,
+                },
+                headers=self.headers,
+            ) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    return result[0]["translations"][0]["text"]
+                else:
+                    error_text = await response.text()
+                    print(f"Bing翻译错误: {response.status}, 详情: {error_text}")
+                    return ""
+        except Exception as e:
+            print(f"Bing翻译过程中发生错误: {e}")
+            return ""
+
+    async def translate(self, texts, original_lang, target_lang):
+        """异步批量翻译"""
+        print(f"开始Bing翻译，共 {len(texts)} 个文本")
+        async with aiohttp.ClientSession() as session:
+            tasks = []
+            for i, text in enumerate(texts):
+                # 添加延迟以避免请求过快被屏蔽
+                await asyncio.sleep(0.5 * (i % 3))  # 每3个请求一组，每组之间间隔0.5秒
+                tasks.append(self.translate_single(session, text, original_lang, target_lang))
+            
+            results = await asyncio.gather(*tasks)
+            print(f"Bing翻译完成，共翻译 {len(results)} 个文本")
+            return results
 
 class Deepseek_translation:
     def __init__(self):
@@ -455,6 +536,20 @@ async def main():
             print(f"{src} -> {tgt}")
     except Exception as e:
         print(f"Error testing GLM translation: {e}")
+
+    # 添加Bing翻译测试
+    try:
+        bing_translator = Bing_translation()
+        translated_bing = await bing_translator.translate(
+            texts=texts,
+            original_lang="en",
+            target_lang="zh"
+        )
+        print("\nBing translations:")
+        for src, tgt in zip(texts, translated_bing):
+            print(f"{src} -> {tgt}")
+    except Exception as e:
+        print(f"Error testing Bing translation: {e}")
 
 if __name__ == "__main__":
     asyncio.run(main())
