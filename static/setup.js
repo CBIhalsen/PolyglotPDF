@@ -258,3 +258,128 @@ function collectConfig() {
 
     return config;
 }
+
+// 在加载翻译服务配置时，确保处理Grok选项
+function loadTranslationServices(config) {
+    const container = document.getElementById('t-translation-services');
+    // ...existing code...
+
+    // 确保在创建服务配置UI时包含Grok
+    // 使用正确的键名'Grok'而不是'grok'
+    if (config.translation_services && config.translation_services.Grok) {
+        const grokDiv = document.createElement('div');
+        grokDiv.className = 't-service';
+        grokDiv.innerHTML = `
+            <h4 data-lang-key="48">Grok Translate API</h4>
+            <div class="t-input-group">
+                <label>Auth Key:</label>
+                <input type="password" name="grok_auth_key" value="${config.translation_services.Grok.auth_key || ''}">
+            </div>
+            <div class="t-input-group">
+                <label>Model Name:</label>
+                <input type="text" name="grok_model_name" value="${config.translation_services.Grok.model_name || 'grok-2-latest'}">
+            </div>
+        `;
+        container.appendChild(grokDiv);
+    }
+    
+    // 确保在创建服务配置UI时包含GLM
+    if (config.translation_services && config.translation_services.GLM) {
+        const glmDiv = document.createElement('div');
+        glmDiv.className = 't-service';
+        glmDiv.innerHTML = `
+            <h4 data-lang-key="50">GLM Translate API</h4>
+            <div class="t-input-group">
+                <label>Auth Key:</label>
+                <input type="password" name="glm_auth_key" value="${config.translation_services.GLM.auth_key || ''}">
+            </div>
+            <div class="t-input-group">
+                <label>Model Name:</label>
+                <input type="text" name="glm_model_name" value="${config.translation_services.GLM.model_name || 'glm-4-plus'}">
+            </div>
+        `;
+        container.appendChild(glmDiv);
+    }
+    
+    // 添加ThirdParty服务配置
+    if (config.translation_services && config.translation_services.ThirdParty) {
+        const thirdPartyDiv = document.createElement('div');
+        thirdPartyDiv.className = 't-sub-section';
+        thirdPartyDiv.innerHTML = `
+            <div class="t-section-header">
+                <h4 data-lang-key="49">ThirdParty</h4>
+                <button class="t-toggle-btn">+</button>
+            </div>
+            <div class="t-content">
+                <div class="t-input-group">
+                    <label>api_url:</label>
+                    <input type="text" class="t-input" value="${config.translation_services.ThirdParty.api_url || 'https://api.example.com/v1/chat/completions'}">
+                </div>
+                <div class="t-input-group">
+                    <label>auth_key:</label>
+                    <input type="password" class="t-input" value="${config.translation_services.ThirdParty.auth_key || ''}">
+                </div>
+                <div class="t-input-group">
+                    <label>model_name:</label>
+                    <input type="text" class="t-input" value="${config.translation_services.ThirdParty.model_name || 'custom-model'}">
+                </div>
+            </div>
+        `;
+        container.appendChild(thirdPartyDiv);
+    } else {
+        // 如果ThirdParty配置不存在，则创建一个默认的
+        const thirdPartyDiv = document.createElement('div');
+        thirdPartyDiv.className = 't-sub-section';
+        thirdPartyDiv.innerHTML = `
+            <div class="t-section-header">
+                <h4>ThirdParty</h4>
+                <button class="t-toggle-btn">+</button>
+            </div>
+            <div class="t-content">
+                <div class="t-input-group">
+                    <label>api_url:</label>
+                    <input type="text" class="t-input" value="https://api.example.com/v1/chat/completions">
+                </div>
+                <div class="t-input-group">
+                    <label>auth_key:</label>
+                    <input type="password" class="t-input" value="">
+                </div>
+                <div class="t-input-group">
+                    <label>model_name:</label>
+                    <input type="text" class="t-input" value="custom-model">
+                </div>
+            </div>
+        `;
+        container.appendChild(thirdPartyDiv);
+    }
+    
+    // 添加Bing服务配置UI
+    if (config.translation_services && config.translation_services.bing) {
+        const bingDiv = document.createElement('div');
+        bingDiv.className = 't-service';
+        bingDiv.innerHTML = `
+            <h4 data-lang-key="51">Bing Translate API</h4>
+            <div class="t-input-group">
+                <label>无需配置API密钥</label>
+            </div>
+        `;
+        container.appendChild(bingDiv);
+    } else {
+        // 如果Bing配置不存在，则创建一个默认的
+        const bingDiv = document.createElement('div');
+        bingDiv.className = 't-sub-section';
+        bingDiv.innerHTML = `
+            <div class="t-section-header">
+                <h4 data-lang-key="51">Bing</h4>
+                <button class="t-toggle-btn">+</button>
+            </div>
+            <div class="t-content">
+                <div class="t-input-group">
+                    <label>无需API密钥，直接使用微软Bing翻译</label>
+                </div>
+            </div>
+        `;
+        container.appendChild(bingDiv);
+    }
+}
+
