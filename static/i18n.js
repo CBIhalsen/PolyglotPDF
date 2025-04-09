@@ -61,7 +61,8 @@ en: {
         '    </ul>',
     '48': 'Grok Translate API',
     '49': 'Third Party API',
-    '50': 'GLM Translate API'
+    '50': 'GLM Translate API',
+    '51': 'Bing Translate API'
 
 },
 
@@ -116,7 +117,8 @@ en: {
         "\n</ul>",
     "48": "Grok 翻译 API",
     "49": "第三方 API",
-    "50": "智谱 GLM 翻译 API"
+    "50": "智谱 GLM 翻译 API",
+    "51": "必应翻译 API"
 
   },
   "es": {
@@ -169,7 +171,8 @@ en: {
   "47": "Notas:\n\n<ul>\n<li>Los modos OCR y Line están desactivados por defecto\n <ul> PPC (Páginas por llamada)\n <li>OCR se utiliza para escanear documentos PDF basados en imágenes</li>\n <li>El modo Line se utiliza para traducir PDFs con contenido disperso</li>\n </ul>\n</li>\n<li>La función de traducción está habilitada por defecto</li>\n<li>Después de cambiar el modelo de traducción, ingrese el nombre y la clave correspondientes en las opciones de la API de traducción</li>\n<li>\n Line_demo: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo.pdf\" target=\"_blank\">Line-model-demo.pdf</a>\n <br>\n Line_zh: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo_zh.pdf\" target=\"_blank\">Line-model-demo_zh.pdf</a>\n</li>\n</ul>",
     "48": "API de traducción de Grok",
     "49": "API de terceros",
-    "50": "API de traducción de GLM"
+    "50": "API de traducción de GLM",
+    "51": "API de traducción de Bing"
   },
   "fr": {
     "1": "Bibliothèque",
@@ -221,7 +224,8 @@ en: {
   "47": "Remarques:\n\n<ul>\n<li>Les modes OCR et Line sont désactivés par défaut\n <ul> PPC (Pages par appel)\n <li>OCR est utilisé pour la numérisation des PDF basés sur des images</li>\n <li>Le mode Line est utilisé pour traduire des PDF au contenu clairsemé</li>\n </ul>\n</li>\n<li>La fonction de traduction est activée par défaut</li>\n<li>Après avoir changé le modèle de traduction, veuillez saisir le nom et la clé correspondants dans les options de l’API de traduction</li>\n<li>\n Line_demo: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo.pdf\" target=\"_blank\">Line-model-demo.pdf</a>\n <br>\n Line_zh: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo_zh.pdf\" target=\"_blank\">Line-model-demo_zh.pdf</a>\n</li>\n</ul>",
     "48": "Grok Translate API",
     "49": "API Tiers",
-    "50": "API de traduction GLM"
+    "50": "API de traduction GLM",
+    "51": "API de traduction Bing"
   },
       "de": {
     "1": "Bibliothek",
@@ -273,7 +277,8 @@ en: {
   "47": "Hinweise:\n\n<ul>\n<li>OCR- und Line-Modus sind standardmäßig deaktiviert\n <ul> PPC (Seiten pro Aufruf)\n <li>OCR wird zum Scannen bildbasierter PDFs verwendet</li>\n <li>Der Line-Modus wird für die Übersetzung spärlicher PDFs verwendet</li>\n </ul>\n</li>\n<li>Die Übersetzungsfunktion ist standardmäßig aktiviert</li>\n<li>Nach dem Wechsel des Übersetzungsmodells geben Sie bitte den entsprechenden Modellnamen und Schlüssel in den Übersetzungs-API-Optionen ein</li>\n<li>\n Line_demo: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo.pdf\" target=\"_blank\">Line-model-demo.pdf</a>\n <br>\n Line_zh: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo_zh.pdf\" target=\"_blank\">Line-model-demo_zh.pdf</a>\n</li>\n</ul>",
     "48": "Grok Translate API",
     "49": "Drittanbieter-API",
-    "50": "GLM Übersetzer-API"
+    "50": "GLM Übersetzer-API",
+    "51": "Bing Übersetzer-API"
       },
   "ar": {
     "1": "المكتبة",
@@ -325,7 +330,8 @@ en: {
     "47": "ملاحظات:\n\n<ul>\n<li>يتم تعطيل وضعي OCR وLine افتراضيًا\n <ul> PPC (عدد الصفحات لكل طلب)\n <li>يُستخدم OCR لمسح ملفات PDF المُستنِدة إلى الصور ضوئيًا</li>\n <li>يُستخدم وضع Line لترجمة ملفات PDF ذات المحتوى القليل</li>\n </ul>\n</li>\n<li>ميزة الترجمة مفعّلة افتراضيًا</li>\n<li>بعد تغيير نموذج الترجمة، يرجى إدخال اسم النموذج والمفتاح المناسبين في خيارات واجهة برمجة تطبيقات الترجمة</li>\n<li>\n Line_demo: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo.pdf\" target=\"_blank\">Line-model-demo.pdf</a>\n <br>\n Line_zh: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo_zh.pdf\" target=\"_blank\">Line-model-demo_zh.pdf</a>\n</li>\n</ul>",
     "48": "Grok Translate API",
     "49": "واجهة برمجة تطبيقات الطرف الثالث",
-    "50": "واجهة برمجة تطبيقات ترجمة GLM"
+    "50": "واجهة برمجة تطبيقات ترجمة GLM",
+    "51": "واجهة برمجة تطبيقات ترجمة Bing"
   },
   "ja": {
     "1": "ライブラリ",
@@ -377,7 +383,8 @@ en: {
   "47": "注釈:\n\n<ul>\n<li>OCR と Line モードはデフォルトで無効になっています\n <ul> PPC（1回の呼び出しで処理できるページ数）\n <li>OCR は画像ベースの PDF をスキャンするために使用します</li>\n <li>Line モードは内容が疎な PDF を翻訳するために使用します</li>\n </ul>\n</li>\n<li>翻訳機能はデフォルトで有効です</li>\n<li>翻訳モデルを変更した後は、対応するモデル名とキーを翻訳モデル API のオプションに入力してください</li>\n<li>\n Line_demo: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo.pdf\" target=\"_blank\">Line-model-demo.pdf</a>\n <br>\n Line_zh: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo_zh.pdf\" target=\"_blank\">Line-model-demo_zh.pdf</a>\n</li>\n</ul>",
     "48": "Grok 翻訳 API",
     "49": "サードパーティ API",
-    "50": "智谱 GLM 翻訳 API"
+    "50": "智谱 GLM 翻訳 API",
+    "51": "Bing 翻訳 API"
   },
   "ko": {
     "1": "라이브러리",
@@ -429,7 +436,8 @@ en: {
   "47": "참고사항:\n\n<ul>\n<li>OCR 모드와 Line 모드는 기본적으로 비활성화되어 있습니다\n <ul> PPC (호출 당 처리할 수 있는 페이지 수)\n <li>OCR은 이미지 기반 PDF 스캔에 사용됩니다</li>\n <li>Line 모드는 내용이 적은 PDF를 번역하는 데 사용됩니다</li>\n </ul>\n</li>\n<li>번역 기능은 기본적으로 활성화되어 있습니다</li>\n<li>번역 모델을 변경한 후에는 해당 모델 이름 및 키를 번역 모델 API 옵션에 입력해주세요</li>\n<li>\n Line_demo: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo.pdf\" target=\"_blank\">Line-model-demo.pdf</a>\n <br>\n Line_zh: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo_zh.pdf\" target=\"_blank\">Line-model-demo_zh.pdf</a>\n</li>\n</ul>",
     "48": "Grok 번역 API",
     "49": "서드파티 API",
-    "50": "GLM 번역 API"
+    "50": "GLM 번역 API",
+    "51": "Bing 번역 API"
   },
   "ru": {
     "1": "Библиотека",
@@ -481,7 +489,8 @@ en: {
   "47": "Примечания:\n\n<ul>\n<li>Режимы OCR и Line по умолчанию отключены\n <ul> PPC (количество страниц за вызов)\n <li>OCR используется для сканирования PDF-файлов, основанных на изображениях</li>\n <li>Режим Line используется для перевода PDF-файлов с разреженным содержимым</li>\n </ul>\n</li>\n<li>Функция перевода включена по умолчанию</li>\n<li>После смены модели перевода в настройках API необходимо ввести соответствующее название модели и ключ</li>\n<li>\n Line_demo: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo.pdf\" target=\"_blank\">Line-model-demo.pdf</a>\n <br>\n Line_zh: <a href=\"https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/Line-model-demo_zh.pdf\" target=\"_blank\">Line-model-demo_zh.pdf</a>\n</li>\n</ul>",
     "48": "Grok Translate API",
     "49": "API третьих сторон",
-    "50": "GLM API перевода"
+    "50": "GLM API перевода",
+    "51": "Bing API перевода"
   }
 
 };

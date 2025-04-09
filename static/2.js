@@ -7,7 +7,8 @@ let translationKeys = {
     tencent: '',
     Grok: '',  // 修改为大写的Grok
     ThirdParty: '',  // 添加ThirdParty
-    GLM: ''  // 添加GLM
+    GLM: '',  // 添加GLM
+    bing: ''  // 添加Bing
 };
 
 // 关闭设置弹窗
@@ -25,7 +26,7 @@ function getValue() {
 function getValue2() {
     return toggle2.checked ?
            toggle2.getAttribute('data-on') :
-           toggle2.getAttribute('data-off');
+           toggle.getAttribute('data-off');
 }
 
 
