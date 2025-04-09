@@ -30,6 +30,9 @@ class Online_translation:
             translated_list = self.deepl_translation()
         elif self.translation_type == 'youdao':
             translated_list = self.youdao_translation()
+        elif self.translation_type == 'bing':
+            # 使用同步包装器运行异步函数
+            translated_list = self.run_async(self.bing_translation())
         elif self.translation_type == 'openai':
             # 使用同步包装器运行异步函数
             translated_list = self.run_async(self.openai_translation())
@@ -146,6 +149,19 @@ class Online_translation:
             print(f"Error in GLM translation: {e}")
             return [""] * len(self.original_text)
 
+    async def bing_translation(self):
+        translator = lt.Bing_translation()
+        try:
+            translated_texts = await translator.translate(
+                texts=self.original_text,
+                original_lang=self.original_lang,
+                target_lang=self.target_language
+            )
+            print(f"Bing translation completed: {len(translated_texts)} texts processed")
+            return translated_texts
+        except Exception as e:
+            print(f"Error in Bing translation: {e}")
+            return [""] * len(self.original_text)
 
 
 t = time.time()

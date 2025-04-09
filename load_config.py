@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import time
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 
@@ -99,28 +100,53 @@ def write_json_file(filename: str, data: Any) -> None:
         raise ConfigError(f"Error writing {filename}: {str(e)}")
 
 
-def load_config() -> Optional[Dict]:
+# 添加配置文件的最后修改时间和缓存
+_config_last_modified_time = 0
+_config_cache = None
+
+def load_config(force_reload=False) -> Optional[Dict]:
     """
     加载主配置文件，优先使用APP_DATA_DIR中的文件
+    每次调用都会检查文件是否被修改，如果被修改则重新加载
+
+    Args:
+        force_reload: 是否强制重新加载，忽略缓存
 
     Returns:
         Dict: 配置数据，如果加载失败则返回None
     """
+    global _config_last_modified_time, _config_cache
+    
     try:
-        # 检查APP_DATA_DIR中是否有config.json
+        # 确定配置文件路径
         app_config_path = os.path.join(APP_DATA_DIR, "config.json")
-        if os.path.exists(app_config_path):
-            with open(app_config_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        else:
-            # 如果APP_DATA_DIR中没有，则使用当前目录的config.json
+        
+        # 检查文件是否存在于APP_DATA_DIR
+        if not os.path.exists(app_config_path):
+            # 如果不存在，从当前目录复制
             config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
-            with open(config_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            # 首次访问时，将config.json复制到APP_DATA_DIR
-            with open(app_config_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-            return data
+            if os.path.exists(config_path):
+                with open(config_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                # 将config.json复制到APP_DATA_DIR
+                with open(app_config_path, "w", encoding="utf-8") as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+            else:
+                print("Error: config.json not found in current directory")
+                return None
+
+        # 获取文件的最后修改时间
+        current_mtime = os.path.getmtime(app_config_path)
+        
+        # 如果文件被修改或强制重新加载，则重新读取
+        if force_reload or current_mtime > _config_last_modified_time or _config_cache is None:
+            print(f"重新加载配置文件，上次修改时间: {time.ctime(current_mtime)}")
+            with open(app_config_path, "r", encoding="utf-8") as f:
+                _config_cache = json.load(f)
+            _config_last_modified_time = current_mtime
+        
+        return _config_cache
+    
     except Exception as e:
         print(f"Error loading config: {str(e)}")
         return None
@@ -333,7 +359,7 @@ def update_default_services(translation: Optional[bool] = None,
 
 def get_default_services() -> Optional[Dict]:
     """
-    获取默认服务配置值
+    获取默认服务配置值，确保每次都读取最新配置
 
     Returns:
         Dict: 包含default_services的所有配置值的字典,格式为:
@@ -345,7 +371,8 @@ def get_default_services() -> Optional[Dict]:
         如果获取失败则返回None
     """
     try:
-        config = load_config()
+        # 强制重新加载配置以确保获取最新设置
+        config = load_config(force_reload=True)
         if config is None:
             return None
 

@@ -402,8 +402,9 @@ def get_config_json():
     """
     前端页面首次加载时，会通过 GET /config_json 获取配置信息。
     返回的内容就是前端需要渲染的 config.json 数据结构。
+    现在总是返回最新配置
     """
-    config_data = load_config.load_config()
+    config_data = load_config.load_config(force_reload=True)
     if config_data is None:
         return jsonify({}), 500
     return jsonify(config_data)
@@ -462,9 +463,8 @@ def save_all():
 
 @app.route('/api/config', methods=['GET'])
 def get_config_api():
-    # 确保返回的配置中包含grok选项
-    # 通常这个函数应该直接从config.json读取，所以如果config.json已更新，不需要修改这里
-    config_data = load_config.load_config()
+    # 每次请求时强制重新加载配置
+    config_data = load_config.load_config(force_reload=True)
     if config_data is None:
         return jsonify({}), 500
     return jsonify(config_data)
@@ -541,6 +541,35 @@ def update_translation_status(filename, status):
         print(f"已更新文件 {filename} 的翻译状态为 {status}")
     except Exception as e:
         print(f"更新翻译状态时出错: {e}")
+
+# 添加重新加载配置的路由
+@app.route('/api/reload-config', methods=['POST'])
+def reload_config():
+    """
+    强制重新加载配置文件
+    
+    Returns:
+        Response: JSON响应，包含重新加载的结果
+    """
+    try:
+        # 强制重新加载配置
+        config = load_config.load_config(force_reload=True)
+        if config is None:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to reload configuration'
+            }), 500
+            
+        return jsonify({
+            'success': True,
+            'message': 'Configuration reloaded successfully',
+            'config': config
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error reloading configuration: {str(e)}'
+        }), 500
 
 server = None
 

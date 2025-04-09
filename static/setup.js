@@ -47,7 +47,7 @@ document.getElementById('count_article').textContent += data.count;
         },
         'Translation_api': {
             type: 'select',
-            options: ['Doubao', 'Qwen', 'deepseek', 'openai', 'deepL', 'youdao','Grok', 'ThirdParty', 'GLM'],
+            options: ['Doubao', 'Qwen', 'deepseek', 'openai', 'deepL', 'youdao','Grok', 'ThirdParty', 'GLM', 'bing'],
             value: data.default_services.Translation_api
         }
     };
@@ -351,6 +351,35 @@ function loadTranslationServices(config) {
             </div>
         `;
         container.appendChild(thirdPartyDiv);
+    }
+    
+    // 添加Bing服务配置UI
+    if (config.translation_services && config.translation_services.bing) {
+        const bingDiv = document.createElement('div');
+        bingDiv.className = 't-service';
+        bingDiv.innerHTML = `
+            <h4 data-lang-key="51">Bing Translate API</h4>
+            <div class="t-input-group">
+                <label>无需配置API密钥</label>
+            </div>
+        `;
+        container.appendChild(bingDiv);
+    } else {
+        // 如果Bing配置不存在，则创建一个默认的
+        const bingDiv = document.createElement('div');
+        bingDiv.className = 't-sub-section';
+        bingDiv.innerHTML = `
+            <div class="t-section-header">
+                <h4 data-lang-key="51">Bing</h4>
+                <button class="t-toggle-btn">+</button>
+            </div>
+            <div class="t-content">
+                <div class="t-input-group">
+                    <label>无需API密钥，直接使用微软Bing翻译</label>
+                </div>
+            </div>
+        `;
+        container.appendChild(bingDiv);
     }
 }
 
