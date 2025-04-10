@@ -1,8 +1,6 @@
 
 
  let uploadFiles = new Map();
-
-
 // 文件输入处理
 const fileInput = document.getElementById('fileInput');
 
@@ -274,6 +272,23 @@ async function handleNextStep() {
     const targetLang = document.getElementById('targetLang').value;
 
     try {
+            const response = await fetch('/config_json')
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            // 使用 response.json() 來解析 JSON 數據
+            const { translation_services } = await response.json();
+            if(translation_services){
+                let hasauthKey = Object.entries(translation_services).some(([key, config]) => {
+                    return config['auth_key'] || config['app_key']
+                });
+                if(!hasauthKey){
+                    throw new Error('not config translation services authKey');
+                }
+            }else{
+                throw new Error('data error');
+            }
             // 1秒后切换界面的Promise
             const switchUIPromise = new Promise((resolve) => {
                 setTimeout(() => {
@@ -319,6 +334,7 @@ async function handleNextStep() {
 
         } catch (error) {
         console.error('Error:', error);
+        alert(error)
         // showError('操作失败，请稍后重试');
     }
 
