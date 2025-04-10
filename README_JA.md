@@ -81,6 +81,21 @@ python app.py
 <details>
   <summary>Docker 使用方法</summary>
 
+## インストール準備
+
+```bash
+# 必要なディレクトリを作成
+mkdir -p config fonts static/original static/target static/merged_pdf
+
+# 設定ファイルを作成
+nano config/config.json    # または任意のテキストエディタを使用
+# プロジェクトの設定テンプレートをこのファイルにコピー
+# APIキーなどの設定情報を入力してください
+
+# 権限を設定
+chmod -R 755 config fonts static
+```
+
 ## クイックスタート
 
 以下のコマンドでPolyglotPDF Dockerイメージをプルして実行：
@@ -90,7 +105,13 @@ python app.py
 docker pull 2207397265/polyglotpdf:latest
 
 # コンテナを実行
-docker run -d -p 12226:12226 --name polyglotpdf 2207397265/polyglotpdf:latest
+docker run -d -p 12226:12226 --name polyglotpdf \
+  -v ./config/config.json:/app/config.json \
+  -v ./fonts:/app/fonts \
+  -v ./static/original:/app/static/original \
+  -v ./static/target:/app/static/target \
+  -v ./static/merged_pdf:/app/static/merged_pdf \
+  2207397265/polyglotpdf:latest
 ```
 
 ## アプリケーションへのアクセス
@@ -111,6 +132,12 @@ services:
     image: 2207397265/polyglotpdf:latest
     ports:
       - "12226:12226"
+    volumes:
+      - ./config.json:/app/config.json # 設定ファイル
+      - ./fonts:/app/fonts # フォントファイル
+      - ./static/original:/app/static/original # 原本PDF
+      - ./static/target:/app/static/target # 翻訳後PDF
+      - ./static/merged_pdf:/app/static/merged_pdf # 結合PDF
     restart: unless-stopped
 ```
 

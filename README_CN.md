@@ -82,6 +82,21 @@ python app.py
 <details>
   <summary>Docker 安装</summary>
 
+## 安装准备
+
+```bash
+# 创建必要目录
+mkdir -p config fonts static/original static/target static/merged_pdf
+
+# 创建配置文件
+nano config/config.json    # 或使用任何文本编辑器
+# 复制项目中的配置模板到该文件
+# 注意填写您的API密钥等配置信息
+
+# 设置权限
+chmod -R 755 config fonts static
+```
+
 ## 快速启动
 
 使用以下命令拉取并运行 PolyglotPDF Docker 镜像：
@@ -91,7 +106,13 @@ python app.py
 docker pull 2207397265/polyglotpdf:latest
 
 # 运行容器
-docker run -d -p 12226:12226 --name polyglotpdf 2207397265/polyglotpdf:latest
+docker run -d -p 12226:12226 --name polyglotpdf \
+  -v ./config/config.json:/app/config.json \
+  -v ./fonts:/app/fonts \
+  -v ./static/original:/app/static/original \
+  -v ./static/target:/app/static/target \
+  -v ./static/merged_pdf:/app/static/merged_pdf \
+  2207397265/polyglotpdf:latest
 ```
 
 ## 访问应用
@@ -112,6 +133,12 @@ services:
     image: 2207397265/polyglotpdf:latest
     ports:
       - "12226:12226"
+    volumes:
+      - ./config/config.json:/app/config.json # 配置文件
+      - ./fonts:/app/fonts # 字体文件
+      - ./static/original:/app/static/original # 原始PDF
+      - ./static/target:/app/static/target # 翻译后PDF
+      - ./static/merged_pdf:/app/static/merged_pdf # 合并PDF
     restart: unless-stopped
 ```
 
