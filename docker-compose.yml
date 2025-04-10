@@ -1,13 +1,14 @@
-
-
 version: '3'
 services:
   polyglotpdf:
-    build: .
+    image: 2207397265/polyglotpdf:latest
     ports:
       - "12226:12226"
     volumes:
-      - ./config.json:/app/config.json
-    environment:
-      - PORT=12226
+      - ./config/config.json:/app/config.json # 配置文件
+      - ./fonts:/app/fonts # 字体文件
+      - ./static/original:/app/static/original # 原始PDF
+      - ./static/target:/app/static/target # 翻译后PDF
+      - ./static/merged_pdf:/app/static/merged_pdf # 合并PDF
+    restart: unless-stopped
 

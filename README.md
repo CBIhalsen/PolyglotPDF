@@ -109,6 +109,21 @@ Open your browser and navigate to `http://127.0.0.1:8000`
 <details>
   <summary>Docker Installation</summary>
 
+## Installation Preparation
+
+```bash
+# Create necessary directories
+mkdir -p config fonts static/original static/target static/merged_pdf
+
+# Create config file
+nano config/config.json    # or use any text editor
+# Copy configuration template from the project into this file
+# Make sure to fill in your API keys and other configuration details
+
+# Set permissions
+chmod -R 755 config fonts static
+```
+
 ### Quick Start
 
 Use the following commands to pull and run the PolyglotPDF Docker image:
@@ -118,7 +133,13 @@ Use the following commands to pull and run the PolyglotPDF Docker image:
 docker pull 2207397265/polyglotpdf:latest
 
 # Run container
-docker run -d -p 12226:12226 --name polyglotpdf 2207397265/polyglotpdf:latest
+docker run -d -p 12226:12226 --name polyglotpdf \
+  -v ./config/config.json:/app/config.json \
+  -v ./fonts:/app/fonts \
+  -v ./static/original:/app/static/original \
+  -v ./static/target:/app/static/target \
+  -v ./static/merged_pdf:/app/static/merged_pdf \
+  2207397265/polyglotpdf:latest
 ```
 
 ### Access the Application
@@ -139,6 +160,12 @@ services:
     image: 2207397265/polyglotpdf:latest
     ports:
       - "12226:12226"
+    volumes:
+      - ./config.json:/app/config.json # Configuration file
+      - ./fonts:/app/fonts # Font files
+      - ./static/original:/app/static/original # Original PDFs
+      - ./static/target:/app/static/target # Translated PDFs
+      - ./static/merged_pdf:/app/static/merged_pdf # Merged PDFs
     restart: unless-stopped
 ```
 

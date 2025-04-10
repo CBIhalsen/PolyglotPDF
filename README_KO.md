@@ -81,6 +81,21 @@ python app.py
 <details>
   <summary>Docker 사용 방법</summary>
 
+## 설치 준비
+
+```bash
+# 필요한 디렉토리 생성
+mkdir -p config fonts static/original static/target static/merged_pdf
+
+# 설정 파일 생성
+nano config/config.json    # 또는 원하는 텍스트 편집기 사용
+# 프로젝트의 설정 템플릿을 이 파일에 복사
+# API 키 등의 설정 정보를 입력하세요
+
+# 권한 설정
+chmod -R 755 config fonts static
+```
+
 ## 빠른 시작
 
 다음 명령을 사용하여 PolyglotPDF Docker 이미지를 가져와 실행:
@@ -90,7 +105,13 @@ python app.py
 docker pull 2207397265/polyglotpdf:latest
 
 # 컨테이너 실행
-docker run -d -p 12226:12226 --name polyglotpdf 2207397265/polyglotpdf:latest
+docker run -d -p 12226:12226 --name polyglotpdf \
+  -v ./config/config.json:/app/config.json \
+  -v ./fonts:/app/fonts \
+  -v ./static/original:/app/static/original \
+  -v ./static/target:/app/static/target \
+  -v ./static/merged_pdf:/app/static/merged_pdf \
+  2207397265/polyglotpdf:latest
 ```
 
 ## 애플리케이션 접속
@@ -111,6 +132,12 @@ services:
     image: 2207397265/polyglotpdf:latest
     ports:
       - "12226:12226"
+    volumes:
+      - ./config.json:/app/config.json # 설정 파일
+      - ./fonts:/app/fonts # 폰트 파일
+      - ./static/original:/app/static/original # 원본 PDF
+      - ./static/target:/app/static/target # 번역된 PDF
+      - ./static/merged_pdf:/app/static/merged_pdf # 병합된 PDF
     restart: unless-stopped
 ```
 
