@@ -49,6 +49,7 @@
             document.getElementById('uploadModal').style.display = 'block';
             document.getElementById('upload_content-1').style.display = 'block';
             document.getElementById('upload_content-2').style.display = 'none';
+            document.getElementById('languageSelection').style.display = 'none';
 
         }
 
