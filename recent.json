@@ -1,38 +1,11 @@
 [
   {
     "index": 0,
-    "date": "2025-04-02 19:20:27",
-    "name": "概率论 [112-117].pdf",
+    "date": "2025-04-13 01:34:09",
+    "name": "2403.20127v1.pdf",
     "original_language": "auto",
     "target_language": "zh",
-    "read": "1",
-    "statue": "1"
-  },
-  {
-    "index": 1,
-    "date": "2025-04-02 19:29:47",
-    "name": "Introspection and consciousness (Smithies, Declan Stoljar, Daniel) (Z-Library) [51-100].pdf",
-    "original_language": "auto",
-    "target_language": "zh",
-    "read": "1",
-    "statue": "1"
-  },
-  {
-    "index": 2,
-    "date": "2025-04-02 20:12:40",
-    "name": "Introspection and consciousness (Smithies, Declan Stoljar, Daniel) (Z-Library) [251-300].pdf",
-    "original_language": "auto",
-    "target_language": "zh",
-    "read": "1",
-    "statue": "1"
-  },
-  {
-    "index": 3,
-    "date": "2025-04-02 20:13:43",
-    "name": "概率论 [112-117].pdf",
-    "original_language": "auto",
-    "target_language": "zh",
-    "read": "1",
+    "read": "0",
     "statue": "1"
   }
 ]
