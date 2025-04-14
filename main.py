@@ -412,7 +412,40 @@ class main_function:
             # 先覆盖所有区域
             for block in blocks:
                 coords = block[1]  # (x0, y0, x1, y1)
-                rect = fitz.Rect(*coords)
+                
+                # 智能计算扩展比例，根据翻译文本和原文的长度比来决定
+                original_text = block[0]
+                translated_text = block[2] if block[2] is not None else original_text
+                
+                # 计算扩展因子：最大限制为5%的扩展
+                len_ratio = min(1.05, max(1.01, len(translated_text) / max(1, len(original_text))))
+                
+                x0, y0, x1, y1 = coords
+                width = x1 - x0
+                height = y1 - y0
+                
+                # 只向右侧扩展，不改变左侧起点
+                h_expand = (len_ratio - 1) * width
+                
+                # 应用扩展，只修改x1值
+                x1 = x1 + h_expand
+                
+                # 缩小上下方向的覆盖区域，使其更加紧凑
+                # 计算上下边距缩小量，但保留一个最小边距
+                vertical_margin = min(height * 0.1, 3)  # 上下各缩小10%，但最多3个点
+                
+                # 应用上下缩小
+                y0 = y0 + vertical_margin
+                y1 = y1 - vertical_margin
+                
+                # 确保最小高度
+                if y1 - y0 < 10:  # 保证最小高度为10pt
+                    y_center = (coords[1] + coords[3]) / 2  # 使用原始bbox的中心点
+                    y0 = y_center - 5
+                    y1 = y_center + 5
+                
+                enlarged_coords = (x0, y0, x1, y1)
+                rect = fitz.Rect(*enlarged_coords)
 
                 # 先尝试使用 Redact 遮盖
                 try:
@@ -431,9 +464,9 @@ class main_function:
                 
                 # 分类文本块
                 if len(block) > 6 and block[6]:  # text_bold
-                    bold_blocks.append(block)
+                    bold_blocks.append((block, enlarged_coords))
                 else:
-                    normal_blocks.append(block)
+                    normal_blocks.append((block, enlarged_coords))
             
             # 处理普通字体文本块
             if normal_blocks:
@@ -462,23 +495,29 @@ class main_function:
                     css_prefix = self.font_css_cache[font_family]
                 
                 # 处理每个普通字体文本块
-                for block in normal_blocks:
-                    coords = block[1]
+                for block_data in normal_blocks:
+                    block, enlarged_coords = block_data
                     # 如果第三个元素是译文，则用之，否则用原文
                     translated_text = block[2] if block[2] is not None else block[0]
                     angle = block[3] if len(block) > 3 else 0
                     html_color = block[4] if len(block) > 4 else '#000000'
                     text_indent = block[5] if len(block) > 5 else 0
                     text_size = float(block[7]) + 3 if len(block) > 7 else 12
-                    rect = fitz.Rect(*coords)
                     
-                    # 组合CSS
+                    # 使用扩大后的坐标创建矩形
+                    rect = fitz.Rect(*enlarged_coords)
+                    
+                    # 组合CSS，添加自动调整大小和自动换行属性
                     css = css_prefix + f"""
                     * {{
                         font-family: "{font_family}";
                         color: {html_color};
                         text-indent: {text_indent}pt;  
                         font-size: {text_size}pt; 
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                        width: 100%;
+                        box-sizing: border-box;
                     }}
                     """
                     
@@ -517,23 +556,29 @@ class main_function:
                     css_prefix = self.font_css_cache[font_family]
                 
                 # 处理每个粗体字体文本块
-                for block in bold_blocks:
-                    coords = block[1]
+                for block_data in bold_blocks:
+                    block, enlarged_coords = block_data
                     # 如果第三个元素是译文，则用之，否则用原文
                     translated_text = block[2] if block[2] is not None else block[0]
                     angle = block[3] if len(block) > 3 else 0
                     html_color = block[4] if len(block) > 4 else '#000000'
                     text_indent = block[5] if len(block) > 5 else 0
                     text_size = float(block[7]) + 3 if len(block) > 7 else 12
-                    rect = fitz.Rect(*coords)
                     
-                    # 组合CSS
+                    # 使用扩大后的坐标创建矩形
+                    rect = fitz.Rect(*enlarged_coords)
+                    
+                    # 组合CSS，添加自动调整大小和自动换行属性
                     css = css_prefix + f"""
                     * {{
                         font-family: "{font_family}";
                         color: {html_color};
                         text-indent: {text_indent}pt;  
-                        font-size: {text_size}pt; 
+                        font-size: {text_size}pt;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                        width: 100%;
+                        box-sizing: border-box;
                     }}
                     """
                     
