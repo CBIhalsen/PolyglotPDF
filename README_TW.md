@@ -81,7 +81,21 @@ python app.py
 <details>
   <summary>Docker 使用說明</summary>
 
-## 安裝準備
+## 無持久化快速啟動
+
+如果您想快速測試PolyglotPDF而不設置持久化目錄：
+
+```bash
+# 先拉取映像
+docker pull 2207397265/polyglotpdf:latest
+
+# 不掛載卷的容器運行（容器刪除後數據將丟失）
+docker run -d -p 12226:12226 --name polyglotpdf 2207397265/polyglotpdf:latest
+```
+
+這是嘗試PolyglotPDF最快的方式，但容器停止後，所有上傳的PDF和配置更改都會丟失。
+
+## 持久化存儲安裝
 
 ```bash
 # 創建必要目錄
