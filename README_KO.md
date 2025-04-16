@@ -81,7 +81,21 @@ python app.py
 <details>
   <summary>Docker 사용 방법</summary>
 
-## 설치 준비
+## 지속성 없는 빠른 시작
+
+지속적인 디렉토리를 설정하지 않고 PolyglotPDF를 빠르게 테스트하려면:
+
+```bash
+# 먼저 이미지 가져오기
+docker pull 2207397265/polyglotpdf:latest
+
+# 볼륨 마운트 없이 컨테이너 실행 (컨테이너 제거 시 데이터 손실)
+docker run -d -p 12226:12226 --name polyglotpdf 2207397265/polyglotpdf:latest
+```
+
+이것은 PolyglotPDF를 시도하는 가장 빠른 방법이지만, 컨테이너가 중지된 후 업로드된 모든 PDF와 구성 변경 사항이 손실됩니다.
+
+## 지속적 스토리지로 설치
 
 ```bash
 # 필요한 디렉토리 생성

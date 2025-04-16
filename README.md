@@ -109,7 +109,21 @@ Open your browser and navigate to `http://127.0.0.1:8000`
 <details>
   <summary>Docker Installation</summary>
 
-## Installation Preparation
+## Quick Start Without Persistence
+
+If you want to quickly test PolyglotPDF without setting up persistent directories:
+
+```bash
+# Pull image first
+docker pull 2207397265/polyglotpdf:latest
+
+# Run container without volume mounts (data will be lost when container is removed)
+docker run -d -p 12226:12226 --name polyglotpdf 2207397265/polyglotpdf:latest
+```
+
+This is the fastest way to try PolyglotPDF, but any uploaded PDFs and configuration changes will be lost when the container stops.
+
+## Installation with Persistent Storage
 
 ```bash
 # Create necessary directories

@@ -82,7 +82,21 @@ python app.py
 <details>
   <summary>Docker 安装</summary>
 
-## 安装准备
+## 无持久化快速启动
+
+如果您想快速测试PolyglotPDF而不设置持久化目录：
+
+```bash
+# 先拉取镜像
+docker pull 2207397265/polyglotpdf:latest
+
+# 不挂载卷的容器运行（容器删除后数据将丢失）
+docker run -d -p 12226:12226 --name polyglotpdf 2207397265/polyglotpdf:latest
+```
+
+这是尝试PolyglotPDF最快的方式，但容器停止后，所有上传的PDF和配置更改都会丢失。
+
+## 持久化存储安装
 
 ```bash
 # 创建必要目录

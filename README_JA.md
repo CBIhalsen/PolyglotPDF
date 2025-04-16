@@ -81,7 +81,21 @@ python app.py
 <details>
   <summary>Docker 使用方法</summary>
 
-## インストール準備
+## 永続化なしのクイックスタート
+
+持続的なディレクトリを設定せずにPolyglotPDFをすぐにテストしたい場合：
+
+```bash
+# まずイメージをプル
+docker pull 2207397265/polyglotpdf:latest
+
+# ボリュームマウントなしでコンテナを実行（コンテナ削除時にデータは失われます）
+docker run -d -p 12226:12226 --name polyglotpdf 2207397265/polyglotpdf:latest
+```
+
+これはPolyglotPDFを試す最も速い方法ですが、コンテナ停止後、アップロードしたPDFや設定変更はすべて失われます。
+
+## 永続的ストレージでのインストール
 
 ```bash
 # 必要なディレクトリを作成
