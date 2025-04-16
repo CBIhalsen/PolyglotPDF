@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -441,8 +440,10 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
 
 def is_math(font_info_list, text_len, text, font_size):
     """
-    判断文本是否为数学公式(或长度太短)，如果是，则排除(标记为 math)。
-    如果长度很短且几乎全为数字/标点/符号，则返回 True。
+    判断文本是否为数学公式(或长度太短)。
+    如果是数学公式，则返回 True。
+    如果长度很短且几乎全为数字/标点/符号，则返回 "abandon"。
+    否则返回 False。
     """
 
     # 用于去除空格计算长度
@@ -458,6 +459,8 @@ def is_math(font_info_list, text_len, text, font_size):
     # 如果文字过短，就检查每个字符是否都是数字/标点/符号/空白
     if text_len < 1.5 * font_size:
         stripped_text = text.strip()
+        all_special_chars = True
+        
         for ch in stripped_text:
             cat = unicodedata.category(ch)
             # 允许通过的情况：
@@ -473,11 +476,15 @@ def is_math(font_info_list, text_len, text, font_size):
                 or cat.startswith('Z')
             ):
                 # 如果发现不属于上述几类，则判定为非“纯数字/标点/符号”
-                return False
+                all_special_chars = False
+                break
 
-        # 如果走到这里，说明所有字符都在我们的“允许”范围内
-        # print(stripped_text, '纯数字/标点/符号')
-        return True
+        # 如果所有字符都在我们的“允许”范围内，则标记为 "abandon"
+        if all_special_chars:
+            # print(stripped_text, '纯数字/标点/符号，标记为abandon')
+            return "abandon"
+            
+        return False
 
     # 其它情况默认不视为 math
     return False
@@ -799,8 +806,13 @@ def get_new_blocks(page):
             # 判断是否是 math（行类型先设置，这里只是初步）
             final_text = line_info['text'] or ''
 
-            if final_text and is_math(line_info['font_names'], text_len, final_text,line_info['font_size']):
-                line_info['type'] = 'math'
+            if final_text:
+                result = is_math(line_info['font_names'], text_len, final_text, line_info['font_size'])
+                if result == True:
+                    line_info['type'] = 'math'
+                elif result == "abandon":
+                    line_info['type'] = 'abandon'
+            
             block_idx = line_info['block_index']
             temp_block_dict[block_idx]['lines'].append(
                 (idx, line_info['type'], text_len)
@@ -839,16 +851,19 @@ def get_new_blocks(page):
             # print(f" 行类型(type): {line_info['type']}")
             # print("-" * 50)
 
-            new_blocks.append([
-                line_info['text'],
-                tuple(line_info['line_bbox']),
-                line_info['type'],
-                line_info['rotation_angle'],
-                line_info['font_color'],
-                line_info['indent'],
-                line_info['font_bold'],
-                line_info['font_size']
-            ])
+
+            # 排除被标记为 abandon 的块
+            if line_info['type'] != 'abandon':
+                new_blocks.append([
+                    line_info['text'],
+                    tuple(line_info['line_bbox']),
+                    line_info['type'],
+                    line_info['rotation_angle'],
+                    line_info['font_color'],
+                    line_info['indent'],
+                    line_info['font_bold'],
+                    line_info['font_size']
+                ])
 
         return new_blocks
 
