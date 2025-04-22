@@ -5,6 +5,7 @@ from typing import List, Dict, Any
 import glob
 from collections import OrderedDict
 import re
+import shutil
 
 def parse_merged_filename(filename: str) -> Dict[str, str]:
     """从合并PDF文件名解析出原始文件名、原始语言和目标语言"""
@@ -84,15 +85,47 @@ def update_config_count(count: int) -> bool:
         print(f"更新config.json的count值时发生错误: {str(e)}")
         return False
 
+def validate_json_file(file_path: str) -> bool:
+    """
+    验证JSON文件格式是否正确
+    
+    Args:
+        file_path: JSON文件路径
+        
+    Returns:
+        bool: 文件格式是否有效
+    """
+    try:
+        if os.path.exists(file_path):
+            with open(file_path, "r", encoding="utf-8") as f:
+                json.load(f)
+            return True
+        return False
+    except Exception as e:
+        print(f"JSON文件格式无效: {str(e)}")
+        return False
+
 def update_recent_json():
     """更新recent.json文件，先清空现有配置，然后从索引0开始重新生成"""
     # 从merged_pdf目录读取文件
     merged_path = os.path.join("static", "merged_pdf")
     
-    # 不读取现有文件，直接创建一个空数组
-    existing_entries = []
+    # 创建备份
+    if os.path.exists("recent.json"):
+        try:
+            shutil.copy2("recent.json", "recent.json.bak")
+            print(f"已创建备份文件: recent.json.bak")
+        except Exception as e:
+            print(f"创建备份文件失败: {str(e)}")
     
     # 扫描merged_pdf目录获取文件
+    if not os.path.exists(merged_path):
+        print(f"警告: 目录不存在 {merged_path}")
+        try:
+            os.makedirs(merged_path, exist_ok=True)
+        except Exception as e:
+            print(f"创建目录失败: {str(e)}")
+    
     merged_files = glob.glob(os.path.join(merged_path, "*.pdf"))
     new_entries = []
     
@@ -104,14 +137,32 @@ def update_recent_json():
     for i, entry in enumerate(new_entries):
         entry["index"] = i 
     
-    # 保存新生成的条目
-    with open("recent.json", "w", encoding="utf-8") as f:
-        json.dump(new_entries, f, ensure_ascii=False, indent=2)
-    
-    # 更新config.json中的count值为新条目的数量
-    update_config_count(len(new_entries))
-    
-    print(f"已重置并更新recent.json")
+    # 保存前先验证数据格式
+    try:
+        # 使用json.dumps检查序列化是否正常
+        json_str = json.dumps(new_entries, ensure_ascii=False, indent=2)
+        
+        # 写入文件
+        with open("recent.json", "w", encoding="utf-8") as f:
+            f.write(json_str)
+        
+        # 验证写入的文件
+        if not validate_json_file("recent.json"):
+            raise Exception("写入的JSON文件验证失败")
+        
+        # 更新config.json中的count值为新条目的数量
+        update_config_count(len(new_entries))
+        
+        print(f"已重置并更新recent.json，共 {len(new_entries)} 条记录")
+    except Exception as e:
+        print(f"更新recent.json文件失败: {str(e)}")
+        # 尝试恢复备份
+        if os.path.exists("recent.json.bak"):
+            try:
+                shutil.copy2("recent.json.bak", "recent.json")
+                print("已从备份恢复recent.json文件")
+            except Exception as e2:
+                print(f"从备份恢复失败: {str(e2)}")
 
 if __name__ == "__main__":
     update_recent_json()
