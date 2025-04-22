@@ -6,9 +6,17 @@ import Bing_translation as bt
 import LLMS_translation as lt
 import asyncio
 from functools import wraps
+import threading
+from queue import Queue
 
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(loop)
+# 创建一个信号量，限制并发为1（串行处理）
+translation_semaphore = asyncio.Semaphore(1)
+# 创建一个队列处理锁，确保队列操作线程安全
+queue_lock = threading.Lock()
+# 创建翻译请求队列
+translation_queue = Queue()
+# 标记队列处理器是否已启动
+queue_processor_started = False
 
 def retry_on_error(max_retries=2, delay=1):
     def decorator(func):
@@ -48,6 +56,42 @@ def retry_on_error(max_retries=2, delay=1):
         return wrapper_async if asyncio.iscoroutinefunction(func) else wrapper_sync
     return decorator
 
+# 队列处理器函数
+def process_translation_queue():
+    global queue_processor_started
+    
+    while True:
+        task = translation_queue.get()
+        if task is None:  # 终止信号
+            translation_queue.task_done()
+            break
+            
+        try:
+            # 解包任务参数
+            func, args, kwargs, result_holder = task
+            # 创建新的事件循环
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            # 在新的事件循环中执行任务
+            result = loop.run_until_complete(func(*args, **kwargs))
+            # 存储结果
+            result_holder['result'] = result
+            # 关闭事件循环
+            loop.close()
+        except Exception as e:
+            print(f"Error processing translation task: {str(e)}")
+            result_holder['result'] = None
+        finally:
+            translation_queue.task_done()
+
+# 启动队列处理线程
+def ensure_queue_processor():
+    global queue_processor_started
+    with queue_lock:
+        if not queue_processor_started:
+            threading.Thread(target=process_translation_queue, daemon=True).start()
+            queue_processor_started = True
+
 class Online_translation:
     def __init__(self, original_language, target_language, translation_type, texts_to_process=[]):
         self.model_name = f"opus-mt-{original_language}-{target_language}"
@@ -55,9 +99,26 @@ class Online_translation:
         self.target_language = target_language
         self.original_lang = original_language
         self.translation_type = translation_type
+        # 确保队列处理器已启动
+        ensure_queue_processor()
 
     def run_async(self, coro):
-        return loop.run_until_complete(coro)
+        # 创建结果容器
+        result_holder = {'result': None}
+        
+        # 将协程包装为任务并放入队列
+        translation_queue.put((self._run_coro_with_semaphore, [coro], {}, result_holder))
+        
+        # 等待任务完成
+        translation_queue.join()
+        
+        # 返回结果
+        return result_holder['result']
+    
+    async def _run_coro_with_semaphore(self, coro):
+        # 使用信号量确保串行执行
+        async with translation_semaphore:
+            return await coro
 
     def translation(self):
         print('翻译api', self.translation_type)
@@ -203,9 +264,19 @@ class Online_translation:
             print(f"Error in GLM translation: {e}")
             return [""] * len(self.original_text)
 
-    
+# 确保程序退出前清理资源
+import atexit
+
+@atexit.register
+def cleanup():
+    # 发送终止信号
+    if queue_processor_started:
+        translation_queue.put(None)
+        # 给队列处理器一些时间来处理终止信号
+        translation_queue.join()
 
 t = time.time()
+
 def split_text_to_fit_token_limit(text, encoder, index_text, max_length=280):
     tokens = encoder.encode(text)
     if len(tokens) <= max_length:

@@ -6,6 +6,7 @@ import fitz
 import os
 
 import load_config
+import update_recent  # 导入update_recent模块
 
 from datetime import datetime
 import pdf_thumbnail
@@ -209,6 +210,11 @@ class main_function:
         print("正在创建双语对照PDF...")
         merge_pdf.merge_pdfs_horizontally(pdf1_path=self.full_path,pdf2_path=target_path,output_path=merged_output_path)
         print(f"处理完成！输出文件: {target_path}")
+        
+        # 更新recent.json文件
+        print("正在更新最近处理记录...")
+        update_recent.update_recent_json()
+        print("记录更新完成！")
 
     def start(self, image, pag_num):
         """
