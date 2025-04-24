@@ -166,6 +166,8 @@ def main():
         'app.py': True,
         'index.html': True,
         'pdfviewer.html': True,
+        'pdfviewer2.html': True,  
+        'merge_pdf.py': True,     
         'config.json': True,
         'static': True
     }
@@ -219,6 +221,17 @@ def main():
     if (current_dir / 'pdfviewer.html').exists():
         print(f"复制 pdfviewer.html 到 {dist_app_dir}")
         shutil.copy2(current_dir / 'pdfviewer.html', dist_app_dir / 'pdfviewer.html')
+        
+    # 复制 pdfviewer2.html 
+    if (current_dir / 'pdfviewer2.html').exists():
+        print(f"复制 pdfviewer2.html 到 {dist_app_dir}")
+        shutil.copy2(current_dir / 'pdfviewer2.html', dist_app_dir / 'pdfviewer2.html')
+        
+    # 复制 merge_pdf.py 
+    if (current_dir / 'merge_pdf.py').exists():
+        print(f"复制 merge_pdf.py 到 {dist_app_dir}")
+        shutil.copy2(current_dir / 'merge_pdf.py', dist_app_dir / 'merge_pdf.py')
+        
     # 复制 config.json
     if (current_dir / 'config.json').exists():
         print(f"复制 config.json 到 {dist_app_dir}")
