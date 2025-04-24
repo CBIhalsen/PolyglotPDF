@@ -133,8 +133,13 @@ class BingTranslator:
         if not text or not text.strip():
             return ""
             
-        # Bing翻译最大长度限制
-        text = text[:1000]
+        # 如果文本超过1000字符，分段翻译
+        if len(text) > 1000:
+            result = []
+            for i in range(0, len(text), 1000):
+                chunk = text[i:i+1000]
+                result.append(self.do_translate(chunk))
+            return ''.join(result)
         
         url, ig, iid, key, token = self.find_sid()
         response = self.session.post(
@@ -207,8 +212,13 @@ class AsyncBingTranslator:
         if not text or not text.strip():
             return ""
         
-        # Bing翻译最大长度限制
-        text = text[:1000]
+        # 如果文本超过1000字符，分段翻译
+        if len(text) > 1000:
+            result = []
+            for i in range(0, len(text), 1000):
+                chunk = text[i:i+1000]
+                result.append(self.do_translate(chunk))
+            return ''.join(result)
         
         url, ig, iid, key, token = await self.find_sid(session)
         
