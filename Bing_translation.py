@@ -72,6 +72,53 @@ def translate_with_asyncio(texts, original_lang, target_lang):
     return loop.run_until_complete(main())
 
 
+def split_text_intelligently(text, max_length=1000):
+    """智能分段文本，尽量在句子边界处断开"""
+    if len(text) <= max_length:
+        return [text]
+        
+    parts = []
+    start = 0
+    
+    while start < len(text):
+        # 如果剩余文本不足max_length，直接添加
+        if len(text) - start <= max_length:
+            parts.append(text[start:])
+            break
+            
+        # 计算当前段落的结束位置
+        end = start + max_length
+        
+        # 尝试在句子结束处断开（优先级：段落 > 句号 > 逗号 > 空格）
+        paragraph_break = text.rfind('\n', start, end)
+        if paragraph_break != -1 and paragraph_break > start + max_length * 0.5:
+            end = paragraph_break + 1
+        else:
+            # 寻找句号、问号、感叹号等
+            for sep in ['. ', '。', '？', '！', '? ', '! ']:
+                pos = text.rfind(sep, start, end)
+                if pos != -1 and pos > start + max_length * 0.5:
+                    end = pos + len(sep)
+                    break
+            else:
+                # 如果没找到句号，尝试在逗号处断开
+                for sep in [', ', '，', '; ', '；']:
+                    pos = text.rfind(sep, start, end)
+                    if pos != -1 and pos > start + max_length * 0.7:
+                        end = pos + len(sep)
+                        break
+                else:
+                    # 实在没有好的断点就在空格处断开
+                    pos = text.rfind(' ', start + max_length * 0.8, end)
+                    if pos != -1:
+                        end = pos + 1
+        
+        parts.append(text[start:end])
+        start = end
+    
+    return parts
+
+
 class BingTranslator:
     name = "bing"
     lang_map = {"zh": "zh-Hans"}
@@ -133,14 +180,28 @@ class BingTranslator:
         if not text or not text.strip():
             return ""
             
-
         # 如果文本超过1000字符，分段翻译
         if len(text) > 1000:
-            result = []
-            for i in range(0, len(text), 1000):
-                chunk = text[i:i+1000]
-                result.append(self.do_translate(chunk))
-            return ''.join(result)
+            parts = split_text_intelligently(text)
+            translated_parts = []
+            
+            for part in parts:
+                url, ig, iid, key, token = self.find_sid()
+                response = self.session.post(
+                    f"{url}ttranslatev3?IG={ig}&IID={iid}",
+                    data={
+                        "fromLang": self.lang_in,
+                        "to": self.lang_out,
+                        "text": part[:1000],  # 确保不超过1000
+                        "token": token,
+                        "key": key,
+                    },
+                    headers=self.headers,
+                )
+                response.raise_for_status()
+                translated_parts.append(response.json()[0]["translations"][0]["text"])
+                
+            return ''.join(translated_parts)
         
         url, ig, iid, key, token = self.find_sid()
         response = self.session.post(
@@ -213,19 +274,38 @@ class AsyncBingTranslator:
         if not text or not text.strip():
             return ""
         
-
         # 如果文本超过1000字符，分段翻译
         if len(text) > 1000:
-            result = []
-            for i in range(0, len(text), 1000):
-                chunk = text[i:i+1000]
-                result.append(self.do_translate(chunk))
-            return ''.join(result)
+            parts = split_text_intelligently(text)
+            translated_parts = []
+            
+            # 非递归异步处理每个文本块
+            for part in parts:
+                url, ig, iid, key, token = await self.find_sid(session)
+                
+                async with session.post(
+                    f"{url}ttranslatev3?IG={ig}&IID={iid}",
+                    data={
+                        "fromLang": self.lang_in,
+                        "to": self.lang_out,
+                        "text": part[:1000],  # 确保不超过1000
+                        "token": token,
+                        "key": key,
+                    },
+                    headers=self.headers,
+                ) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        translated_parts.append(result[0]["translations"][0]["text"])
+                    else:
+                        print(f"翻译请求失败: HTTP {response.status}")
+                        translated_parts.append("")
+            
+            return ''.join(translated_parts)
         
         try:
             url, ig, iid, key, token = await self.find_sid(session)
-            
-            async with session.post(
+            response = await session.post(
                 f"{url}ttranslatev3?IG={ig}&IID={iid}",
                 data={
                     "fromLang": self.lang_in,
@@ -235,13 +315,13 @@ class AsyncBingTranslator:
                     "key": key,
                 },
                 headers=self.headers,
-            ) as response:
-                if response.status == 200:
-                    result = await response.json()
-                    return result[0]["translations"][0]["text"]
-                else:
-                    print(f"翻译请求失败: HTTP {response.status}")
-                    return ""
+            )
+            if response.status == 200:
+                result = await response.json()
+                return result[0]["translations"][0]["text"]
+            else:
+                print(f"翻译请求失败: HTTP {response.status}")
+                return ""
         except Exception as e:
             print(f"翻译过程中发生错误: {e}")
             print(f"原文: {text}")
@@ -255,7 +335,7 @@ class AsyncBingTranslator:
             
             async def translate_with_limit(index, text):
                 retry_count = 0
-                max_retries = 3
+                max_retries = 10
                 backoff_time = 1.0  # 初始重试等待时间
                 
                 while retry_count < max_retries:
@@ -265,6 +345,7 @@ class AsyncBingTranslator:
                             if index > 0 and index % batch_size == 0:
                                 await asyncio.sleep(0.1)
                             
+
                             translated = await self.translate_text(session, text)
                             if translated:  # 如果翻译成功
                                 results[index] = translated
