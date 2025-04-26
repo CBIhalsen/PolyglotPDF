@@ -133,6 +133,7 @@ class BingTranslator:
         if not text or not text.strip():
             return ""
             
+
         # 如果文本超过1000字符，分段翻译
         if len(text) > 1000:
             result = []
@@ -212,6 +213,7 @@ class AsyncBingTranslator:
         if not text or not text.strip():
             return ""
         
+
         # 如果文本超过1000字符，分段翻译
         if len(text) > 1000:
             result = []
@@ -220,9 +222,9 @@ class AsyncBingTranslator:
                 result.append(self.do_translate(chunk))
             return ''.join(result)
         
-        url, ig, iid, key, token = await self.find_sid(session)
-        
         try:
+            url, ig, iid, key, token = await self.find_sid(session)
+            
             async with session.post(
                 f"{url}ttranslatev3?IG={ig}&IID={iid}",
                 data={
@@ -242,6 +244,7 @@ class AsyncBingTranslator:
                     return ""
         except Exception as e:
             print(f"翻译过程中发生错误: {e}")
+            print(f"原文: {text}")
             return ""
 
     async def translate_batch(self, texts, batch_size=10, max_concurrent=5):
@@ -251,11 +254,36 @@ class AsyncBingTranslator:
             semaphore = asyncio.Semaphore(max_concurrent)
             
             async def translate_with_limit(index, text):
-                async with semaphore:
-                    # 每批次间隔较小的延迟，比原来的0.5秒小得多
-                    if index > 0 and index % batch_size == 0:
-                        await asyncio.sleep(0.1)
-                    results[index] = await self.translate_text(session, text)
+                retry_count = 0
+                max_retries = 3
+                backoff_time = 1.0  # 初始重试等待时间
+                
+                while retry_count < max_retries:
+                    try:
+                        async with semaphore:
+                            # 每批次间隔较小的延迟
+                            if index > 0 and index % batch_size == 0:
+                                await asyncio.sleep(0.1)
+                            
+                            translated = await self.translate_text(session, text)
+                            if translated:  # 如果翻译成功
+                                results[index] = translated
+                                if retry_count > 0:  # 如果是重试成功的
+                                    print(f"第{index}个文本重试成功！")
+                                return
+                    except Exception as e:
+                        print(f"第{index}个文本翻译失败 (尝试 {retry_count+1}/{max_retries}): {e}")
+                        print(f"原文: {text}")
+                    
+                    # 如果到这里，说明需要重试
+                    retry_count += 1
+                    if retry_count < max_retries:
+                        print(f"将在{backoff_time}秒后重试...")
+                        await asyncio.sleep(backoff_time)
+                        backoff_time *= 2  # 指数退避策略
+                    else:
+                        print(f"已达到最大重试次数，翻译失败")
+                        results[index] = ""
             
             # 创建所有任务
             tasks = [
