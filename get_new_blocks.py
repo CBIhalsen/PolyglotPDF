@@ -446,6 +446,7 @@ def is_math(font_info_list, text_len, text, font_size):
     否则返回 False。
     """
 
+
     # 用于去除空格计算长度
     text_length_nospaces = len(text.replace(" ", ""))
 
@@ -458,9 +459,8 @@ def is_math(font_info_list, text_len, text, font_size):
 
     # 如果文字过短，就检查每个字符是否都是数字/标点/符号/空白
     if text_len < 1.5 * font_size:
-        stripped_text = text.strip()
         all_special_chars = True
-        
+        stripped_text = text.strip()
         for ch in stripped_text:
             cat = unicodedata.category(ch)
             # 允许通过的情况：
@@ -625,7 +625,7 @@ def merge_adjacent_math_lines(lines):
 
 
 
-def get_new_blocks(page):
+def get_new_blocks(page,pdf_path=None,page_num=None):
     """
     从指定 PDF 的某页提取文本行(blocks->lines->spans)，
     做基础的过滤和 bbox 合并后，得到行数据 lines_data。
@@ -639,7 +639,15 @@ def get_new_blocks(page):
     """
 
     try:
-        page = page
+
+        if pdf_path and page_num:
+            pdf_document = fitz.open(pdf_path)
+            if page_number < 1 or page_number > pdf_document.page_count:
+                print(f"页码 {page_number} 超出范围（1 - {pdf_document.page_count}）")
+                return
+
+            page = pdf_document[page_number - 1]
+
 
 
         blocks = page.get_text("dict")["blocks"]
@@ -812,6 +820,8 @@ def get_new_blocks(page):
                     line_info['type'] = 'math'
                 elif result == "abandon":
                     line_info['type'] = 'abandon'
+            else:
+                line_info['type'] = 'abandon'
             
             block_idx = line_info['block_index']
             temp_block_dict[block_idx]['lines'].append(
@@ -873,9 +883,9 @@ def get_new_blocks(page):
 
 if __name__ == "__main__":
     b = datetime.datetime.now()
-    pdf_path = "g2.pdf"  # 换成你的 PDF 文件路径
+    pdf_path = "pp2.pdf"  # 换成你的 PDF 文件路径
     page_number = 1   # 换成想处理的页码
-    z = get_new_blocks(pdf_path, page_number)
+    z = get_new_blocks(page=None,pdf_path=pdf_path, page_num= page_number)
     print("最终返回的 new_blocks:", z)
     e = datetime.datetime.now()
     elapsed_time = (e - b).total_seconds()
