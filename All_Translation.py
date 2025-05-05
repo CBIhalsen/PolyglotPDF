@@ -59,31 +59,32 @@ def retry_on_error(max_retries=2, delay=1):
 # 队列处理器函数
 def process_translation_queue():
     global queue_processor_started
-    
+
+    # 在这里只创建一次事件循环
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
     while True:
         task = translation_queue.get()
         if task is None:  # 终止信号
             translation_queue.task_done()
             break
-            
         try:
-            # 解包任务参数
             func, args, kwargs, result_holder = task
-            # 创建新的事件循环
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            # 在新的事件循环中执行任务
+            # 这里直接用上面创建的 loop 执行
             result = loop.run_until_complete(func(*args, **kwargs))
-            # 存储结果
             result_holder['result'] = result
-            # 关闭事件循环
-            loop.close()
         except Exception as e:
             print(f"Error processing translation task: {str(e)}")
             result_holder['result'] = None
         finally:
             translation_queue.task_done()
 
+    # 跳出循环后，才一次性关闭事件循环
+    # 先清理异步生成器
+    loop.run_until_complete(loop.shutdown_asyncgens())
+    # 然后再 close
+    loop.close()
 # 启动队列处理线程
 def ensure_queue_processor():
     global queue_processor_started
@@ -317,39 +318,39 @@ def calculate_split_points(processed_texts, max_tokens=425):
     split_points.append(len(processed_texts) - 1)
 
     return split_points
-
-def translate(texts,original_language,target_language):
-    from transformers import pipeline, AutoTokenizer
-
-    model_name = f"./opus-mt-{original_language}-{target_language}"
-    pipe = pipeline("translation", model=model_name)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-    result = pipe(texts)
-
-    result_values = [d['translation_text'] for d in result]
-
-    return result_values
-
-def batch_translate(processed_texts, split_points,original_language,target_language):
-    translated_texts = []
-    index_mapping = {}
-
-    start_index = 0
-
-    for split_point in split_points:
-        batch = processed_texts[start_index:split_point + 1]
-        batch_texts = [text for text, _, _ in batch]
-        translated_batch = translate(texts=batch_texts,original_language=original_language,target_language=target_language)
-
-        for translated_text, (_, _, int_value) in zip(translated_batch, batch):
-            if int_value in index_mapping:
-                translated_texts[index_mapping[int_value]] += " " + translated_text
-            else:
-                index_mapping[int_value] = len(translated_texts)
-                translated_texts.append(translated_text)
-
-        start_index = split_point + 1
-
-    return translated_texts
-
+#
+# def translate(texts,original_language,target_language):
+#     from transformers import pipeline, AutoTokenizer
+#
+#     model_name = f"./opus-mt-{original_language}-{target_language}"
+#     pipe = pipeline("translation", model=model_name)
+#     tokenizer = AutoTokenizer.from_pretrained(model_name)
+#
+#     result = pipe(texts)
+#
+#     result_values = [d['translation_text'] for d in result]
+#
+#     return result_values
+#
+# def batch_translate(processed_texts, split_points,original_language,target_language):
+#     translated_texts = []
+#     index_mapping = {}
+#
+#     start_index = 0
+#
+#     for split_point in split_points:
+#         batch = processed_texts[start_index:split_point + 1]
+#         batch_texts = [text for text, _, _ in batch]
+#         translated_batch = translate(texts=batch_texts,original_language=original_language,target_language=target_language)
+#
+#         for translated_text, (_, _, int_value) in zip(translated_batch, batch):
+#             if int_value in index_mapping:
+#                 translated_texts[index_mapping[int_value]] += " " + translated_text
+#             else:
+#                 index_mapping[int_value] = len(translated_texts)
+#                 translated_texts.append(translated_text)
+#
+#         start_index = split_point + 1
+#
+#     return translated_texts
+#
