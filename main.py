@@ -456,7 +456,7 @@ class main_function:
                 # 先尝试使用 Redact 遮盖
                 try:
                     page.add_redact_annot(rect)
-                    page.apply_redactions()
+                    page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
                 except Exception as e:
                     # 若 Redact 失败，改用白色方块覆盖
                     annots = list(page.annots() or [])
