@@ -788,7 +788,7 @@ def get_new_blocks(page,pdf_path=None,page_num=None):
             max_horizontal_gap=20,
             max_y_diff=5,
             check_font_size=True,
-            check_font_name=True,
+            check_font_name=False,
             check_font_color=True
         )
 
@@ -796,7 +796,7 @@ def get_new_blocks(page,pdf_path=None,page_num=None):
         merged_final = merge_lines(
             merged_horizontally,
             check_font_size=True,
-            check_font_name=True,
+            check_font_name=False,
             check_font_color=True
         )
 

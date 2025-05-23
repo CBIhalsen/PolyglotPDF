@@ -47,7 +47,7 @@ document.getElementById('count_article').textContent += data.count;
         },
         'Translation_api': {
             type: 'select',
-            options: ['Doubao', 'Qwen', 'deepseek', 'openai', 'deepL', 'youdao','Grok', 'ThirdParty', 'GLM', 'bing'],
+            options: ['Doubao', 'Qwen', 'deepseek', 'openai', 'deepl', 'youdao','Grok', 'ThirdParty', 'GLM', 'bing'],
             value: data.default_services.Translation_api
         }
     };

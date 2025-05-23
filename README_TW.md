@@ -203,6 +203,13 @@ docker logs polyglotpdf
 - **解決方向**：使用OCR模式處理包含不支援色彩空間的整個頁面
 - **重現範例**：[查看不支援色彩空間的PDF範例](https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/colorspace_issue_sample.pdf)
 
+### TODO
+- □ **自定義術語庫**：支援自定義術語庫，設置prompt進行領域專業翻譯
+- □ **AI重排功能**：把雙欄的PDF轉換成HTML部落格的單欄線性閱讀格式，便於移動端閱讀
+- □ **多格式匯出**：翻譯結果可以匯出為PDF、HTML、Markdown等格式
+- □ **多端同步**：電腦上翻譯完，手機上也能看
+- □ **增強合併邏輯**：現版本預設合併邏輯把檢測字體名字全部關閉，加上水平、垂直、x、y範圍重疊全部合併
+
 ### 字型最佳化
 目前在`main.py`的`start`函數中，使用預設字型設定插入文字：
 ```python

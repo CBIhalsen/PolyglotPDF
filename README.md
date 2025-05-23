@@ -231,6 +231,12 @@ This project leverages PyMuPDF's capabilities for efficient PDF processing and l
 - **Proposed Solution**: Switch to OCR mode for entire pages containing unsupported color spaces
 - **Example**: [View PDF sample with unsupported color spaces](https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/colorspace_issue_sample.pdf)
 
+### TODO
+- □ **Custom Terminology Database**: Support custom terminology databases with prompts for domain-specific professional translation
+- □ **AI Reflow Feature**: Convert double-column PDFs to single-column HTML blog format for easier reading on mobile devices
+- □ **Multi-format Export**: Export translation results to PDF, HTML, Markdown and other formats
+- □ **Multi-device Synchronization**: Read translations on mobile after processing on desktop
+- □ **Enhanced Merge Logic**: Improve the current merge logic by disabling font name detection and enabling horizontal, vertical, x, y range overlap merging
 
 ### Font Optimization
 Current font configuration in the `start` function of `main.py`:
