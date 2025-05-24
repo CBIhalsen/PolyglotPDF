@@ -206,6 +206,12 @@ docker logs polyglotpdf
 - **复现示例**：[查看不支持色彩空间的PDF样例](https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/colorspace_issue_sample.pdf)
 
 
+### TODO
+- □ **自定义术语库**：支持自定义术语库，设置prompt进行领域专业翻译
+- □ **AI重排功能**：把双栏的PDF转换成HTML博客的单栏线性阅读格式，便于移动端阅读
+- □ **多格式导出**：翻译结果可以导出为PDF、HTML、Markdown等格式
+- □ **多端同步**：电脑上翻译完，手机上也能看
+- □ **增强合并逻辑**：现版本默认合并逻辑把检测字体名字全部关闭，加上水平、垂直、x、y范围重叠全部合并
 
 
 ### 字体优化

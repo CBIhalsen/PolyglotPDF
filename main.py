@@ -508,7 +508,7 @@ class main_function:
                     angle = block[3] if len(block) > 3 else 0
                     html_color = block[4] if len(block) > 4 else '#000000'
                     text_indent = block[5] if len(block) > 5 else 0
-                    text_size = float(block[7]) + 3 if len(block) > 7 else 12
+                    text_size = float(block[7]) if len(block) > 7 else 12
                     
                     # 使用扩大后的坐标创建矩形
                     rect = fitz.Rect(*enlarged_coords)
@@ -569,7 +569,7 @@ class main_function:
                     angle = block[3] if len(block) > 3 else 0
                     html_color = block[4] if len(block) > 4 else '#000000'
                     text_indent = block[5] if len(block) > 5 else 0
-                    text_size = float(block[7]) + 3 if len(block) > 7 else 12
+                    text_size = float(block[7])  if len(block) > 7 else 12
                     
                     # 使用扩大后的坐标创建矩形
                     rect = fitz.Rect(*enlarged_coords)
