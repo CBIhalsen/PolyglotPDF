@@ -34,7 +34,25 @@ def snap_angle_func(raw_angle):
     }
     return angle_mapping.get(closest_angle, closest_angle)
 
+def is_bbox_overlap(bbox1, bbox2, min_overlap=2):
+    """
+    判断两个矩形区域（bbox）是否有重叠，且重叠宽/高大于最小阈值
+    """
+    x0_1, y0_1, x1_1, y1_1 = bbox1
+    x0_2, y0_2, x1_2, y1_2 = bbox2
+    x_overlap = max(0, min(x1_1, x1_2) - max(x0_1, x0_2))
+    y_overlap = max(0, min(y1_1, y1_2) - max(y0_1, y0_2))
+    return x_overlap >= min_overlap and y_overlap >= min_overlap
 
+def is_bbox_overlap(bbox1, bbox2, min_overlap=2):
+    """
+    判断两个矩形区域（bbox）是否有重叠，且重叠宽/高都大于等于min_overlap
+    """
+    x0_1, y0_1, x1_1, y1_1 = bbox1
+    x0_2, y0_2, x1_2, y1_2 = bbox2
+    x_overlap = max(0, min(x1_1, x1_2) - max(x0_1, x0_2))
+    y_overlap = max(0, min(y1_1, y1_2) - max(y0_1, y0_2))
+    return x_overlap >= min_overlap and y_overlap >= min_overlap
 
 def horizontal_merge(
     lines_data,
@@ -43,14 +61,10 @@ def horizontal_merge(
     check_font_size=True,
     check_font_name=True,
     check_font_color=True,
-    bold_max_horizontal_gap=20  # ← 新增：粗体文本的自定义合并间距
+    bold_max_horizontal_gap=20
 ):
     """
-    水平方向合并：保留原始 PDF 顺序，判断同一水平行、间距小，
-    且可选同一字体大小/名称/颜色时合并。
-    新增：合并后统计 total_bold_chars / total_nonbold_chars，判断整行是否为粗体。
-    新增：如果当前行或上一行是粗体，则使用自定义的 bold_max_horizontal_gap 作为最大水平间距。
-    【改动】：在合并时，合并子行的 font_names 字段，避免只保留一个。
+    水平方向合并，优先判断重叠区域，其次是原有的行顺序+间距合并条件。
     """
     merged = []
     for line in lines_data:
@@ -61,18 +75,33 @@ def horizontal_merge(
             prev_line = merged[-1]
             px0, py0, px1, py1 = prev_line["line_bbox"]
 
-            # 基础条件
+            # 1. 区域重叠优先合并
+            if is_bbox_overlap(line["line_bbox"], prev_line["line_bbox"], min_overlap=2):
+                prev_line["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
+                new_x0 = min(px0, x0)
+                new_y0 = min(py0, y0)
+                new_x1 = max(px1, x1)
+                new_y1 = max(py1, y1)
+                prev_line["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
+                prev_line["total_bold_chars"] += line["total_bold_chars"]
+                prev_line["total_nonbold_chars"] += line["total_nonbold_chars"]
+                prev_line["font_bold"] = prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]
+                prev_line["font_names"].extend(line["font_names"])
+                prev_line["font_names"] = list(set(prev_line["font_names"]))
+                inserted = True
+                continue  # 已合并，不再进行后续判断
+
+            # 2. 原有条件下的水平方向合并
             same_block = (line["block_index"] == prev_line["block_index"])
             same_font_size_flag = (line["font_size"] == prev_line["font_size"])
             same_font_name_flag = (line["font_name"] == prev_line["font_name"])
 
-            # 颜色差判断
             color_diff_val = 0
             if (line["font_color"] is not None) and (prev_line["font_color"] is not None):
                 color_diff_val = abs(line["font_color"] - prev_line["font_color"])
             same_font_color_flag = (color_diff_val <= 500000)
 
-            # 根据开关决定是否要求它们一致
+            # 属性开关
             if not check_font_size:
                 same_font_size_flag = True
             if not check_font_name:
@@ -80,34 +109,23 @@ def horizontal_merge(
             if not check_font_color:
                 same_font_color_flag = True
 
-            # 若两行的字体大小有 None，则先做一下简单兜底处理
             curr_font_size = line["font_size"] if line["font_size"] else 10
             prev_font_size = prev_line["font_size"] if prev_line["font_size"] else 10
 
-            # 如果当前行或上一个行是粗体，则使用 bold_max_horizontal_gap
+            # 粗体加宽合并间距
             if line["font_bold"] and prev_line["font_bold"]:
                 effective_max_gap = (curr_font_size + prev_font_size)
             else:
-                # 原逻辑：动态计算最大水平间距
                 effective_max_gap = (curr_font_size + prev_font_size) / 1.7
 
-            # 1) 打印或调试用
-            # print('最大x间距(根据是否粗体调节后)', effective_max_gap, line['text'])
-
-            # 2) 将 max_y_diff 改为该均值的一半（用户原逻辑）
-            #   这里也可以区分是否是粗体做进一步的调节，不过暂时先不分
             max_y_diff = effective_max_gap / 2.0
 
-            # 判断是否在同一水平行
             y0_diff = abs(y0 - py0)
             y1_diff = abs(y1 - py1)
             same_horizontal_line = (y0_diff < max_y_diff and y1_diff < max_y_diff)
-
-            # 判断水平间距是否足够小
             horizontal_gap = x0 - px1
             close_enough = (0 <= horizontal_gap < effective_max_gap)
 
-            # 如果满足合并条件，则合并
             if (
                 same_block
                 and same_font_size_flag
@@ -116,30 +134,17 @@ def horizontal_merge(
                 and same_horizontal_line
                 and close_enough
             ):
-                # 合并文本
                 prev_line["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
-                # 更新 bbox
                 new_x0 = min(px0, x0)
                 new_y0 = min(py0, y0)
                 new_x1 = max(px1, x1)
                 new_y1 = max(py1, y1)
                 prev_line["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
-
-                # 合并粗体/非粗体字符数
                 prev_line["total_bold_chars"] += line["total_bold_chars"]
                 prev_line["total_nonbold_chars"] += line["total_nonbold_chars"]
-
-                # 更新 font_bold
-                if prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]:
-                    prev_line["font_bold"] = True
-                else:
-                    prev_line["font_bold"] = False
-
-                # 合并字体名称（核心改动）
+                prev_line["font_bold"] = prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]
                 prev_line["font_names"].extend(line["font_names"])
-                # 去重
                 prev_line["font_names"] = list(set(prev_line["font_names"]))
-
                 inserted = True
 
         if not inserted:
@@ -180,6 +185,20 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
         px0, py0, px1, py1 = prev_line["line_bbox"]
         prev_width = (px1 - px0)
 
+        # -------- 区域重叠优先合并 --------
+        if is_bbox_overlap(line["line_bbox"], prev_line["line_bbox"], min_overlap=2):
+            merged[-1]["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
+            new_x0 = min(px0, x0)
+            new_y0 = min(py0, y0)
+            new_x1 = max(px1, x1)
+            new_y1 = max(py1, y1)
+            merged[-1]["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
+            merged[-1]["total_bold_chars"] += line["total_bold_chars"]
+            merged[-1]["total_nonbold_chars"] += line["total_nonbold_chars"]
+            merged[-1]["font_bold"] = merged[-1]["total_bold_chars"] > merged[-1]["total_nonbold_chars"]
+            merged[-1]["font_names"].extend(line["font_names"])
+            merged[-1]["font_names"] = list(set(merged[-1]["font_names"]))
+
         # 基础属性判断
         same_block = (line["block_index"] == prev_line["block_index"])
         same_font_size_flag = (line["font_size"] == prev_line["font_size"])
@@ -218,32 +237,32 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
 
         # condition_1: “中间合并豁免”
         condition_1 = (
-            same_block
-            and same_font_size_flag
-            and same_font_name_flag
-            and same_font_color_flag
-            and y_distance_small
-            and (x0 >= px0 + margin_in_middle)
-            and (x1 <= px1 - margin_in_middle)
+                same_block
+                and same_font_size_flag
+                and same_font_name_flag
+                and same_font_color_flag
+                and y_distance_small
+                and (x0 >= px0 + margin_in_middle)
+                and (x1 <= px1 - margin_in_middle)
         )
 
         # condition_2：新逻辑合并
         condition_2 = (
-            same_block
-            and y_distance_small
-            and x_distance_small
-            and (px1 >= x1)
-            and (abs(px0 - x0) < margin_in_middle / 2.5)
+                same_block
+                and y_distance_small
+                and x_distance_small
+                and (px1 >= x1)
+                and (abs(px0 - x0) < margin_in_middle / 2.5)
         )
 
         # condition_3：老逻辑合并
         condition_3 = (
-            same_block
-            and y_distance_small
-            and same_font_size_flag  # 可选
-            and same_font_name_flag
-            and same_font_color_flag
-            and x_distance_small
+                same_block
+                and y_distance_small
+                and same_font_size_flag  # 可选
+                and same_font_name_flag
+                and same_font_color_flag
+                and x_distance_small
         )
 
         # 【新增】 condition_4: “包裹合并”逻辑
@@ -256,18 +275,7 @@ def merge_lines(lines_data, check_font_size=True, check_font_name=True, check_fo
                 and (x1 <= px1 + tolerance)
                 and (y1 <= py1 + tolerance)
         )
-        # print(f"[merge_lines_debug] ----------")
-        # print(f" 当前行 idx_line = {idx_line}")
-        # print(f" 上一行 bbox = ({px0:.2f}, {py0:.2f}, {px1:.2f}, {py1:.2f}), prev_width = {prev_width:.2f}")
-        # print(f" 当前行 bbox = ({x0:.2f}, {y0:.2f}, {x1:.2f}, {y1:.2f}), current_width = {current_width:.2f}")
-        # print(f" same_block = {same_block}, same_font_size = {same_font_size_flag}, same_font_name = {same_font_name_flag}")
-        # print(f" same_font_color = {same_font_color_flag}")
-        # print(f" y_distance = {y_distance:.2f}, y_distance_small = {y_distance_small}")
-        # print(f" x_distance = {horizontal_distance:.2f}, x_distance_small = {x_distance_small}")
-        # print(f" condition_1 = {condition_1}")
-        # print(f" condition_2 = {condition_2}")
-        # print(f" condition_3 = {condition_3}")
-        # print(f" condition_4 (包裹合并) = {condition_4}")
+
 
         # (1) condition_1 -> 中间豁免合并
         if condition_1:
@@ -446,7 +454,6 @@ def is_math(font_info_list, text_len, text, font_size):
     否则返回 False。
     """
 
-
     # 用于去除空格计算长度
     text_length_nospaces = len(text.replace(" ", ""))
 
@@ -470,10 +477,10 @@ def is_math(font_info_list, text_len, text, font_size):
             # 4. 空格或其他空白符 (cat.startswith('Z'))
             #    - 或者你可以直接用 ch.isspace() 来判断空格
             if not (
-                cat == 'Nd'
-                or cat.startswith('P')
-                or cat.startswith('S')
-                or cat.startswith('Z')
+                    cat == 'Nd'
+                    or cat.startswith('P')
+                    or cat.startswith('S')
+                    or cat.startswith('Z')
             ):
                 # 如果发现不属于上述几类，则判定为非“纯数字/标点/符号”
                 all_special_chars = False
@@ -483,7 +490,7 @@ def is_math(font_info_list, text_len, text, font_size):
         if all_special_chars:
             # print(stripped_text, '纯数字/标点/符号，标记为abandon')
             return "abandon"
-            
+
         return False
 
     # 其它情况默认不视为 math
@@ -539,28 +546,28 @@ def merge_adjacent_math_lines(lines):
 
         # 条件 1：两行都为 math，并且距离较小
         cond_math_both = (
-            prev_is_math
-            and curr_is_math
-            and (
-                (x_distance < 5 * max_horizontal_gap and y_distance < 3 * max_horizontal_gap)
-                or (x_distance_overlap < 5 * max_horizontal_gap and y_distance < 3 * max_horizontal_gap)
-            )
+                prev_is_math
+                and curr_is_math
+                and (
+                        (x_distance < 5 * max_horizontal_gap and y_distance < 3 * max_horizontal_gap)
+                        or (x_distance_overlap < 5 * max_horizontal_gap and y_distance < 3 * max_horizontal_gap)
+                )
         )
 
         # 条件 2：只有一行是 math，且另一行非常短; 距离也小
         cond_one_math_prev = (
-            prev_is_math
-            and not curr_is_math
-            and (curr_len < max_horizontal_gap)
-            and (x_distance < 2 * max_horizontal_gap)
-            and (y_distance < 1.5 * max_horizontal_gap)
+                prev_is_math
+                and not curr_is_math
+                and (curr_len < max_horizontal_gap)
+                and (x_distance < 2 * max_horizontal_gap)
+                and (y_distance < 1.5 * max_horizontal_gap)
         )
         cond_one_math_curr = (
-            not prev_is_math
-            and curr_is_math
-            and (prev_len < max_horizontal_gap)
-            and (x_distance < 2 * max_horizontal_gap)
-            and (y_distance < 1.5 * max_horizontal_gap)
+                not prev_is_math
+                and curr_is_math
+                and (prev_len < max_horizontal_gap)
+                and (x_distance < 2 * max_horizontal_gap)
+                and (y_distance < 1.5 * max_horizontal_gap)
         )
 
         if cond_math_both:
@@ -624,8 +631,7 @@ def merge_adjacent_math_lines(lines):
     return new_lines
 
 
-
-def get_new_blocks(page,pdf_path=None,page_num=None):
+def get_new_blocks(page, pdf_path=None, page_num=None):
     """
     从指定 PDF 的某页提取文本行(blocks->lines->spans)，
     做基础的过滤和 bbox 合并后，得到行数据 lines_data。
@@ -647,8 +653,6 @@ def get_new_blocks(page,pdf_path=None,page_num=None):
                 return
 
             page = pdf_document[page_number - 1]
-
-
 
         blocks = page.get_text("dict")["blocks"]
         lines_data = []
@@ -726,7 +730,6 @@ def get_new_blocks(page,pdf_path=None,page_num=None):
                 if not stripped_text:
                     continue
 
-
                 # 3) 若行首有“•”，则去掉并向右偏移
                 if stripped_text.startswith("•"):
                     stripped_text = stripped_text[1:].lstrip()
@@ -765,18 +768,16 @@ def get_new_blocks(page,pdf_path=None,page_num=None):
                     "text": full_text,
                     "font_size": (list(font_sizes)[0] if font_sizes else None),
                     "font_color": (list(colors)[0] if colors else None),
-                    "font_name": chosen_font_name,    # 仅代表字体名称
+                    "font_name": chosen_font_name,  # 仅代表字体名称
                     "font_names": list(font_names_set),  # 全部子span字体集合
                     "rotation_angle": angle,
-                    "type": "plain_text",             # 初始行类型
+                    "type": "plain_text",  # 初始行类型
                     "font_bold": line_is_bold,
                     "indent": 0,
                     "total_bold_chars": tb,
                     "total_nonbold_chars": tnb
                 }
                 lines_data.append(line_data)
-
-
 
         if not lines_data:
             print("该页面没有提取到任何文本行")
@@ -789,7 +790,7 @@ def get_new_blocks(page,pdf_path=None,page_num=None):
             max_y_diff=5,
             check_font_size=True,
             check_font_name=False,
-            check_font_color=True
+            check_font_color=False
         )
 
         # ============= (2) 垂直合并 =============
@@ -797,15 +798,15 @@ def get_new_blocks(page,pdf_path=None,page_num=None):
             merged_horizontally,
             check_font_size=True,
             check_font_name=False,
-            check_font_color=True
+            check_font_color=False
         )
 
         # ============= (3) 基于合并后行信息，构建临时数据结构 =============
         #    存储块号 -> [ (行在 merged_final 列表中的索引, 字符长度, 行类型) ... ]，
         #    并统计块内总字符数。
         temp_block_dict = defaultdict(lambda: {
-            'lines': [],       # [(merged_final_idx, line_type, text_len), ...]
-            'total_chars': 0   # 整个 block 的字符串长度总和
+            'lines': [],  # [(merged_final_idx, line_type, text_len), ...]
+            'total_chars': 0  # 整个 block 的字符串长度总和
         })
 
         for idx, line_info in enumerate(merged_final):
@@ -822,7 +823,7 @@ def get_new_blocks(page,pdf_path=None,page_num=None):
                     line_info['type'] = 'abandon'
             else:
                 line_info['type'] = 'abandon'
-            
+
             block_idx = line_info['block_index']
             temp_block_dict[block_idx]['lines'].append(
                 (idx, line_info['type'], text_len)
@@ -861,7 +862,6 @@ def get_new_blocks(page,pdf_path=None,page_num=None):
             # print(f" 行类型(type): {line_info['type']}")
             # print("-" * 50)
 
-
             # 排除被标记为 abandon 的块
             if line_info['type'] != 'abandon':
                 new_blocks.append([
@@ -884,8 +884,8 @@ def get_new_blocks(page,pdf_path=None,page_num=None):
 if __name__ == "__main__":
     b = datetime.datetime.now()
     pdf_path = "pp2.pdf"  # 换成你的 PDF 文件路径
-    page_number = 1   # 换成想处理的页码
-    z = get_new_blocks(page=None,pdf_path=pdf_path, page_num= page_number)
+    page_number = 1  # 换成想处理的页码
+    z = get_new_blocks(page=None, pdf_path=pdf_path, page_num=page_number)
     print("最终返回的 new_blocks:", z)
     e = datetime.datetime.now()
     elapsed_time = (e - b).total_seconds()
