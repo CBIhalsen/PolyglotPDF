@@ -14,7 +14,7 @@ MATH_FONTS_SET = {
     "CMEX5", "CMEX6", "CMEX7", "CMEX8", "CMEX9", "CMEX10",  # 新增CMEX字体家族
     "MSAM", "MSBM", "EUFM", "EUSM", "TXMI", "TXSY", "PXMI", "PXSY",
     "CambriaMath", "AsanaMath", "STIXMath", "XitsMath", "Latin Modern Math",
-    "Neo Euler", 'MTMI', 'MTSYN'
+    "Neo Euler", 'MTMI', 'MTSYN','TimesNewRomanPSMT'
 }
 
 
