@@ -36,71 +36,55 @@ def snap_angle_func(raw_angle):
 
 
 def horizontal_merge(
-        lines_data,
-        max_horizontal_gap=10,
-        max_y_diff=5,
-        check_font_size=False,
-        check_font_name=False,
-        check_font_color=False,
-        bold_max_horizontal_gap=20
+    lines_data,
+    max_horizontal_gap=10,
+    max_y_diff=5,
+    check_font_size=False,
+    check_font_name=False,
+    check_font_color=False,
+    bold_max_horizontal_gap=20
 ):
     """
-    水平方向合并，若同在一个 block、行高接近、字体属性一致，且只要 x 轴区间重叠就直接合并。
-    为确保所有可合并的行都能最终被合并，会在内部反复多轮合并，直到没有新行可以再合并为止。
+    水平方向合并（光标推进式），只对相邻两行递推判断能否合并，合并后光标不移动。
     """
     if not lines_data:
         return []
 
-    while True:
-        merged = []
-        # 标记本轮是否发生新的合并
-        changed = False
+    merged = []
+    i = 0
+    n = len(lines_data)
+    while i < n:
+        line = lines_data[i]
+        if not merged:
+            merged.append(line)
+            i += 1
+            continue
 
-        for line in lines_data:
-            x0, y0, x1, y1 = line["line_bbox"]
-            # 如果 merged 还为空，直接放入
-            if not merged:
-                merged.append(line)
-                continue
+        prev_line = merged[-1]
+        x0, y0, x1, y1 = line["line_bbox"]
+        px0, py0, px1, py1 = prev_line["line_bbox"]
 
-            prev_line = merged[-1]
-            px0, py0, px1, py1 = prev_line["line_bbox"]
+        # (1) 如果 x、y 轴范围都有交集，就直接合并
+        overlap_y = (y0 <= py1) and (py0 <= y1)
+        overlap_x = (x0 <= px1) and (px0 <= x1)
+        merged_this_round = False
 
-            # (1) 如果 x、y 轴范围都有交集，就直接合并
-            overlap_y = (y0 <= py1) and (py0 <= y1)
-            overlap_x = (x0 <= px1) and (px0 <= x1)
+        if overlap_x and overlap_y:
+            prev_line["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
 
-            if overlap_x and overlap_y:
-                # 打印提示，仅作调试
-                # print("水平合并")
-
-                # 合并文本
-                prev_line["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
-
-                # 更新 bbox
-                new_x0 = min(px0, x0)
-                new_y0 = min(py0, y0)
-                new_x1 = max(px1, x1)
-                new_y1 = max(py1, y1)
-                prev_line["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
-
-                # 合并粗/非粗体字符数
-                prev_line["total_bold_chars"] += line["total_bold_chars"]
-                prev_line["total_nonbold_chars"] += line["total_nonbold_chars"]
-                if prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]:
-                    prev_line["font_bold"] = True
-                else:
-                    prev_line["font_bold"] = False
-
-                # 合并字体名称
-                prev_line["font_names"].extend(line["font_names"])
-                prev_line["font_names"] = list(set(prev_line["font_names"]))
-
-                changed = True
-                # 本次合并完成后继续看下一行
-                continue
-
-            # (2) 如果“直接合并”未触发，则检查更细化合并条件
+            new_x0 = min(px0, x0)
+            new_y0 = min(py0, y0)
+            new_x1 = max(px1, x1)
+            new_y1 = max(py1, y1)
+            prev_line["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
+            prev_line["total_bold_chars"] += line["total_bold_chars"]
+            prev_line["total_nonbold_chars"] += line["total_nonbold_chars"]
+            prev_line["font_bold"] = prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]
+            prev_line["font_names"].extend(line["font_names"])
+            prev_line["font_names"] = list(set(prev_line["font_names"]))
+            merged_this_round = True
+        else:
+            # (2) 细化合并条件
             same_block = (line["block_index"] == prev_line["block_index"])
             same_font_size_flag = (line["font_size"] == prev_line["font_size"])
             same_font_name_flag = (line["font_name"] == prev_line["font_name"])
@@ -110,7 +94,7 @@ def horizontal_merge(
                 color_diff_val = abs(line["font_color"] - prev_line["font_color"])
             same_font_color_flag = (color_diff_val <= 50)
 
-            # 根据开关有关联地放宽判断
+            # 根据开关放宽判断
             if not check_font_size:
                 same_font_size_flag = True
             if not check_font_name:
@@ -118,266 +102,250 @@ def horizontal_merge(
             if not check_font_color:
                 same_font_color_flag = True
 
-            # 若两行的字体大小为 None，则兜底为 10
             curr_font_size = line["font_size"] if line["font_size"] else 10
             prev_font_size = prev_line["font_size"] if prev_line["font_size"] else 10
 
-            # 判断最大水平间距
             if line["font_bold"] and prev_line["font_bold"]:
                 effective_max_gap = (curr_font_size + prev_font_size)
             else:
                 effective_max_gap = (curr_font_size + prev_font_size) / 1.7
 
-            # 同一水平行的阈值(根据行高等增大一下)
-            final_y_diff = effective_max_gap / 2.0
-            y0_diff = abs(y0 - py0)
-            y1_diff = abs(y1 - py1)
-            same_horizontal_line = (y0_diff < final_y_diff and y1_diff < final_y_diff)
+            # y轴重叠判据
+            overlap_y = (y0 <= py1) and (py0 <= y1)
+            same_horizontal_line = overlap_y
 
             horizontal_gap = x0 - px1
             close_enough = (0 <= horizontal_gap < effective_max_gap)
 
             if (same_block and same_font_size_flag and same_font_name_flag
-                    and same_font_color_flag and same_horizontal_line and close_enough
+                and same_font_color_flag and same_horizontal_line and close_enough
             ):
-                # 执行合并
                 prev_line["text"] = (
-                        prev_line["text"].rstrip() + " " + line["text"].lstrip()
+                    prev_line["text"].rstrip() + " " + line["text"].lstrip()
                 )
-                # 更新 bbox
+
                 new_x0 = min(px0, x0)
                 new_y0 = min(py0, y0)
                 new_x1 = max(px1, x1)
                 new_y1 = max(py1, y1)
                 prev_line["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
-
-                # 合并粗/非粗体字符数
                 prev_line["total_bold_chars"] += line["total_bold_chars"]
                 prev_line["total_nonbold_chars"] += line["total_nonbold_chars"]
-                if prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]:
-                    prev_line["font_bold"] = True
-                else:
-                    prev_line["font_bold"] = False
-
-                # 合并所有字体名称
+                prev_line["font_bold"] = prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]
                 prev_line["font_names"].extend(line["font_names"])
                 prev_line["font_names"] = list(set(prev_line["font_names"]))
+                merged_this_round = True
 
-                changed = True
-                # print('水平文本', prev_line["text"])
-            else:
-                # 若无法合并，就将当前行压入 merged 列表
-                merged.append(line)
-
-        # 本轮结束，如果没有发生新的合并，就说明结果稳定
-        if not changed:
-            break
+        if merged_this_round:
+            # 合并成功，继续用当前 prev_line 和下一行比较
+            i += 1
+            continue
         else:
-            # 否则将合并结果再赋给 lines_data，进入下一轮合并
-            lines_data = merged
+            # 没合并，推进光标，当前行直接进 merged
+            merged.append(line)
+            i += 1
 
-    # 合并全部完成后，打印结果（可按需保留或删去）
-    # print("\n--- 水平合并后的最终行列表 ---")
-    # for i, line in enumerate(merged, start=1):
-    #     text = line["text"]
-    #     bbox = line["line_bbox"]
-    #     print(f"行 {i}: text = {text!r}, bbox = {bbox}")
+    # 打印合并后结果
+    for idx, line in enumerate(merged, 1):
+        text = line["text"]
+        bbox = line["line_bbox"]
+        print(f"行 {idx}: text = {text!r}, bbox = {bbox}")
 
     return merged
 
-
 def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_font_color=True):
     """
-    垂直方向合并函数示例。（已用 while 循环来反复执行，直到没有新的合并才结束）
-    原先的 (1) 中间合并豁免、(2) 新逻辑合并、(3) 老逻辑合并、(4) 包裹合并、
-    (5) 若 y 轴区间有重叠就直接合并 等逻辑均保持不变，仅增加了循环与 changed 标记。
+    垂直方向合并函数（合并后继续检查当前位置，不全量遍历回头）
+    支持四种合并逻辑 condition_1 ~ condition_4
     """
 
-    while True:
-        changed = False  # 用来记录本轮合并中是否发生了新的合并
-        merged = []
+    merged = []
+    i = 0
+    n = len(lines_data)
+    while i < n:
+        line = lines_data[i]
+        if not merged:
+            merged.append(line)
+            i += 1
+            continue
 
-        # 横向距离阈值(非中间豁免时要满足此判断)
-        max_x_distance = 80
-        # “行在上一行中间”的左右边界余量阈值
-        margin_in_middle = 5
+        prev_line = merged[-1]
+        x0, y0, x1, y1 = line["line_bbox"]
+        px0, py0, px1, py1 = prev_line["line_bbox"]
+        current_width = (x1 - x0)
+        prev_width = (px1 - px0)
 
-        for idx_line, line in enumerate(lines_data, start=1):
-            # 每行初始缩进量
-            line["indent"] = 0
-            x0, y0, x1, y1 = line["line_bbox"]
-            current_width = (x1 - x0)
+        # 判断同一块
+        same_block = (line["block_index"] == prev_line["block_index"])
+        # 无缩进
+        no_indent = not line["indent"]
 
-            # 如果 merged 还没有行，直接放入
-            if not merged:
+        # 字体大小布尔标记
+        if check_font_size:
+            if line["font_size"] is not None and prev_line["font_size"] is not None:
+                font_size_diff = abs(line["font_size"] - prev_line["font_size"])
+                same_font_size_flag = (font_size_diff <= 0.6)
+            else:
+                same_font_size_flag = True
+        else:
+            same_font_size_flag = True
+        # 字体名称布尔标记
+        if check_font_name:
+            same_font_name_flag = (line["font_name"] == prev_line["font_name"])
+        else:
+            same_font_name_flag = True
+        # 字体颜色布尔标记
+        color_diff_val = 0
+        if line["font_color"] is not None and prev_line["font_color"] is not None:
+            color_diff_val = abs(line["font_color"] - prev_line["font_color"])
+        if check_font_color:
+            same_font_color_flag = (color_diff_val <= 50)
+        else:
+            same_font_color_flag = True
+
+        # 动态调整阈值
+        curr_font_size = line["font_size"] if line["font_size"] else 10
+        prev_font_size = prev_line["font_size"] if prev_line["font_size"] else 10
+        max_horizontal_gap = (curr_font_size + prev_font_size) / 2.0
+        margin_in_middle = max_horizontal_gap / 1.5
+        max_x_distance = max_horizontal_gap * 8
+
+        # Y 轴、X 轴距离
+        y_distance = (y0 - py1)
+        y_distance_small = (abs(y_distance) < margin_in_middle)
+        horizontal_distance = abs(x0 - px0)
+        x_distance_small = (horizontal_distance < max_x_distance)
+
+        # 判断水平/竖直重叠
+        overlap_y = (y0 <= py1) and (py0 <= y1)
+        overlap_x = (x0 <= px1) and (px0 <= x1)
+
+        # 合并条件
+        # condition_1: “中间合并豁免”
+        condition_1 = (
+            same_block and same_font_size_flag and same_font_name_flag and same_font_color_flag
+            and y_distance_small and (x0 >= px0 + margin_in_middle) and (x1 <= px1 - margin_in_middle)
+            and no_indent
+        )
+        # condition_2: “新逻辑合并”
+        condition_2 = (
+            same_block and y_distance_small and x_distance_small
+            and (abs(px0 - x0) < margin_in_middle) and no_indent
+        )
+        # condition_3: “老逻辑合并”
+        condition_3 = (
+            same_block and y_distance_small and same_font_size_flag and same_font_name_flag and same_font_color_flag
+            and x_distance_small and no_indent
+        )
+        # condition_4: “包裹合并”
+        tolerance = max_horizontal_gap / 2
+        condition_4 = (
+            same_block and (x0 >= px0 - tolerance) and (y0 >= py0 - tolerance)
+            and (x1 <= px1 + tolerance) and (y1 <= py1 + tolerance) and no_indent
+        )
+
+        merged_this_round = False
+
+        # 依次判断合并逻辑
+        if overlap_x and overlap_y:
+            # 水平合并
+            prev_line["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
+
+            new_x0 = min(px0, x0)
+            new_y0 = min(py0, y0)
+            new_x1 = max(px1, x1)
+            new_y1 = max(py1, y1)
+            prev_line["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
+            prev_line["total_bold_chars"] += line["total_bold_chars"]
+            prev_line["total_nonbold_chars"] += line["total_nonbold_chars"]
+            prev_line["font_bold"] = prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]
+            prev_line["font_names"].extend(line["font_names"])
+            prev_line["font_names"] = list(set(prev_line["font_names"]))
+            # print("水平合并文本：", prev_line["text"])
+            merged_this_round = True
+        elif condition_1:
+            indent_val = abs(px0 - x0)
+            merged[-1]["indent"] = indent_val
+            merged[-1]["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
+
+            new_x0 = min(px0, x0)
+            new_y0 = min(py0, y0)
+            new_x1 = max(px1, x1)
+            new_y1 = max(py1, y1)
+            merged[-1]["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
+            merged[-1]["total_bold_chars"] += line["total_bold_chars"]
+            merged[-1]["total_nonbold_chars"] += line["total_nonbold_chars"]
+            merged[-1]["font_bold"] = merged[-1]["total_bold_chars"] > merged[-1]["total_nonbold_chars"]
+            merged[-1]["font_names"].extend(line["font_names"])
+            merged[-1]["font_names"] = list(set(merged[-1]["font_names"]))
+            if line["font_size"] is not None and line["font_size"] > margin_in_middle * 2:
+                merged[-1]["type"] = "title"
+            print('合并1', merged[-1]["text"])
+            merged_this_round = True
+        elif condition_2:
+            if (prev_line["indent"] and not line["indent"]):
+                indent_val = prev_line["indent"]
+            elif (prev_line["indent"] and line["indent"]):
+                indent_val = line["indent"]
+            else:
+                indent_val = abs(px0 - x0)
+            merged[-1]["indent"] = indent_val
+            merged[-1]["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
+
+            new_x0 = min(px0, x0)
+            new_y0 = min(py0, y0)
+            new_x1 = max(px1, x1)
+            new_y1 = max(py1, y1)
+            merged[-1]["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
+            merged[-1]["total_bold_chars"] += line["total_bold_chars"]
+            merged[-1]["total_nonbold_chars"] += line["total_nonbold_chars"]
+            merged[-1]["font_bold"] = merged[-1]["total_bold_chars"] > merged[-1]["total_nonbold_chars"]
+            merged[-1]["font_names"].extend(line["font_names"])
+            merged[-1]["font_names"] = list(set(merged[-1]["font_names"]))
+            print('合并2', merged[-1]["text"])
+            merged_this_round = True
+        elif condition_3:
+            if (x1 - px1) > max_x_distance:
                 merged.append(line)
+                i += 1
                 continue
+            width_diff = abs(current_width - prev_width)
+            if width_diff <= margin_in_middle / 2.0:
+                merged_text = prev_line["text"].rstrip() + " " + line["text"].lstrip()
+                if (prev_line["indent"] and not line["indent"]):
+                    indent_val = prev_line["indent"]
+                elif (prev_line["indent"] and line["indent"]):
+                    indent_val = line["indent"]
+                else:
+                    indent_val = abs(px0 - x0)
+                merged[-1]["indent"] = indent_val
+                prev_line["text"] = merged_text
 
-            prev_line = merged[-1]
-            px0, py0, px1, py1 = prev_line["line_bbox"]
-            prev_width = (px1 - px0)
 
-            # 2) 检查 y 轴范围是否重叠
-            overlap_y = (y0 <= py1) and (py0 <= y1)
-            # 3) 检查 x 轴范围是否重叠
-            overlap_x = (x0 <= px1) and (px0 <= x1)
-            # 4) 如果在同一个块，且 x、y 轴范围都有交集，则判定为同一“水平行”
-            if overlap_x and overlap_y:
-
-                # 直接合并（不做 same_block / 字体大小等判断）
-                prev_line["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
-                # print("垂直合并",prev_line["text"])
-
-                # 更新 bbox
                 new_x0 = min(px0, x0)
                 new_y0 = min(py0, y0)
                 new_x1 = max(px1, x1)
                 new_y1 = max(py1, y1)
                 prev_line["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
-                # 合并粗 / 非粗体字符数
                 prev_line["total_bold_chars"] += line["total_bold_chars"]
                 prev_line["total_nonbold_chars"] += line["total_nonbold_chars"]
-                if  prev_line["total_nonbold_chars"]:
-                    prev_line["font_bold"] = False
-                else:
-                    prev_line["font_bold"] = True
-                # 合并字体名称
+                prev_line["font_bold"] = prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]
                 prev_line["font_names"].extend(line["font_names"])
                 prev_line["font_names"] = list(set(prev_line["font_names"]))
-
-
-                changed = True  # 标记本轮出现新的合并
-                continue  # 处理下一行
-
-            # 判断是否同一块
-            same_block = (line["block_index"] == prev_line["block_index"])
-
-            # 1) 字体大小布尔标记(相差<=0.6 就认为可以)
-            if check_font_size:
-                if line["font_size"] is not None and prev_line["font_size"] is not None:
-                    font_size_diff = abs(line["font_size"] - prev_line["font_size"])
-                    same_font_size_flag = (font_size_diff <= 0.6)
-                else:
-                    # 如果有一方没有 font_size，就默认通过
-                    same_font_size_flag = True
+                print('合并3', merged[-1]["text"])
+                merged_this_round = True
             else:
-                same_font_size_flag = True
-
-            # 2) 字体名称布尔标记
-            if check_font_name:
-                same_font_name_flag = (line["font_name"] == prev_line["font_name"])
-            else:
-                same_font_name_flag = True
-
-            # 3) 字体颜色布尔标记
-            color_diff_val = 0
-            if line["font_color"] is not None and prev_line["font_color"] is not None:
-                color_diff_val = abs(line["font_color"] - prev_line["font_color"])
-            if check_font_color:
-                same_font_color_flag = (color_diff_val <= 50)
-            else:
-                same_font_color_flag = True
-
-            # 动态调整阈值
-            curr_font_size = line["font_size"] if line["font_size"] else 10
-            prev_font_size = prev_line["font_size"] if prev_line["font_size"] else 10
-            max_horizontal_gap = (curr_font_size + prev_font_size) / 2.0
-            margin_in_middle = max_horizontal_gap / 1.5
-            max_x_distance = max_horizontal_gap * 8
-
-            # Y 轴、X 轴距离
-            y_distance = (y0 - py1)  # 用于判断上下间距
-            y_distance_small = (abs(y_distance) < margin_in_middle)
-            horizontal_distance = abs(x0 - px0)
-            x_distance_small = (horizontal_distance < max_x_distance)
-
-            # condition_1: “中间合并豁免”
-            condition_1 = (
-                    same_block and same_font_size_flag and same_font_name_flag and same_font_color_flag
-                    and y_distance_small
-                    and (x0 >= px0 + margin_in_middle) and (x1 <= px1 - margin_in_middle)
-            )
-
-            # condition_2: “新逻辑合并”
-            condition_2 = (
-                    same_block and y_distance_small and x_distance_small
-                    and (px1 >= x1)
-                    and (abs(px0 - x0) < margin_in_middle / 2.5)
-            )
-
-            # condition_3: “老逻辑合并”
-            condition_3 = (
-                    same_block and y_distance_small and same_font_size_flag
-                    and same_font_name_flag and same_font_color_flag and x_distance_small
-            )
-
-            # condition_4: “包裹合并”逻辑
-            tolerance = 4.0
-            condition_4 = (
-                    same_block
-                    and (x0 >= px0 - tolerance) and (y0 >= py0 - tolerance)
-                    and (x1 <= px1 + tolerance) and (y1 <= py1 + tolerance)
-            )
-
-
-            # 依次判断合并逻辑
-            # (1) condition_1
-            if condition_1:
-                merged[-1]["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
-                new_x0 = min(px0, x0)
-                new_y0 = min(py0, y0)
-                new_x1 = max(px1, x1)
-                new_y1 = max(py1, y1)
-                merged[-1]["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
-                merged[-1]["total_bold_chars"] += line["total_bold_chars"]
-                merged[-1]["total_nonbold_chars"] += line["total_nonbold_chars"]
-                if merged[-1]["total_bold_chars"] > merged[-1]["total_nonbold_chars"]:
-                    merged[-1]["font_bold"] = True
-                else:
-                    merged[-1]["font_bold"] = False
-                merged[-1]["font_names"].extend(line["font_names"])
-                merged[-1]["font_names"] = list(set(merged[-1]["font_names"]))
-                # 大字体可判定为标题(可选逻辑)
-                if line["font_size"] is not None and line["font_size"] > margin_in_middle * 2:
-                    merged[-1]["type"] = "title"
-
-                changed = True
-                continue
-
-
-
-            # (2) condition_2
-            elif condition_2:
-                merged[-1]["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
-                new_x0 = min(px0, x0)
-                new_y0 = min(py0, y0)
-                new_x1 = max(px1, x1)
-                new_y1 = max(py1, y1)
-                merged[-1]["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
-                merged[-1]["total_bold_chars"] += line["total_bold_chars"]
-                merged[-1]["total_nonbold_chars"] += line["total_nonbold_chars"]
-                if merged[-1]["total_bold_chars"] > merged[-1]["total_nonbold_chars"]:
-                    merged[-1]["font_bold"] = True
-                else:
-                    merged[-1]["font_bold"] = False
-                merged[-1]["font_names"].extend(line["font_names"])
-                merged[-1]["font_names"] = list(set(merged[-1]["font_names"]))
-
-                changed = True
-                continue
-
-            # (3) condition_3
-            elif condition_3:
-                # 如果下一行 x1 比上行 px1 超出太多，就不合并
-                if (x1 - px1) > max_x_distance:
-                    merged.append(line)
-                    continue
-
-                width_diff = abs(current_width - prev_width)
-                if width_diff <= margin_in_middle / 2.5:
-                    # 直接合并
+                if (prev_width < current_width) and (px0 > x0):
+                    if (prev_line["indent"] and not line["indent"]):
+                        indent_val = prev_line["indent"]
+                    elif (prev_line["indent"] and line["indent"]):
+                        indent_val = line["indent"]
+                    else:
+                        indent_val = abs(px0 - x0)
+                    merged[-1]["indent"] = indent_val
                     merged_text = prev_line["text"].rstrip() + " " + line["text"].lstrip()
                     prev_line["text"] = merged_text
+
 
                     new_x0 = min(px0, x0)
                     new_y0 = min(py0, y0)
@@ -386,23 +354,27 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
                     prev_line["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
                     prev_line["total_bold_chars"] += line["total_bold_chars"]
                     prev_line["total_nonbold_chars"] += line["total_nonbold_chars"]
-                    if prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]:
-                        prev_line["font_bold"] = True
-                    else:
-                        prev_line["font_bold"] = False
+                    prev_line["font_bold"] = prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]
                     prev_line["font_names"].extend(line["font_names"])
                     prev_line["font_names"] = list(set(prev_line["font_names"]))
-
-                    changed = True
+                    print('合并4', merged[-1]["text"])
+                    merged_this_round = True
+                elif (current_width < prev_width) and (x0 >= px0 + 2):
+                    merged.append(line)
+                    i += 1
                     continue
                 else:
-                    # 宽度差 > 2 时的自定义逻辑
-                    if (prev_width < current_width) and (px0 > x0):
-                        # 记录缩进并合并
-                        indent_val = abs(px0 - x0)
+                    if prev_width < current_width:
+                        if (prev_line["indent"] and not line["indent"]):
+                            indent_val = prev_line["indent"]
+                        elif (prev_line["indent"] and line["indent"]):
+                            indent_val = line["indent"]
+                        else:
+                            indent_val = abs(px0 - x0)
                         merged[-1]["indent"] = indent_val
                         merged_text = prev_line["text"].rstrip() + " " + line["text"].lstrip()
                         prev_line["text"] = merged_text
+
 
                         new_x0 = min(px0, x0)
                         new_y0 = min(py0, y0)
@@ -411,75 +383,41 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
                         prev_line["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
                         prev_line["total_bold_chars"] += line["total_bold_chars"]
                         prev_line["total_nonbold_chars"] += line["total_nonbold_chars"]
-                        if prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]:
-                            prev_line["font_bold"] = True
-                        else:
-                            prev_line["font_bold"] = False
+                        prev_line["font_bold"] = prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]
                         prev_line["font_names"].extend(line["font_names"])
                         prev_line["font_names"] = list(set(prev_line["font_names"]))
+                        merged_this_round = True
+        elif condition_4:
+            merged[-1]["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
 
-                        changed = True
-                        continue
-                    elif (current_width < prev_width) and (x0 >= px0 + 2):
-                        # 当前行更窄且稍微缩进，就不合并
-                        merged.append(line)
-                        continue
-                    else:
-                        # 其它情况按老逻辑合并
-                        if prev_width < current_width:
-                            indent_val = abs(px0 - x0)
-                            merged[-1]["indent"] = indent_val
-                            merged_text = (
-                                    prev_line["text"].rstrip() + " " + line["text"].lstrip()
-                            )
-                            prev_line["text"] = merged_text
+            new_x0 = min(px0, x0)
+            new_y0 = min(py0, y0)
+            new_x1 = max(px1, x1)
+            new_y1 = max(py1, y1)
+            if (prev_line["indent"] and not line["indent"]):
+                indent_val = prev_line["indent"]
+            elif (prev_line["indent"] and line["indent"]):
+                indent_val = line["indent"]
+            else:
+                indent_val = abs(px0 - x0)
+            merged[-1]["indent"] = indent_val
+            merged[-1]["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
+            merged[-1]["total_bold_chars"] += line["total_bold_chars"]
+            merged[-1]["total_nonbold_chars"] += line["total_nonbold_chars"]
+            merged[-1]["font_bold"] = merged[-1]["total_bold_chars"] > merged[-1]["total_nonbold_chars"]
+            merged[-1]["font_names"].extend(line["font_names"])
+            merged[-1]["font_names"] = list(set(merged[-1]["font_names"]))
+            print('合并后的indent', merged[-1]["indent"])
+            merged_this_round = True
 
-                            new_x0 = min(px0, x0)
-                            new_y0 = min(py0, y0)
-                            new_x1 = max(px1, x1)
-                            new_y1 = max(py1, y1)
-                            prev_line["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
-                            prev_line["total_bold_chars"] += line["total_bold_chars"]
-                            prev_line["total_nonbold_chars"] += line["total_nonbold_chars"]
-                            if prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]:
-                                prev_line["font_bold"] = True
-                            else:
-                                prev_line["font_bold"] = False
-                            prev_line["font_names"].extend(line["font_names"])
-                            prev_line["font_names"] = list(set(prev_line["font_names"]))
-
-                            changed = True
-                            continue
-
-            # (4) condition_4
-            elif condition_4:
-                merged[-1]["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
-                new_x0 = min(px0, x0)
-                new_y0 = min(py0, y0)
-                new_x1 = max(px1, x1)
-                new_y1 = max(py1, y1)
-                merged[-1]["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
-                merged[-1]["total_bold_chars"] += line["total_bold_chars"]
-                merged[-1]["total_nonbold_chars"] += line["total_nonbold_chars"]
-                if merged[-1]["total_bold_chars"] > merged[-1]["total_nonbold_chars"]:
-                    merged[-1]["font_bold"] = True
-                else:
-                    merged[-1]["font_bold"] = False
-                merged[-1]["font_names"].extend(line["font_names"])
-                merged[-1]["font_names"] = list(set(merged[-1]["font_names"]))
-
-                changed = True
-                continue
-
-            # 否则不满足任何条件，直接加入 merged
-            merged.append(line)
-
-        # 一轮 for 循环结束，如果本轮没有发生新的合并，则跳出循环返回最终结果
-        if not changed:
-            break
+        if merged_this_round:
+            # 合并成功，i不递增，下一轮继续用当前prev_line和下一行比较
+            i += 1
+            continue
         else:
-            # 如果发生了新的合并，就把 merged 替换 lines_data，再来一轮
-            lines_data = merged
+            # 没合并，推进下一个
+            merged.append(line)
+            i += 1
 
     return merged
 
@@ -921,8 +859,8 @@ def get_new_blocks(page, pdf_path=None, page_num=None):
 
 if __name__ == "__main__":
     b = datetime.datetime.now()
-    pdf_path = "g8.pdf"  # 换成你的 PDF 文件路径
-    page_number = 5 # 换成想处理的页码
+    pdf_path = "g2.pdf"  # 换成你的 PDF 文件路径
+    page_number = 2 # 换成想处理的页码
     z = get_new_blocks(page=None, pdf_path=pdf_path, page_num=page_number)
     print("最终返回的 new_blocks:", z)
     e = datetime.datetime.now()
