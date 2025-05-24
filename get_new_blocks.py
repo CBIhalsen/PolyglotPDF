@@ -14,7 +14,7 @@ MATH_FONTS_SET = {
     "CMEX5", "CMEX6", "CMEX7", "CMEX8", "CMEX9", "CMEX10",  # 新增CMEX字体家族
     "MSAM", "MSBM", "EUFM", "EUSM", "TXMI", "TXSY", "PXMI", "PXSY",
     "CambriaMath", "AsanaMath", "STIXMath", "XitsMath", "Latin Modern Math",
-    "Neo Euler", 'MTMI', 'MTSYN','TimesNewRomanPSMT'
+    "Neo Euler", 'MTMI', 'MTSYN', 'TimesNewRomanPSMT'
 }
 
 
@@ -36,13 +36,13 @@ def snap_angle_func(raw_angle):
 
 
 def horizontal_merge(
-    lines_data,
-    max_horizontal_gap=10,
-    max_y_diff=5,
-    check_font_size=False,
-    check_font_name=False,
-    check_font_color=False,
-    bold_max_horizontal_gap=20
+        lines_data,
+        max_horizontal_gap=10,
+        max_y_diff=5,
+        check_font_size=False,
+        check_font_name=False,
+        check_font_color=False,
+        bold_max_horizontal_gap=20
 ):
     """
     水平方向合并，若同在一个 block、行高接近、字体属性一致，且只要 x 轴区间重叠就直接合并。
@@ -138,11 +138,11 @@ def horizontal_merge(
             close_enough = (0 <= horizontal_gap < effective_max_gap)
 
             if (same_block and same_font_size_flag and same_font_name_flag
-                and same_font_color_flag and same_horizontal_line and close_enough
+                    and same_font_color_flag and same_horizontal_line and close_enough
             ):
                 # 执行合并
                 prev_line["text"] = (
-                    prev_line["text"].rstrip() + " " + line["text"].lstrip()
+                        prev_line["text"].rstrip() + " " + line["text"].lstrip()
                 )
                 # 更新 bbox
                 new_x0 = min(px0, x0)
@@ -177,10 +177,10 @@ def horizontal_merge(
 
     # 合并全部完成后，打印结果（可按需保留或删去）
     # print("\n--- 水平合并后的最终行列表 ---")
-    for i, line in enumerate(merged, start=1):
-        text = line["text"]
-        bbox = line["line_bbox"]
-        print(f"行 {i}: text = {text!r}, bbox = {bbox}")
+    # for i, line in enumerate(merged, start=1):
+    #     text = line["text"]
+    #     bbox = line["line_bbox"]
+    #     print(f"行 {i}: text = {text!r}, bbox = {bbox}")
 
     return merged
 
@@ -235,15 +235,14 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
                 # 合并粗 / 非粗体字符数
                 prev_line["total_bold_chars"] += line["total_bold_chars"]
                 prev_line["total_nonbold_chars"] += line["total_nonbold_chars"]
-                if prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]:
-                    prev_line["font_bold"] = True
-                else:
+                if  prev_line["total_nonbold_chars"]:
                     prev_line["font_bold"] = False
+                else:
+                    prev_line["font_bold"] = True
                 # 合并字体名称
                 prev_line["font_names"].extend(line["font_names"])
                 prev_line["font_names"] = list(set(prev_line["font_names"]))
 
-                print("水平合并文本：", prev_line["text"])
 
                 changed = True  # 标记本轮出现新的合并
                 continue  # 处理下一行
@@ -292,36 +291,36 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
 
             # condition_1: “中间合并豁免”
             condition_1 = (
-                same_block and same_font_size_flag and same_font_name_flag and same_font_color_flag
-                and y_distance_small
-                and (x0 >= px0 + margin_in_middle) and (x1 <= px1 - margin_in_middle)
+                    same_block and same_font_size_flag and same_font_name_flag and same_font_color_flag
+                    and y_distance_small
+                    and (x0 >= px0 + margin_in_middle) and (x1 <= px1 - margin_in_middle)
             )
 
             # condition_2: “新逻辑合并”
             condition_2 = (
-                same_block and y_distance_small and x_distance_small
-                and (px1 >= x1)
-                and (abs(px0 - x0) < margin_in_middle / 2.5)
+                    same_block and y_distance_small and x_distance_small
+                    and (px1 >= x1)
+                    and (abs(px0 - x0) < margin_in_middle / 2.5)
             )
 
             # condition_3: “老逻辑合并”
             condition_3 = (
-                same_block and y_distance_small and same_font_size_flag
-                and same_font_name_flag and same_font_color_flag and x_distance_small
+                    same_block and y_distance_small and same_font_size_flag
+                    and same_font_name_flag and same_font_color_flag and x_distance_small
             )
 
             # condition_4: “包裹合并”逻辑
             tolerance = 4.0
             condition_4 = (
-                same_block
-                and (x0 >= px0 - tolerance) and (y0 >= py0 - tolerance)
-                and (x1 <= px1 + tolerance) and (y1 <= py1 + tolerance)
+                    same_block
+                    and (x0 >= px0 - tolerance) and (y0 >= py0 - tolerance)
+                    and (x1 <= px1 + tolerance) and (y1 <= py1 + tolerance)
             )
 
             # condition_5: 如果两行在 Y 轴范围内有重叠就直接合并
             condition_5 = (
-                same_block
-                and (y0 < py1) and (py0 < y1)
+                    same_block
+                    and (y0 < py1) and (py0 < y1)
             )
 
             # 依次判断合并逻辑
@@ -426,7 +425,7 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
                         merged[-1]["indent"] = indent_val
                         merged_text = prev_line["text"].rstrip() + " " + line["text"].lstrip()
                         prev_line["text"] = merged_text
-                
+
                         new_x0 = min(px0, x0)
                         new_y0 = min(py0, y0)
                         new_x1 = max(px1, x1)
@@ -453,10 +452,10 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
                             indent_val = abs(px0 - x0)
                             merged[-1]["indent"] = indent_val
                             merged_text = (
-                                prev_line["text"].rstrip() + " " + line["text"].lstrip()
+                                    prev_line["text"].rstrip() + " " + line["text"].lstrip()
                             )
                             prev_line["text"] = merged_text
-             
+
                             new_x0 = min(px0, x0)
                             new_y0 = min(py0, y0)
                             new_x1 = max(px1, x1)
@@ -505,7 +504,6 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
             lines_data = merged
 
     return merged
-
 
 
 def is_math(font_info_list, text_len, text, font_size):
@@ -850,7 +848,7 @@ def get_new_blocks(page, pdf_path=None, page_num=None):
             lines_data,
             max_horizontal_gap=20,
             max_y_diff=5,
-            check_font_size=True,
+            check_font_size=False,
             check_font_name=False,
             check_font_color=False
         )
@@ -858,7 +856,7 @@ def get_new_blocks(page, pdf_path=None, page_num=None):
         # ============= (2) 垂直合并 =============
         merged_final = merge_lines(
             merged_horizontally,
-            check_font_size=True,
+            check_font_size=False,
             check_font_name=False,
             check_font_color=False
         )
@@ -945,8 +943,8 @@ def get_new_blocks(page, pdf_path=None, page_num=None):
 
 if __name__ == "__main__":
     b = datetime.datetime.now()
-    pdf_path = "pp2.pdf"  # 换成你的 PDF 文件路径
-    page_number = 1  # 换成想处理的页码
+    pdf_path = "g8.pdf"  # 换成你的 PDF 文件路径
+    page_number = 5 # 换成想处理的页码
     z = get_new_blocks(page=None, pdf_path=pdf_path, page_num=page_number)
     print("最终返回的 new_blocks:", z)
     e = datetime.datetime.now()
