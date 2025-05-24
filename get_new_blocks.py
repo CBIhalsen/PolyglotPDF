@@ -164,6 +164,7 @@ def horizontal_merge(
                 prev_line["font_names"] = list(set(prev_line["font_names"]))
 
                 changed = True
+                # print('水平文本', prev_line["text"])
             else:
                 # 若无法合并，就将当前行压入 merged 列表
                 merged.append(line)
@@ -222,9 +223,10 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
             overlap_x = (x0 <= px1) and (px0 <= x1)
             # 4) 如果在同一个块，且 x、y 轴范围都有交集，则判定为同一“水平行”
             if overlap_x and overlap_y:
-                print("水平合并")
+
                 # 直接合并（不做 same_block / 字体大小等判断）
                 prev_line["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
+                # print("垂直合并",prev_line["text"])
 
                 # 更新 bbox
                 new_x0 = min(px0, x0)
@@ -317,11 +319,6 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
                     and (x1 <= px1 + tolerance) and (y1 <= py1 + tolerance)
             )
 
-            # condition_5: 如果两行在 Y 轴范围内有重叠就直接合并
-            condition_5 = (
-                    same_block
-                    and (y0 < py1) and (py0 < y1)
-            )
 
             # 依次判断合并逻辑
             # (1) condition_1
@@ -347,26 +344,7 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
                 changed = True
                 continue
 
-            # (5) condition_5
-            elif condition_5:
-                merged[-1]["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
-            
-                new_x0 = min(px0, x0)
-                new_y0 = min(py0, y0)
-                new_x1 = max(px1, x1)
-                new_y1 = max(py1, y1)
-                merged[-1]["line_bbox"] = (new_x0, new_y0, new_x1, new_y1)
-                merged[-1]["total_bold_chars"] += line["total_bold_chars"]
-                merged[-1]["total_nonbold_chars"] += line["total_nonbold_chars"]
-                if merged[-1]["total_bold_chars"] > merged[-1]["total_nonbold_chars"]:
-                    merged[-1]["font_bold"] = True
-                else:
-                    merged[-1]["font_bold"] = False
-                merged[-1]["font_names"].extend(line["font_names"])
-                merged[-1]["font_names"] = list(set(merged[-1]["font_names"]))
 
-                changed = True
-                continue
 
             # (2) condition_2
             elif condition_2:
