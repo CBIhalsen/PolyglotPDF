@@ -350,7 +350,7 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
             # (5) condition_5
             elif condition_5:
                 merged[-1]["text"] = prev_line["text"].rstrip() + " " + line["text"].lstrip()
-                print('5合并', merged[-1]["text_html"])
+            
                 new_x0 = min(px0, x0)
                 new_y0 = min(py0, y0)
                 new_x1 = max(px1, x1)
