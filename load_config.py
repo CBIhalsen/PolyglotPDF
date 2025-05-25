@@ -294,6 +294,16 @@ def delete_entry(index: int) -> bool:
             else:
                 print(f"目标文件不存在: {target_file}")
 
+            # 删除双语对照PDF文件
+            merged_file = os.path.join(APP_DATA_DIR, 'static', 'merged_pdf',
+                                       f"{filename_without_ext}_{target_entry.get('original_language', 'unknown')}_{target_entry['target_language']}.pdf")
+            print(f"双语对照文件路径: {merged_file}")
+            if os.path.exists(merged_file):
+                os.remove(merged_file)
+                print(f"成功删除双语对照文件: {merged_file}")
+            else:
+                print(f"双语对照文件不存在: {merged_file}")
+
         # 从数据中删除记录
         data = [item for item in data if item['index'] != index]
         write_json_file('recent.json', data)
