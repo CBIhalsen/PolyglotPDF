@@ -178,7 +178,7 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
         # 判断同一块
         same_block = (line["block_index"] == prev_line["block_index"])
         # 无缩进
-        no_indent = not line["indent"]
+        no_indent = True
 
         # 字体大小布尔标记
         if check_font_size:
