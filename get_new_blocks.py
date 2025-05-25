@@ -146,10 +146,10 @@ def horizontal_merge(
             i += 1
 
     # 打印合并后结果
-    for idx, line in enumerate(merged, 1):
-        text = line["text"]
-        bbox = line["line_bbox"]
-        print(f"行 {idx}: text = {text!r}, bbox = {bbox}")
+    # for idx, line in enumerate(merged, 1):
+    #     text = line["text"]
+    #     bbox = line["line_bbox"]
+    #     print(f"行 {idx}: text = {text!r}, bbox = {bbox}")
 
     return merged
 
@@ -280,7 +280,7 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
             merged[-1]["font_names"] = list(set(merged[-1]["font_names"]))
             if line["font_size"] is not None and line["font_size"] > margin_in_middle * 2:
                 merged[-1]["type"] = "title"
-            print('合并1', merged[-1]["text"])
+            # print('合并1', merged[-1]["text"])
             merged_this_round = True
         elif condition_2:
             if (prev_line["indent"] and not line["indent"]):
@@ -302,7 +302,7 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
             merged[-1]["font_bold"] = merged[-1]["total_bold_chars"] > merged[-1]["total_nonbold_chars"]
             merged[-1]["font_names"].extend(line["font_names"])
             merged[-1]["font_names"] = list(set(merged[-1]["font_names"]))
-            print('合并2', merged[-1]["text"])
+            # print('合并2', merged[-1]["text"])
             merged_this_round = True
         elif condition_3:
             if (x1 - px1) > max_x_distance:
@@ -332,7 +332,7 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
                 prev_line["font_bold"] = prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]
                 prev_line["font_names"].extend(line["font_names"])
                 prev_line["font_names"] = list(set(prev_line["font_names"]))
-                print('合并3', merged[-1]["text"])
+                # print('合并3', merged[-1]["text"])
                 merged_this_round = True
             else:
                 if (prev_width < current_width) and (px0 > x0):
@@ -357,7 +357,7 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
                     prev_line["font_bold"] = prev_line["total_bold_chars"] > prev_line["total_nonbold_chars"]
                     prev_line["font_names"].extend(line["font_names"])
                     prev_line["font_names"] = list(set(prev_line["font_names"]))
-                    print('合并4', merged[-1]["text"])
+                    # print('合并4', merged[-1]["text"])
                     merged_this_round = True
                 elif (current_width < prev_width) and (x0 >= px0 + 2):
                     merged.append(line)
@@ -407,7 +407,7 @@ def merge_lines(lines_data, check_font_size=False, check_font_name=True, check_f
             merged[-1]["font_bold"] = merged[-1]["total_bold_chars"] > merged[-1]["total_nonbold_chars"]
             merged[-1]["font_names"].extend(line["font_names"])
             merged[-1]["font_names"] = list(set(merged[-1]["font_names"]))
-            print('合并后的indent', merged[-1]["indent"])
+            # print('合并后的indent', merged[-1]["indent"])
             merged_this_round = True
 
         if merged_this_round:
