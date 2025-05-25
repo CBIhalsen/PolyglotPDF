@@ -642,7 +642,7 @@ def get_new_blocks(page, pdf_path=None, page_num=None):
                 if not spans:
                     continue
 
-                filtered_spans = spans  # 此处可插入自定义过滤逻辑
+                filtered_spans = [span for span in spans if span.get("text", "").strip() != ""]
                 if not filtered_spans:
                     continue
 
