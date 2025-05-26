@@ -263,7 +263,7 @@ condition_5 = (
 
         # Y 轴、X 轴距离
         y_distance = (y0 - py1)
-        y_distance_small = (abs(y_distance) < margin_in_middle)
+         y_distance_small = (abs(y_distance) < max_horizontal_gap)
         horizontal_distance = abs(x0 - px0)
         x_distance_small = (horizontal_distance < max_x_distance)
 
