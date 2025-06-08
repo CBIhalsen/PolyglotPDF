@@ -582,7 +582,7 @@ class main_function:
                         color: {html_color};
                         text-indent: {text_indent}pt;  
                         font-size: {text_size}pt;
-                        line-height: 1.5;
+                        line-height: 1.2;
                         word-wrap: break-word;
                         overflow-wrap: break-word;
                         width: 100%;
