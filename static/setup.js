@@ -49,6 +49,10 @@ document.getElementById('count_article').textContent += data.count;
             type: 'select',
             options: ['Doubao', 'Qwen', 'deepseek', 'openai', 'deepl', 'youdao','Grok', 'ThirdParty', 'GLM', 'bing'],
             value: data.default_services.Translation_api
+        },
+        'translation_prompt': {
+            type: 'textarea',
+            value: data.translation_prompt ? data.translation_prompt.system_prompt : 'You are a professional translator. Translate from {original_lang} to {target_lang}. Return only the translation without explanations or notes.'
         }
     };
 
@@ -57,34 +61,55 @@ Object.entries(defaultConfig).forEach(([key, config]) => {
     const inputGroup = document.createElement('div');
     inputGroup.className = 't-input-group';
 
-    const select = document.createElement('select');
-    select.className = 't-input';
+    if (config.type === 'textarea') {
+        // 处理textarea类型（翻译提示词）
+        const textarea = document.createElement('textarea');
+        textarea.className = 't-input';
+        textarea.value = config.value;
+        textarea.rows = 3;
+        textarea.style.resize = 'vertical';
+        textarea.style.width = '100%';
+        textarea.placeholder = '请输入翻译提示词，可使用 {original_lang} 和 {target_lang} 作为占位符';
+        
+        if (key === 'translation_prompt') {
+            inputGroup.innerHTML = `<label data-lang-key="52" style="font-weight: bold;">翻译提示词:</label>`;
+        } else {
+            inputGroup.innerHTML = `<label>${key}:</label>`;
+        }
+        
+        inputGroup.appendChild(textarea);
+    } else {
+        // 处理select类型
+        const select = document.createElement('select');
+        select.className = 't-input';
 
-    config.options.forEach(option => {
-        const optionElement = document.createElement('option');
-        optionElement.value = option;
-        optionElement.textContent = option;
+        config.options.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            optionElement.textContent = option;
 
-        // 修改选项匹配逻辑
-        if (key === 'Translation_api') {
-            // 直接比较字符串值
-            optionElement.selected = (option === config.value);
-            console.log(`Translation API option: ${option}, config value: ${config.value}, selected: ${optionElement.selected}`);
-        }  else if (key === 'ocr_model' || key === 'Enable_translation' ) {
-                const optionBool = option.toLowerCase() === 'true';
-                optionElement.selected = (optionBool === config.value);
-            }
+            // 修改选项匹配逻辑
+            if (key === 'Translation_api') {
+                // 直接比较字符串值
+                optionElement.selected = (option === config.value);
+                console.log(`Translation API option: ${option}, config value: ${config.value}, selected: ${optionElement.selected}`);
+            }  else if (key === 'ocr_model' || key === 'Enable_translation' ) {
+                    const optionBool = option.toLowerCase() === 'true';
+                    optionElement.selected = (optionBool === config.value);
+                }
 
-        select.appendChild(optionElement);
-    });
-      if (key === 'Enable_translation') {
-        inputGroup.innerHTML = `<label style="font-size: 80%; font-weight: bold;">${key}:</label>`;
-      } else {
-        inputGroup.innerHTML = `<label>${key}:</label>`;
-      }
+            select.appendChild(optionElement);
+        });
+        
+        if (key === 'Enable_translation') {
+            inputGroup.innerHTML = `<label style="font-size: 80%; font-weight: bold;">${key}:</label>`;
+        } else {
+            inputGroup.innerHTML = `<label>${key}:</label>`;
+        }
 
-
-    inputGroup.appendChild(select);
+        inputGroup.appendChild(select);
+    }
+    
     defaultServices.appendChild(inputGroup);
 });
 
@@ -135,7 +160,7 @@ Object.entries(defaultConfig).forEach(([key, config]) => {
     // 添加自动保存功能
     let saveTimeout;
     document.addEventListener('input', function(e) {
-        if (e.target.classList.contains('t-input')) {
+        if (e.target.classList.contains('t-input') || e.target.tagName === 'TEXTAREA') {
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(() => {
                 // 收集当前所有配置数据
@@ -244,13 +269,30 @@ function collectConfig() {
         const defaultServices = document.getElementById('t-default-services');
         [...defaultServices.getElementsByClassName('t-input-group')].forEach(group => {
             const key = group.querySelector('label').textContent.replace(':', '');
-            let value = group.querySelector('select').value;
+            let value;
+            
+            // 检查是否为textarea
+            const textarea = group.querySelector('textarea');
+            const select = group.querySelector('select');
+            
+            if (textarea) {
+                value = textarea.value;
+                if (key === '翻译提示词') {
+                    // 翻译提示词需要单独处理
+                    if (!config.translation_prompt) {
+                        config.translation_prompt = {};
+                    }
+                    config.translation_prompt.system_prompt = value;
+                    return; // 跳过后续处理
+                }
+            } else if (select) {
+                value = select.value;
+            }
 
             // 对特定key进行布尔值转换
             if(key === 'ocr_model' || key === 'Enable_translation' ) {
                 value = value === 'true' ? true : false;
             }
-
 
             config.default_services[key] = value;
         });

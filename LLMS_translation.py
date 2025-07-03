@@ -15,6 +15,9 @@ class Openai_translation:
             "Content-Type": "application/json"
         }
         self.model = config['translation_services']['openai']['model_name']
+        # 从配置中读取翻译提示词
+        self.prompt_template = config.get('translation_prompt', {}).get('system_prompt', 
+            'You are a professional translator. Translate from {original_lang} to {target_lang}. Return only the translation without explanations or notes.')
 
     async def translate_single(self, session, text, original_lang, target_lang):
         """单个文本的异步翻译"""
@@ -23,7 +26,7 @@ class Openai_translation:
             "messages": [
                 {
                     "role": "system",
-                    "content": f"You are a professional translator. Translate from {original_lang} to {target_lang}.Return only the translations"
+                    "content": self.prompt_template.format(original_lang=original_lang, target_lang=target_lang)
                 },
                 {
                     "role": "user",
@@ -147,6 +150,9 @@ class Deepseek_translation:
             "Content-Type": "application/json"
         }
         self.model = config['translation_services']['deepseek']['model_name']
+        # 从配置中读取翻译提示词
+        self.prompt_template = config.get('translation_prompt', {}).get('system_prompt', 
+            'You are a professional translator. Translate from {original_lang} to {target_lang}. Return only the translation without explanations or notes.')
 
     async def translate_single(self, session, text, original_lang, target_lang):
         """单个文本的异步翻译"""
@@ -155,7 +161,7 @@ class Deepseek_translation:
             "messages": [
                 {
                     "role": "system",
-                    "content": f"You are a professional translator. Translate from {original_lang} to {target_lang}.Return only the translations"
+                    "content": self.prompt_template.format(original_lang=original_lang, target_lang=target_lang)
                 },
                 {
                     "role": "user",
@@ -196,6 +202,9 @@ class Doubao_translation:
             "Content-Type": "application/json"
         }
         self.model = config['translation_services']['Doubao']['model_name']
+        # 从配置中读取翻译提示词
+        self.prompt_template = config.get('translation_prompt', {}).get('system_prompt', 
+            'You are a professional translator. Translate from {original_lang} to {target_lang}. Return only the translation without explanations or notes.')
 
     async def translate_single(self, session, text, original_lang, target_lang):
         """单个文本的异步翻译"""
@@ -204,7 +213,7 @@ class Doubao_translation:
             "messages": [
                 {
                     "role": "system",
-                    "content": f"You are a professional translator. Translate from {original_lang} to {target_lang}.Return only the translations"
+                    "content": self.prompt_template.format(original_lang=original_lang, target_lang=target_lang)
                 },
                 {
                     "role": "user",
@@ -245,6 +254,9 @@ class Qwen_translation:
             "Content-Type": "application/json"
         }
         self.model = config['translation_services']['Qwen']['model_name']
+        # 从配置中读取翻译提示词
+        self.prompt_template = config.get('translation_prompt', {}).get('system_prompt', 
+            'You are a professional translator. Translate from {original_lang} to {target_lang}. Return only the translation without explanations or notes.')
 
     async def translate_single(self, session, text, original_lang, target_lang):
         """单个文本的异步翻译"""
@@ -253,7 +265,7 @@ class Qwen_translation:
             "messages": [
                 {
                     "role": "system",
-                    "content": f"You are a professional translator. Translate from {original_lang} to {target_lang}.Return only the translations"
+                    "content": self.prompt_template.format(original_lang=original_lang, target_lang=target_lang)
                 },
                 {
                     "role": "user",
@@ -297,6 +309,9 @@ class Grok_translation:
             "Authorization": f"Bearer {self.api_key}"
         }
         self.model = config['translation_services']['Grok']['model_name']
+        # 从配置中读取翻译提示词
+        self.prompt_template = config.get('translation_prompt', {}).get('system_prompt', 
+            'You are a professional translator. Translate from {original_lang} to {target_lang}. Return only the translation without explanations or notes.')
 
     async def translate_single(self, session, text, original_lang, target_lang):
         """单个文本的异步翻译"""
@@ -305,7 +320,7 @@ class Grok_translation:
             "messages": [
                 {
                     "role": "system",
-                    "content": f"You are a professional translator. Translate from {original_lang} to {target_lang}. Return ONLY the translation without explanations or notes."
+                    "content": self.prompt_template.format(original_lang=original_lang, target_lang=target_lang)
                 },
                 {
                     "role": "user",
@@ -354,6 +369,9 @@ class ThirdParty_translation:
             "Content-Type": "application/json"
         }
         self.model = config['translation_services']['ThirdParty']['model_name']
+        # 从配置中读取翻译提示词
+        self.prompt_template = config.get('translation_prompt', {}).get('system_prompt', 
+            'You are a professional translator. Translate from {original_lang} to {target_lang}. Return only the translation without explanations or notes.')
 
     async def translate_single(self, session, text, original_lang, target_lang):
         """单个文本的异步翻译"""
@@ -362,7 +380,7 @@ class ThirdParty_translation:
             "messages": [
                 {
                     "role": "system",
-                    "content": f"You are a professional translator. Translate from {original_lang} to {target_lang}. Return ONLY the translation without explanations or notes."
+                    "content": self.prompt_template.format(original_lang=original_lang, target_lang=target_lang)
                 },
                 {
                     "role": "user",
@@ -411,6 +429,9 @@ class GLM_translation:
             "Content-Type": "application/json"
         }
         self.model = config['translation_services']['GLM']['model_name']
+        # 从配置中读取翻译提示词
+        self.prompt_template = config.get('translation_prompt', {}).get('system_prompt', 
+            'You are a professional translator. Translate from {original_lang} to {target_lang}. Return only the translation without explanations or notes.')
 
     async def translate_single(self, session, text, original_lang, target_lang):
         """单个文本的异步翻译"""
@@ -419,7 +440,7 @@ class GLM_translation:
             "messages": [
                 {
                     "role": "system",
-                    "content": f"You are a professional translator. Translate from {original_lang} to {target_lang}. Return ONLY the translation without explanations or notes."
+                    "content": self.prompt_template.format(original_lang=original_lang, target_lang=target_lang)
                 },
                 {
                     "role": "user",

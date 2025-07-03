@@ -48,5 +48,8 @@
     "ocr_model": false,
     "Enable_translation": true,
     "Translation_api": "GLM"
+  },
+  "translation_prompt": {
+    "system_prompt": "You are a professional translator. Translate from {original_lang} to {target_lang}. Return only the translation without explanations or notes."
   }
 }

@@ -62,7 +62,8 @@ en: {
     '48': 'Grok Translate API',
     '49': 'Third Party API',
     '50': 'GLM Translate API',
-    '51': 'Bing Translate API'
+    '51': 'Bing Translate API',
+    '52': 'Translation Prompt'
 
 },
 
@@ -118,7 +119,8 @@ en: {
     "48": "Grok 翻译 API",
     "49": "第三方 API",
     "50": "智谱 GLM 翻译 API",
-    "51": "必应翻译 API"
+    "51": "必应翻译 API",
+    "52": "翻译提示词"
 
   },
   "es": {
@@ -172,7 +174,8 @@ en: {
     "48": "API de traducción de Grok",
     "49": "API de terceros",
     "50": "API de traducción de GLM",
-    "51": "API de traducción de Bing"
+    "51": "API de traducción de Bing",
+    "52": "Prompt de Traducción"
   },
   "fr": {
     "1": "Bibliothèque",
@@ -225,7 +228,8 @@ en: {
     "48": "Grok Translate API",
     "49": "API Tiers",
     "50": "API de traduction GLM",
-    "51": "API de traduction Bing"
+    "51": "API de traduction Bing",
+    "52": "Prompt de Traduction"
   },
       "de": {
     "1": "Bibliothek",
@@ -278,7 +282,8 @@ en: {
     "48": "Grok Translate API",
     "49": "Drittanbieter-API",
     "50": "GLM Übersetzer-API",
-    "51": "Bing Übersetzer-API"
+    "51": "Bing Übersetzer-API",
+    "52": "Übersetzungs-Prompt"
       },
   "ar": {
     "1": "المكتبة",
@@ -331,7 +336,8 @@ en: {
     "48": "Grok Translate API",
     "49": "واجهة برمجة تطبيقات الطرف الثالث",
     "50": "واجهة برمجة تطبيقات ترجمة GLM",
-    "51": "واجهة برمجة تطبيقات ترجمة Bing"
+    "51": "واجهة برمجة تطبيقات ترجمة Bing",
+    "52": "موجه الترجمة"
   },
   "ja": {
     "1": "ライブラリ",
@@ -384,7 +390,8 @@ en: {
     "48": "Grok 翻訳 API",
     "49": "サードパーティ API",
     "50": "智谱 GLM 翻訳 API",
-    "51": "Bing 翻訳 API"
+    "51": "Bing 翻訳 API",
+    "52": "翻訳プロンプト"
   },
   "ko": {
     "1": "라이브러리",
@@ -437,7 +444,8 @@ en: {
     "48": "Grok 번역 API",
     "49": "서드파티 API",
     "50": "GLM 번역 API",
-    "51": "Bing 번역 API"
+    "51": "Bing 번역 API",
+    "52": "번역 프롬프트"
   },
   "ru": {
     "1": "Библиотека",
@@ -490,7 +498,8 @@ en: {
     "48": "Grok Translate API",
     "49": "API третьих сторон",
     "50": "GLM API перевода",
-    "51": "Bing API перевода"
+    "51": "Bing API перевода",
+    "52": "Промпт перевода"
   }
 
 };
