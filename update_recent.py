@@ -10,7 +10,7 @@ import shutil
 def parse_merged_filename(filename: str) -> Dict[str, str]:
     """从合并PDF文件名解析出原始文件名、原始语言和目标语言"""
     # 格式为：原始文件名_原始语言_目标语言.pdf
-    pattern = r"(.+)_(\w+)_(\w+)\.pdf$"
+    pattern = r"(.+)_([\w-]+)_([\w-]+)\.pdf$"
     match = re.match(pattern, filename)
     
     if match:
