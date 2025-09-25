@@ -435,6 +435,11 @@ class GLM_translation:
 
     async def translate_single(self, session, text, original_lang, target_lang):
         """单个文本的异步翻译"""
+        # 过滤控制字符，解决GLM 1213错误
+        cleaned_text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]', '', text)
+        if not cleaned_text.strip():
+            return ""
+            
         payload = {
             "model": self.model,
             "messages": [
@@ -444,7 +449,7 @@ class GLM_translation:
                 },
                 {
                     "role": "user",
-                    "content": text
+                    "content": cleaned_text
                 }
             ],
             "temperature": 0.3,
