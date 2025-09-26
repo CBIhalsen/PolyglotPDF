@@ -58,7 +58,7 @@ In addition, consider adding arxiv search function and rendering arxiv papers af
 AI service aggregation platform supporting multiple international mainstream AI models:
 - Official Website: [302.ai](https://302.ai)
 - Registration: [Sign up with invitation link](https://share.302.ai/JBmCb1) (Use invitation code `JBmCb1` to get $1 bonus)
-- Available Models: GPT-4o, GPT-4o-mini, Claude-3.5-Sonnet, DeepSeek-V3 and more
+- Available Models: GPT-4o, GPT-4o-mini, Claude-3.7-Sonnet, DeepSeek-V3 and more
 - Features: Access multiple AI models with one account, pay-per-use pricing
 
 ## Doubao & Deepseek
