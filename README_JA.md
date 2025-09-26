@@ -25,7 +25,14 @@
     <img src="https://github.com/CBIhalsen/PolyglotPDF/blob/main/static/page4.png?raw=true" width="40%" height="20%">
 </div>
 
-# 中国の大規模言語モデルAPIの申請
+# 大規模言語モデルAPIの申請
+
+## 302.ai
+複数の国際主流AIモデルをサポートするAIサービス統合プラットフォーム:
+- 公式サイト: [302.ai](https://302.ai)
+- 登録サイト: [招待リンクで登録](https://share.302.ai/JBmCb1) (招待コード`JBmCb1`を使用して登録すると$1のボーナス)
+- 対応モデル: GPT-4o、GPT-4o-mini、Claude-3.5-Sonnet、DeepSeek-V3など
+- 特徴: 一つのアカウントで複数のAIモデルを利用可能、従量課金制
 
 ## Doubao & Deepseek
 火山エンジンプラットフォームから申請:

@@ -63,7 +63,8 @@ en: {
     '49': 'Third Party API',
     '50': 'GLM Translate API',
     '51': 'Bing Translate API',
-    '52': 'Translation Prompt'
+    '52': 'Translation Prompt',
+    '53': '302.ai API'
 
 },
 
@@ -120,7 +121,8 @@ en: {
     "49": "第三方 API",
     "50": "智谱 GLM 翻译 API",
     "51": "必应翻译 API",
-    "52": "翻译提示词"
+    "52": "翻译提示词",
+    "53": "302.ai API"
 
   },
   "es": {
@@ -175,7 +177,8 @@ en: {
     "49": "API de terceros",
     "50": "API de traducción de GLM",
     "51": "API de traducción de Bing",
-    "52": "Prompt de Traducción"
+    "52": "Prompt de Traducción",
+    "53": "API de 302.ai"
   },
   "fr": {
     "1": "Bibliothèque",
@@ -229,7 +232,8 @@ en: {
     "49": "API Tiers",
     "50": "API de traduction GLM",
     "51": "API de traduction Bing",
-    "52": "Prompt de Traduction"
+    "52": "Prompt de Traduction",
+    "53": "API de 302.ai"
   },
       "de": {
     "1": "Bibliothek",
@@ -283,7 +287,8 @@ en: {
     "49": "Drittanbieter-API",
     "50": "GLM Übersetzer-API",
     "51": "Bing Übersetzer-API",
-    "52": "Übersetzungs-Prompt"
+    "52": "Übersetzungs-Prompt",
+    "53": "302.ai API"
       },
   "ar": {
     "1": "المكتبة",
@@ -337,7 +342,8 @@ en: {
     "49": "واجهة برمجة تطبيقات الطرف الثالث",
     "50": "واجهة برمجة تطبيقات ترجمة GLM",
     "51": "واجهة برمجة تطبيقات ترجمة Bing",
-    "52": "موجه الترجمة"
+    "52": "موجه الترجمة",
+    "53": "واجهة برمجة تطبيقات 302.ai"
   },
   "ja": {
     "1": "ライブラリ",
@@ -391,7 +397,8 @@ en: {
     "49": "サードパーティ API",
     "50": "智谱 GLM 翻訳 API",
     "51": "Bing 翻訳 API",
-    "52": "翻訳プロンプト"
+    "52": "翻訳プロンプト",
+    "53": "302.ai API"
   },
   "ko": {
     "1": "라이브러리",
@@ -445,7 +452,8 @@ en: {
     "49": "서드파티 API",
     "50": "GLM 번역 API",
     "51": "Bing 번역 API",
-    "52": "번역 프롬프트"
+    "52": "번역 프롬프트",
+    "53": "302.ai API"
   },
   "ru": {
     "1": "Библиотека",
@@ -499,7 +507,8 @@ en: {
     "49": "API третьих сторон",
     "50": "GLM API перевода",
     "51": "Bing API перевода",
-    "52": "Промпт перевода"
+    "52": "Промпт перевода",
+    "53": "302.ai API"
   }
 
 };

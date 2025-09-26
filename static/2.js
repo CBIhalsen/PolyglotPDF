@@ -1,5 +1,6 @@
 // 全局变量存储API密钥
 let translationKeys = {
+    AI302: '', 
     deepl: '',
     google: '',
     youdao: '',

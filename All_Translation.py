@@ -123,7 +123,9 @@ class Online_translation:
 
     def translation(self):
         print('翻译api', self.translation_type)
-        if self.translation_type == 'deepl':
+        if self.translation_type == 'AI302':
+            translated_list = self.run_async(self.AI302_translation())
+        elif self.translation_type == 'deepl':
             translated_list = self.deepl_translation()
         elif self.translation_type == 'youdao':
             translated_list = self.youdao_translation()
@@ -179,6 +181,16 @@ class Online_translation:
         except Exception as e:
             print(f"Error in Bing translation: {e}")
             return [""] * len(self.original_text)
+
+    @retry_on_error()
+    async def AI302_translation(self):
+        translator = lt.AI302_translation()
+        translated_texts = await translator.translate(
+            texts=self.original_text,
+            original_lang=self.original_lang,
+            target_lang=self.target_language
+        )
+        return translated_texts
 
     @retry_on_error()
     async def openai_translation(self):
