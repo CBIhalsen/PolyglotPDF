@@ -28,9 +28,9 @@
 
 # 大语言模型API申请
 
-## 302.ai
+## 302.AI
 AI服务聚合平台，支持多种国际主流AI模型:
-- 官网地址: [302.ai](https://302.ai)
+- 官网地址: [302.AI](https://302.ai)
 - 注册地址: [邀请链接注册](https://share.302.ai/JBmCb1) (使用邀请码 `JBmCb1` 注册即送$1)
 - 支持模型: GPT-4o、GPT-4o-mini、Claude-3.7-Sonnet、DeepSeek-V3等多种模型
 - 特点: 一个账户即可使用多种AI模型，按使用量付费
